@@ -5,7 +5,7 @@ A simplified LinkedIn-like app
 | Name | Github | ID | 
 | --- | --- | --- | 
 | Ahmad Abdul Maati | @ahmadabd20 | 40079613 | 
-| Abdulrahman Seror | @A-Seror | 40127293 |
+| Abdelrahman Seror | @A-Seror | 40127293 |
 | Marc Kajjo | @Marckajjo96 | 40135132 | 
 | Nicolas	Towa Kamgne | @nicotowa | 40154685 | 
 | Thierno Ibrahima Barry | @TNT05 | 40112383 | 
