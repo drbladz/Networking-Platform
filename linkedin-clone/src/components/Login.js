@@ -12,7 +12,7 @@ const Login = (props) => {
       }
       <Nav>
         <a href="/">
-          <img src="/images/login-logo.svg" alt="" />
+          <img src="/images/jobshare.png" alt="" />
         </a>
         <div>
           <Join>Join now</Join>
