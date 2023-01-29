@@ -19,6 +19,5 @@ jobs:
       run: |
         cd linkedin-clone
         npm install
-        npm run build --if-present
         npm test
     
