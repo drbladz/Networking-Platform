@@ -2,5 +2,5 @@
 A simplified LinkedIn-like app
 
 ## Team Members
-Oussama Jmili @OussamaJmili
-Mouhamed Boubacar Diane @MomooDiane
+- Oussama Jmili @OussamaJmili
+- Mouhamed Boubacar Diane @MomooDiane
