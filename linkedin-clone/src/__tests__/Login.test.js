@@ -3,7 +3,7 @@ import {Provider} from "react-redux"
 import store from "../store"
 import Login from "../components/Login"
 
-test('renders learn react link', () => {
+test('renders the Login component', () => {
   render(<Provider store={store}>
     <Login />
   </Provider>);

@@ -15,8 +15,8 @@ const Login = (props) => {
           <img src="/images/jobshare.png" alt="" />
         </a>
         <div>
-          <Join>Join now</Join>
-          <SignIn>Sign in</SignIn>
+          <Join>Join us now</Join>
+          <SignIn onClick={() => props.SignIn()}>Sign in</SignIn>
         </div>
       </Nav>
       <Section>

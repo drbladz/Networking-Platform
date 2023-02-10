@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import Header from '../components/Header';
+import {Provider} from "react-redux"
+import store from "../store"
 
-test('renders learn react link', () => {
+test('renders the Header component', () => {
   render(
+    <Provider store={store}>
     <Header />);
-  const linkElement = screen.getByText("Sign Out");
+  </Provider>);
+    
+  const linkElement = screen.getByText("Notifications");
   expect(linkElement).toBeInTheDocument();
 });
