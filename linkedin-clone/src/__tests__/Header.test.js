@@ -11,4 +11,5 @@ test('renders the Header component', () => {
     
   const linkElement = screen.getByText("Notifications");
   expect(linkElement).toBeInTheDocument();
+  
 });

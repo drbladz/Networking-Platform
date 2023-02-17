@@ -1,19 +1,44 @@
-import {auth, provider} from "../firebase"
-import {SET_USER} from "./actionType"
+import db, {auth, provider, storage, signInWithPopup} from "../firebase"
+import store from "../store"
+import {ADD_POST, SET_USER} from "./actionType"
+import {doc, getDoc, collection, getDocs} from "firebase/firestore"
+
+
 
 export const setUser = (payload) =>({
   type: SET_USER,
   user: payload,
 })
 
-export function signInAPI(){
+export const addPosting = (payload) =>({
+  type: ADD_POST,
+  post: payload,
+})
+
+export async function signInAPI(){
+  const collectionRef = collection(db, "Users");
+  const collectionSnap = await getDocs(collectionRef);
+  collectionSnap.forEach(doc => {
+    console.log(doc.data());
+})
   return (dispatch) =>{
-    auth.signInWithPopup(provider)
+    
+    signInWithPopup(auth , provider)
     .then((payload) => {
       console.log(payload)
-      dispatch(setUser(payload.user))
-    })
+      dispatch(setUser(payload.user))})
     .catch((error) => alert(error.message))
+  }
+}
+
+export function createUser(email, password){
+  return (dispatch) =>{
+    console.log(email + ' ' + password)
+    auth.createUserWithEmailAndPassword(email, password)
+    .catch((error) => {
+      console.log("err")
+      alert(error.message)})
+      console.log("here")
   }
 }
 
@@ -35,3 +60,12 @@ export function signOutAPI(){
     .catch((error) => console.log(error))
   }
 }
+
+
+/*
+export function createPosting(jobName, jobField, experience){
+  return (dispacth) =>{
+    //function that create a post in the database
+    dispatch(addPosting(payload))
+  }
+}*/

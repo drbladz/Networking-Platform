@@ -2,8 +2,14 @@ import styled from "styled-components";
 import { signInAPI } from "../actions";
 import {connect} from "react-redux"
 import {Redirect} from "react-router"
+import { useState } from "react";
+import SignUpForm from "./SignUpForm";
+import LoginForm from "./LoginForm";
 
 const Login = (props) => {
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
     <Container>
       {
@@ -15,11 +21,23 @@ const Login = (props) => {
           <img src="/images/jobshare.png" alt="" />
         </a>
         <div>
-          <Join>Join us now</Join>
-          <SignIn onClick={() => props.SignIn()}>Sign in</SignIn>
+          <Join onClick={() => {
+            setShowSignUp(false)
+            setShowLogin(true)
+          }}>Login</Join>
+          <SignIn onClick={() => {
+            setShowLogin(false)
+            setShowSignUp(true)
+          }}>Sign Up</SignIn>
         </div>
       </Nav>
       <Section>
+      {showSignUp ? (
+        <SignUpForm />
+      ) : showLogin ? (
+        <LoginForm /> )
+        : <></>
+      }
         <Hero>
           <h1>Welcome to your professional community</h1>
           <img src="/images/login-hero.svg" alt="" />
