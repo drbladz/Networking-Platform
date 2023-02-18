@@ -15,12 +15,12 @@ export const addPosting = (payload) =>({
   post: payload,
 })
 
-export async function signInAPI(){
-  const collectionRef = collection(db, "Users");
+export function signInAPI(){
+ /* const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
   collectionSnap.forEach(doc => {
     console.log(doc.data());
-})
+})*/
   return (dispatch) =>{
     
     signInWithPopup(auth , provider)
