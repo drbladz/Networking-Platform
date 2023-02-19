@@ -25,6 +25,18 @@ const Main = (props) => {
               <img src="/images/ellipsis.svg"/>
             </button>
           </SharedActor>
+          <Description>Description</Description>
+          <SocialCounts>
+              <button>
+                <a>44 Applicants</a>
+              </button>
+          </SocialCounts>
+          <SocialActions>
+          <button>
+            <img src="/images/apply.svg"/>
+            <span>Apply!</span>
+          </button>
+          </SocialActions>
         </Articles>
       </div>
     </Container>)
@@ -49,7 +61,7 @@ const Sharebox = styled(CommonCard)`
   display: flex;
   flex-direction: column;
   color: #958b7b;
-  margin: 0 0 0px;
+  margin: 0 0 8px;
   background: white;
   div {
     button {
@@ -139,5 +151,52 @@ const Sharebox = styled(CommonCard)`
       outline: none;
     }
   `;
+
+  const Description = styled.div`
+    padding: 0 16px;
+    overflow: hidden;
+    color: rgba(0, 0, 0, 0.9);
+    font-size: 14px;
+    text-align: left;
+    `;
+
+  const SocialCounts = styled.div`
+    line-height: 1.3;
+    display: flex;
+    align-items: flex-start;
+    overflow: auto;
+    margin: 0 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9e5df;
+    list-style: none;
+    li {
+      margin-right: 5px;
+      font-size: 12px
+      button {
+        display: flex;
+      }
+    }
+  `;
+
+  const SocialActions = styled.div`
+    align-items: center;
+    display: flex;
+    justify-content: flex-start;
+    margin: 0;
+    min-height: 40px;
+    padding: 4px 8px;
+    button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px;
+      color: #0a66c2;
+      
+      @media (min-width: 468px) {
+        span {
+          margin-left: 8px;
+        }
+      }
+    }
+  `
 
 export default Main;
