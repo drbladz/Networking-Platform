@@ -1,25 +1,29 @@
 import { connect } from "react-redux";
-import { createUser } from "../actions";
+import { createUserByEmail } from "../actions";
 import { useState } from "react";
-const SignUpForm = () => {
+const SignUpForm = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("")
+
   return (
-    <form onSubmit={createUser(email, password)}>
-      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)}/>
-      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit">Sign Up</button>
-    </form>
+    <div>
+      <input type="email" required={true} placeholder="Email" onChange={(e) => setEmail(e.target.value)}/>
+      <input type="text" required={true} placeholder="Full Name" onChange={(e) => setFullName(e.target.value)} />
+      <input type="password" required={true} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={()=>props.SignUp(email, password, fullName)}>Sign Up</button>
+    </div>
   );
 };
 
 const mapStateToProps = (state) => {
   return {
+    user: state.userState.user,
   }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  SignUp: (email, password) => dispatch(createUser(email, password))
+  SignUp: (email, password, fullName) => dispatch(createUserByEmail(email, password, fullName))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignUpForm)
