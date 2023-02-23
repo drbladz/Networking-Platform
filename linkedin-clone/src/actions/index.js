@@ -36,7 +36,7 @@ async function getUserDataById(userId){
   return userDocument.data()
 }
 
-async function createUserInDB(userId){
+async function createUserInDB(InitialUserData){
   /*const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
   collectionSnap.forEach(doc => {
@@ -44,16 +44,11 @@ async function createUserInDB(userId){
   })*/
     // Get the document reference
     console.log("got herrre")
-    const userDocumentRef = doc(db,`Users/${userId}`)
+    const userDocumentRef = doc(db,`Users/${InitialUserData.userId}`)
 
   // Get the document data
   //const documentSnapshot = await documentRef.get();
-   await setDoc(userDocumentRef, {
-      userId: userId,
-      name: "test",
-      state: "test",
-      country: "USA"
-    });
+   await setDoc(userDocumentRef, InitialUserData);
   } 
 
 export function signInAPI(){
@@ -68,8 +63,27 @@ export function signInAPI(){
       let userExist = await userExistsInDB(payload.user.uid)
       if(!userExist){
         console.log("here")
+        const InitialDataToStore = {
+          userId: payload.user.uid,
+          displayName: payload.user.displayName,
+          photoURL: payload.user.photoURL,
+          contactInfo: payload.user.phoneNumber,
+          mail: payload.user.email,
+          volunteerings: [],
+          works: [],
+          courses: [],
+          educations: [],
+          languages: [],
+          projects: [],
+          recommendations: [],
+          skills: [],
+          awards: [],
+          bio: "",
+          connections: [],
+
+        }
         //can send more data from google to create the user
-        await createUserInDB(payload.user.uid)
+        await createUserInDB(InitialDataToStore)
       }
       const userData = await getUserDataById(payload.user.uid)
       dispatch(setUser(userData))})
@@ -77,13 +91,31 @@ export function signInAPI(){
   }
 }
 
-export function createUserByEmail(email, password){
+export function createUserByEmail(email, password, fullName){
   return (dispatch) =>{
     createUserWithEmailAndPassword(auth,email,password)
     .then(async (payload) => {
       console.log(payload)
+      const InitialDataToStore = {
+        userId: payload.user.uid,
+        displayName: fullName,
+        photoURL: "",
+        contactInfo: "",
+        mail: email,
+        volunteerings: [],
+        works: [],
+        courses: [],
+        educations: [],
+        languages: [],
+        projects: [],
+        recommendations: [],
+        skills: [],
+        awards: [],
+        bio: "",
+        connections: [],
+      }
       //provide him with more data to fill the field in database
-      await createUserInDB(payload.user.uid)
+      await createUserInDB(InitialDataToStore)
       const userData = await getUserDataById(payload.user.uid)
       dispatch(setUser(userData))})
     .catch((error) => {

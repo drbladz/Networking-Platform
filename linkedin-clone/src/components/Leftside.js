@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { connect } from "react-redux";
 
 const Leftside = (props) => {
+  console.log(props.user)
   return (
     <Container>
       <ArtCard>
