@@ -4,12 +4,14 @@ import { useState } from "react";
 const SignUpForm = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("")
 
   return (
     <div>
-      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)}/>
-      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={()=>props.SignUp(email, password)}>Sign Up</button>
+      <input type="email" required={true} placeholder="Email" onChange={(e) => setEmail(e.target.value)}/>
+      <input type="text" required={true} placeholder="Full Name" onChange={(e) => setFullName(e.target.value)} />
+      <input type="password" required={true} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={()=>props.SignUp(email, password, fullName)}>Sign Up</button>
     </div>
   );
 };
@@ -21,7 +23,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  SignUp: (email, password) => dispatch(createUserByEmail(email, password))
+  SignUp: (email, password, fullName) => dispatch(createUserByEmail(email, password, fullName))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignUpForm)
