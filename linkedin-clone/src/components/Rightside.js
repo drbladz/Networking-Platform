@@ -1,6 +1,19 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { getUsers, addConnectionById, getNameById, acceptRequest, declineRequest } from "../actions";
+import { connect } from "react-redux";
 
 const Rightside = (props) => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+  getUsers().then(data => {
+    setUsers(data);
+  });
+  console.log("usernames:");
+  console.log(users);
+  })
+
   return (
     <Container>
       <FollowCard>
@@ -41,6 +54,26 @@ const Rightside = (props) => {
           alt=""
         />
       </BannerCard>
+      <table>
+        <caption>Users</caption>
+        {users.map((user, index) => (
+          <tr>
+            {user.displayName}
+            {(props.user.pending.includes(user.id)) ? <button disabled>Pending</button> : <button onClick={addConnectionById(user.userId)}>Connect</button>}
+          </tr>
+      ))} 
+      </table>
+      <br/>
+      <table>
+        <caption>Requests</caption>
+        {/* {props.user.requests.map((requestId, index) => (
+          <tr>{getNameById(requestId).then(name => name)}
+          <button onClick={acceptRequest(requestId)}>Accept</button>
+          <button onClick={declineRequest(requestId)}>Decline</button>
+          </tr>   
+        )
+        )} */}
+      </table>
     </Container>
   );
 };
@@ -125,4 +158,13 @@ const BannerCard = styled(FollowCard)`
   }
 `;
 
-export default Rightside;
+const mapStateToProps = (state) =>{
+  return {
+    user: state.userState.user
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Rightside)

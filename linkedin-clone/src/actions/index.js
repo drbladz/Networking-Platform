@@ -2,7 +2,7 @@ import db, {auth, provider, storage, signInWithPopup, createUserWithEmailAndPass
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import store from "../store"
 import {ADD_POST, SET_USER} from "./actionType"
-import {doc, getDoc, collection, getDocs, setDoc} from "firebase/firestore"
+import {doc, getDoc, collection, getDocs, setDoc, updateDoc, FieldValue, arrayUnion, arrayRemove} from "firebase/firestore"
 import { async } from "@firebase/util"
 
 
@@ -27,6 +27,60 @@ async function userExistsInDB(userId){
    }
    console.log("nop")
    return false
+}
+
+export async function getUsers(){
+  const collectionRef = collection(db,"Users");
+  const collectionSnap = await getDocs(collectionRef);
+  console.log(collectionSnap);
+  let users = [];
+  collectionSnap.forEach(doc => {
+    users.push(doc.data());
+  })
+  return users
+}
+
+export async function addConnectionById(id){
+  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+  const otherUserRef = doc(db,"Users",id);
+
+  //current user is pending and other user gets a request
+  updateDoc(currentUserRef, {pending: arrayUnion(id)});
+  updateDoc(otherUserRef, {requests: arrayUnion(auth.currentUser.uid)});
+  alert("Request has been sent!");
+}
+
+export async function acceptRequest(id){
+  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+  const otherUserRef = doc(db,"Users",id);
+
+  //Both users get added in their connections
+  updateDoc(currentUserRef, {connections: arrayUnion(id)});
+  updateDoc(otherUserRef, {connections: arrayUnion(auth.currentUser.uid)});
+}
+
+export async function declineRequest(id){
+  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+  const otherUserRef = doc(db,"Users",id);
+
+  //remove request and pending for other user
+  updateDoc(currentUserRef, {requests: arrayRemove(id)});
+  updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+}
+
+export async function removeConnectionById(id){
+  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+  const otherUserRef = doc(db,"Users",id);
+
+  //Remove connections for both users
+  updateDoc(currentUserRef, {connections: arrayRemove(id)});
+  updateDoc(otherUserRef, {connections: arrayRemove(auth.currentUser.uid)});
+}
+
+export async function getNameById(id){
+  const userDocumentRef = doc(db,"Users",id);
+  const userDocument = await getDoc(userDocumentRef);
+  return userDocument.data().displayName;
 }
 
 async function getUserDataById(userId){
@@ -80,7 +134,7 @@ export function signInAPI(){
           awards: [],
           bio: "",
           connections: [],
-
+          requests: [],
         }
         //can send more data from google to create the user
         await createUserInDB(InitialDataToStore)
@@ -113,6 +167,7 @@ export function createUserByEmail(email, password, fullName){
         awards: [],
         bio: "",
         connections: [],
+        requests: [],
       }
       //provide him with more data to fill the field in database
       await createUserInDB(InitialDataToStore)
