@@ -1,18 +1,30 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getUsers, addConnectionById, getNameById, acceptRequest, declineRequest } from "../actions";
+import { getUsers, addConnectionById, getNameById, acceptRequest, declineRequest, getRequests } from "../actions";
 import { connect } from "react-redux";
 
 const Rightside = (props) => {
   const [users, setUsers] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
   getUsers().then(data => {
     setUsers(data);
   });
-  console.log("usernames:");
+  console.log("users:");
   console.log(users);
-  })
+  console.log(props.user.requests);
+  if (props.user){
+    if (props.user.requests !== undefined){
+      setRequests(props.user.requests);
+  }
+  }
+  //console.log(getRequests());
+  return () => {
+    setUsers([]);
+    setRequests([]); 
+  }
+  }, [])
 
   return (
     <Container>
@@ -56,23 +68,27 @@ const Rightside = (props) => {
       </BannerCard>
       <table>
         <caption>Users</caption>
+        <tbody>
         {users.map((user, index) => (
-          <tr>
+          <tr key={user.userId}>
             {user.displayName}
-            {(props.user.pending.includes(user.id)) ? <button disabled>Pending</button> : <button onClick={addConnectionById(user.userId)}>Connect</button>}
+            <button onClick={() => addConnectionById(user.userId)}>Connect</button>
+            {/* {(props.user.pending.includes(user.userId)) ? <button disabled>Pending</button> : <button onClick={addConnectionById(user.userId)}>Connect</button>} */}
           </tr>
       ))} 
+      </tbody>
       </table>
       <br/>
       <table>
         <caption>Requests</caption>
-        {/* {props.user.requests.map((requestId, index) => (
-          <tr>{getNameById(requestId).then(name => name)}
-          <button onClick={acceptRequest(requestId)}>Accept</button>
-          <button onClick={declineRequest(requestId)}>Decline</button>
+        {requests.map((requestId, index) => (
+          <tr key={requestId}>
+            {requestId}
+            <button onClick={() => acceptRequest(requestId)}>Accept</button>
+            <button onClick={() => declineRequest(requestId)}>Decline</button>
           </tr>   
         )
-        )} */}
+        )}
       </table>
     </Container>
   );

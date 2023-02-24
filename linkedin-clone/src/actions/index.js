@@ -47,7 +47,7 @@ export async function addConnectionById(id){
   //current user is pending and other user gets a request
   updateDoc(currentUserRef, {pending: arrayUnion(id)});
   updateDoc(otherUserRef, {requests: arrayUnion(auth.currentUser.uid)});
-  alert("Request has been sent!");
+  console.log("Request has been sent!");
 }
 
 export async function acceptRequest(id){
@@ -57,6 +57,7 @@ export async function acceptRequest(id){
   //Both users get added in their connections
   updateDoc(currentUserRef, {connections: arrayUnion(id)});
   updateDoc(otherUserRef, {connections: arrayUnion(auth.currentUser.uid)});
+  console.log("accepted");
 }
 
 export async function declineRequest(id){
@@ -66,6 +67,7 @@ export async function declineRequest(id){
   //remove request and pending for other user
   updateDoc(currentUserRef, {requests: arrayRemove(id)});
   updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+  console.log("declined");
 }
 
 export async function removeConnectionById(id){
@@ -75,12 +77,21 @@ export async function removeConnectionById(id){
   //Remove connections for both users
   updateDoc(currentUserRef, {connections: arrayRemove(id)});
   updateDoc(otherUserRef, {connections: arrayRemove(auth.currentUser.uid)});
+  console.log("removed");
 }
 
 export async function getNameById(id){
   const userDocumentRef = doc(db,"Users",id);
   const userDocument = await getDoc(userDocumentRef);
+  console.log("get name");
   return userDocument.data().displayName;
+  
+}
+
+export async function getRequests(){
+  const userDocumentRef = doc(db,"Users",auth.currentUser.id);
+  const userDocument = await getDoc(userDocumentRef);
+  return userDocument.data().requests;
 }
 
 async function getUserDataById(userId){
@@ -135,6 +146,7 @@ export function signInAPI(){
           bio: "",
           connections: [],
           requests: [],
+          pending: [],
         }
         //can send more data from google to create the user
         await createUserInDB(InitialDataToStore)
@@ -168,6 +180,7 @@ export function createUserByEmail(email, password, fullName){
         bio: "",
         connections: [],
         requests: [],
+        pending: [],
       }
       //provide him with more data to fill the field in database
       await createUserInDB(InitialDataToStore)
