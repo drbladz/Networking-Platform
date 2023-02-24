@@ -1,31 +1,59 @@
 import styled from "styled-components";
+import { getAllJobPostings } from "../actions";
+import { connect } from "react-redux";
+import PostModal from './PostModal'
+import { useState } from "react";
 
 const Main = (props) => {
+  const [showModal, setShowModal] = useState("close")
+  const handleClick = (e) =>{
+    console.log("herrr")
+    e.preventDefault();
+    if(e.target !== e.currentTarget){
+      return
+    }
+    switch(showModal){
+      case "open": 
+        setShowModal("close");
+        break
+      case "close":
+        setShowModal("open")
+        break
+      default:
+        setShowModal("close")
+        break
+    }
+  }
+  console.log(props.jobPostings)
   return (
     <Container>
       <Sharebox>
         Share
       <div>
         <img src="/images/user.svg" alt=""/>
-        <button>Post Job</button>
+        <button onClick={handleClick}>Post Job</button>
       </div>
       </Sharebox>
       <div>
         <Articles>
+          {props.jobPostings ? 
+          props.jobPostings.map((job) =>{
+            return (
+              <div>
           <SharedActor>
             <a>
-              <img src="/images/user.svg"/>
+              <img src={job.photoURL}/>
               <div>
-                <span>Title</span>
-                <span>Info</span>
-                <span>Date</span>
+                <span>{job.postTitle}</span>
+                <span>{job.displayName}</span>
+                <span>2023-02-24</span>
               </div>
             </a>
             <button>
               <img src="/images/ellipsis.svg"/>
             </button>
           </SharedActor>
-          <Description>Description</Description>
+          <Description>{job.postDescription}</Description>
           <SocialCounts>
               <button>
                 <a>44 Applicants</a>
@@ -37,8 +65,12 @@ const Main = (props) => {
             <span>Apply!</span>
           </button>
           </SocialActions>
+          </div>
+          )
+          }) : <></>}
         </Articles>
       </div>
+      <PostModal showModal={showModal} handleClick={handleClick}/>
     </Container>)
 };
 
@@ -199,4 +231,15 @@ const Sharebox = styled(CommonCard)`
     }
   `
 
-export default Main;
+  const mapStateToProps = (state) => {
+    return {
+      user: state.userState.user,
+      jobPostings: state.jobPostingsState.jobPostings
+    }
+  }
+  
+  const mapDispatchToProps = (dispatch) => ({
+   // getAllJobPostings: () => dispatch(getAllJobPostings())
+  })
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Main)

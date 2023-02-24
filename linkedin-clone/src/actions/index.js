@@ -1,8 +1,8 @@
 import db, {auth, provider, storage, signInWithPopup, createUserWithEmailAndPassword} from "../firebase"
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import store from "../store"
-import {ADD_POST, SET_USER} from "./actionType"
-import {doc, getDoc, collection, getDocs, setDoc} from "firebase/firestore"
+import {SET_JOB_POSTINGS, SET_USER} from "./actionType"
+import {doc, getDoc, collection, getDocs, setDoc, addDoc} from "firebase/firestore"
 import { async } from "@firebase/util"
 
 
@@ -12,9 +12,9 @@ export const setUser = (payload) =>({
   user: payload,
 })
 
-export const addPosting = (payload) =>({
-  type: ADD_POST,
-  post: payload,
+export const setJobPostings = (payload) =>({
+  type: SET_JOB_POSTINGS,
+  jobPostings: payload,
 })
 
 async function userExistsInDB(userId){
@@ -86,7 +86,10 @@ export function signInAPI(){
         await createUserInDB(InitialDataToStore)
       }
       const userData = await getUserDataById(payload.user.uid)
-      dispatch(setUser(userData))})
+      dispatch(setUser(userData))
+      const jobPostings = await getAllJobPostings()
+      console.log("wawawaw")
+      dispatch(setJobPostings(jobPostings))})
     .catch((error) => alert(error.message))
   }
 }
@@ -117,7 +120,9 @@ export function createUserByEmail(email, password, fullName){
       //provide him with more data to fill the field in database
       await createUserInDB(InitialDataToStore)
       const userData = await getUserDataById(payload.user.uid)
-      dispatch(setUser(userData))})
+      dispatch(setUser(userData))
+      const jobPostings = await getAllJobPostings()
+      dispatch(setJobPostings(jobPostings))})
     .catch((error) => {
       console.log(error)
       alert(error.message)})
@@ -132,6 +137,9 @@ export function loginWithEmail(email, password){
     const user = userCredential.user;
     const userData = await getUserDataById(user.uid)
     dispatch(setUser(userData))
+    const jobPostings = await getAllJobPostings()
+    console.log("wowowo")
+    dispatch(setJobPostings(jobPostings))
     // ...
   })
   .catch((error) => {
@@ -157,11 +165,57 @@ export function signOutAPI(){
   return (dispatch) => {
     auth.signOut().then(() => {
       dispatch(setUser(null))
+      dispatch(setJobPostings(null))
     })
     .catch((error) => console.log(error))
   }
 }
 
+async function getAllJobPostings(){
+    console.log("here")
+    const jobPostingsRef = collection(db, "JobPostings");
+    const jobPostingsRaw = await getDocs(jobPostingsRef);
+    const jobPostingsData = []
+    jobPostingsRaw.forEach(doc => {
+    jobPostingsData.push(doc.data());
+  })
+  console.log("leaving")
+  return jobPostingsData
+  }
+
+  export function createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName){
+    return (dispatch) => {
+      const newJobPostingData = {
+        userId: userId,
+        postTitle: postTitle,
+        postDescription: postDescription,
+        timeStamp: Date.now(),
+        photoURL: userPhotoURL,
+        displayName: displayName
+      }
+      createJobPostingInDB(newJobPostingData).then(() => {
+        currentPostingsList.push(newJobPostingData);
+        const newPostingsList = currentPostingsList.map(ele => ele)
+        dispatch(setJobPostings(newPostingsList))
+      })
+      .catch((error) => console.log(error))
+    }
+  }
+
+  async function createJobPostingInDB(newJobPostingData){
+    /*const collectionRef = collection(db, "Users");
+    const collectionSnap = await getDocs(collectionRef);
+    collectionSnap.forEach(doc => {
+      console.log(doc.data());
+    })*/
+      // Get the document reference
+      console.log("got herrre")
+      const jobPostingCollectionRef = collection(db,`JobPostings`)
+  
+    // Get the document data
+    //const documentSnapshot = await documentRef.get();
+     await addDoc(jobPostingCollectionRef, newJobPostingData);
+    } 
 
 /*
 export function createPosting(jobName, jobField, experience){
