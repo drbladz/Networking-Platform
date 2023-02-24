@@ -1,28 +1,94 @@
 import styled from "styled-components";
+import React, { useState } from "react";
 import { connect } from "react-redux";
+import { useSelector } from "react-redux";
+import UpdatePhoto from "./UpdatePhoto";
+import EditForm from "./EditForm";
+import Modal from "react-modal";
+import UpdateConnections from "./UpdateConnections";
+
+Modal.setAppElement("#root"); // set the modal's parent element
 
 const Leftside = (props) => {
-  console.log(props.user)
+  //const [showForm, setShowForm] = useState(false);
+
+  //function handleClick() {
+  //  setShowForm(true);
+  //}
+
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+
+  const handleConnectionClick = () => {
+    setShowConnectionModal(true);
+  };
+
+  const handlePhotoClick = () => {
+    setShowPhotoModal(true);
+  };
+
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  const handleClose = () => {
+    setShowPhotoModal(false);
+    setShowEditModal(false);
+    setShowConnectionModal(false);
+  };
+
   return (
     <Container>
       <ArtCard>
         <UserInfo>
           <CardBackground />
           <a>
-          {props.user && props.user.photoURL ?
-         <img src={props.user.photoURL} referrerPolicy="no-referrer"/>
-          :<Photo />
-            }
-            {
-              props.user && props.user.displayName ?
-              <Link>Welcome {props.user.displayName}</Link>:
+            {props.user && props.user.photoURL ? (
+              <img src={props.user.photoURL} referrerPolicy="no-referrer" />
+            ) : (
+              <Photo />
+            )}
+            {props.user && props.user.displayName ? (
+              <Link>Welcome {props.user.displayName}</Link>
+            ) : (
               <Link>Welcome User</Link>
-            }
+            )}
           </a>
           <a>
-            <AddPhotoText>Add a photo</AddPhotoText>
+            <Bio>Software Engineering student at Concordia</Bio>
           </a>
+          <a>
+            <AddPhotoText onClick={handlePhotoClick}>Add a photo</AddPhotoText>
+            <CustomModal isOpen={showPhotoModal} onRequestClose={handleClose}>
+              {showPhotoModal && (
+                <UpdatePhoto
+                  userId="
+KEc8gO7UzPKq5yAekSDu"
+                />
+              )}
+            </CustomModal>
+          </a>
+          {/*
+           */}
+
+          <EditInfo>
+            <img
+              onClick={handleEditClick}
+              src="/images/edit-icon.svg"
+              alt=""
+            ></img>
+            <CustomModal2 isOpen={showEditModal} onRequestClose={handleClose}>
+              {showEditModal && (
+                <EditForm
+                  userId="
+KEc8gO7UzPKq5yAekSDu"
+                />
+              )}
+            </CustomModal2>
+          </EditInfo>
         </UserInfo>
+
         <Widget>
           <a>
             <div>
@@ -31,7 +97,103 @@ const Leftside = (props) => {
             </div>
             <img src="/images/widget-icon.svg" alt="" />
           </a>
+          <a>
+            <ReviewConnections onClick={handleConnectionClick}>
+              View Connections
+            </ReviewConnections>
+            <CustomModal3
+              isOpen={showConnectionModal}
+              onRequestClose={handleClose}
+            >
+              {showConnectionModal && (
+                <UpdateConnections
+                  userId="
+KEc8gO7UzPKq5yAekSDu"
+                />
+              )}
+            </CustomModal3>
+          </a>
         </Widget>
+        <ContactInfo>
+          <a>
+            <div>
+              <span>Contact Information</span>
+              <span>+1 514-570-8132</span>
+            </div>
+          </a>
+        </ContactInfo>
+        <Education>
+          <a>
+            <div>
+              <span>Education</span>
+              <span>Concordia University</span>
+            </div>
+          </a>
+        </Education>
+
+        <Work>
+          <a>
+            <div>
+              <span>Work</span>
+              <span>Google</span>
+            </div>
+          </a>
+        </Work>
+
+        <Skills>
+          <a>
+            <div>
+              <span>Skills</span>
+              <span>Java, JS, Python</span>
+            </div>
+          </a>
+        </Skills>
+
+        <Languages>
+          <a>
+            <div>
+              <span>Languages</span>
+              <span>French, English</span>
+            </div>
+          </a>
+        </Languages>
+
+        <Courses>
+          <a>
+            <div>
+              <span>Courses</span>
+              <span>Databases,OS, OOP</span>
+            </div>
+          </a>
+        </Courses>
+
+        <Projects>
+          <a>
+            <div>
+              <span>Projects</span>
+              <span>Website, website 2</span>
+            </div>
+          </a>
+        </Projects>
+
+        <Awards>
+          <a>
+            <div>
+              <span>Awards</span>
+              <span>prize1, prize2</span>
+            </div>
+          </a>
+        </Awards>
+
+        <Recommandations>
+          <a>
+            <div>
+              <span>Recommandations</span>
+              <span>award1,award1</span>
+            </div>
+          </a>
+        </Recommandations>
+
         <Item>
           <span>
             <img src="/images/item-icon.svg" alt="" />
@@ -61,6 +223,372 @@ const Leftside = (props) => {
   );
 };
 
+const ReviewConnections = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
+
+const CustomModal3 = styled(Modal)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const EditInfo = styled.div`
+  position: absolute;
+  right: 0;
+  padding-bottom: 100px;
+`;
+
+const CustomModal = styled(Modal)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const CustomModal2 = styled(Modal)`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 800px;
+  height: 800px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const ContactInfo = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Education = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Work = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Skills = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Languages = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Courses = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Awards = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Projects = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const Bio = styled.a`
+  font-size: 10px;
+`;
+
+const Recommandations = styled.a`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
 const Container = styled.div`
   grid-area: leftside;
 `;
@@ -78,6 +606,7 @@ const ArtCard = styled.div`
 `;
 
 const UserInfo = styled.div`
+  padding-bottom: 50px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   padding: 12px 12px 16px;
   word-wrap: break-word;
@@ -124,6 +653,7 @@ const AddPhotoText = styled.div`
 `;
 
 const Widget = styled.div`
+  margin-top: 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   padding-top: 12px;
   padding-bottom: 12px;
@@ -205,13 +735,12 @@ const CommunityCard = styled(ArtCard)`
   }
 `;
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
-    user: state.userState.user
-  }
-}
+    user: state.userState.user,
+  };
+};
 
-const mapDispatchToProps = (dispatch) => ({
-})
+const mapDispatchToProps = (dispatch) => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(Leftside)
+export default connect(mapStateToProps, mapDispatchToProps)(Leftside);
