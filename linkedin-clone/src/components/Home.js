@@ -5,13 +5,10 @@ import Rightside from "./Rightside";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
-/* {
-   !props.user && 
-   <Redirect to="/"/>
- } */
 const Home = (props) => {
   return (
     <Container>
+      {!props.user && <Redirect to="/" />}
       <Section>
         <h5>
           <a>Hiring in a hurry? - </a>

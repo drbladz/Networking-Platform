@@ -29,17 +29,26 @@ export const addPosting = (payload) => ({
 });
 
 // Define a function to handle form submission and update user document
-export function updateUserProfile(userId, updatedUserData) {
+export function updateUserProfile(userId, updatedUserData, currentUserData) {
   // Update the user document in the "Users" collection
+  for (let property in currentUserData) {
+    if (
+      updatedUserData[property] == "" ||
+      !updatedUserData.hasOwnProperty(property)
+    ) {
+      updatedUserData[property] = currentUserData[property];
+    }
+  }
 
   return async (dispatch) => {
     console.log("got herrre");
     const userDocumentRef = doc(db, `Users/${userId}`);
 
-    const userData = await setDoc(userDocumentRef, updatedUserData, {
+    await setDoc(userDocumentRef, updatedUserData, {
       merge: true,
     });
-    console.log(userData);
+
+    dispatch(setUser(updatedUserData));
   };
 }
 
@@ -118,15 +127,15 @@ export function signInAPI() {
             photoURL: payload.user.photoURL,
             contactInfo: payload.user.phoneNumber,
             mail: payload.user.email,
-            volunteerings: [],
-            works: [],
-            courses: [],
-            educations: [],
-            languages: [],
-            projects: [],
-            recommendations: [],
-            skills: [],
-            awards: [],
+            volunteerings: "",
+            works: "",
+            courses: "",
+            educations: "",
+            languages: "",
+            projects: "",
+            recommendations: "",
+            skills: "",
+            awards: "",
             bio: "",
             connections: [],
           };

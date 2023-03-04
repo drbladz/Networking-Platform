@@ -38,6 +38,7 @@ const Leftside = (props) => {
     setShowConnectionModal(false);
   };
 
+  console.log(props.user);
   return (
     <Container>
       <ArtCard>
@@ -56,17 +57,12 @@ const Leftside = (props) => {
             )}
           </a>
           <a>
-            <Bio>Software Engineering student at Concordia</Bio>
+            <Bio>{props.user.bio}</Bio>
           </a>
           <a>
             <AddPhotoText onClick={handlePhotoClick}>Add a photo</AddPhotoText>
             <CustomModal isOpen={showPhotoModal} onRequestClose={handleClose}>
-              {showPhotoModal && (
-                <UpdatePhoto
-                  userId="
-KEc8gO7UzPKq5yAekSDu"
-                />
-              )}
+              {showPhotoModal && <UpdatePhoto userId={props.user.userId} />}
             </CustomModal>
           </a>
           {/*
@@ -79,12 +75,7 @@ KEc8gO7UzPKq5yAekSDu"
               alt=""
             ></img>
             <CustomModal2 isOpen={showEditModal} onRequestClose={handleClose}>
-              {showEditModal && (
-                <EditForm
-                  userId="
-KEc8gO7UzPKq5yAekSDu"
-                />
-              )}
+              {showEditModal && <EditForm userId={props.user.userId} />}
             </CustomModal2>
           </EditInfo>
         </UserInfo>
@@ -106,10 +97,7 @@ KEc8gO7UzPKq5yAekSDu"
               onRequestClose={handleClose}
             >
               {showConnectionModal && (
-                <UpdateConnections
-                  userId="
-KEc8gO7UzPKq5yAekSDu"
-                />
+                <UpdateConnections userId={props.user.userId} />
               )}
             </CustomModal3>
           </a>
@@ -118,15 +106,15 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Contact Information</span>
-              <span>+1 514-570-8132</span>
+              <span>{props.user.contactInfo}</span>
             </div>
           </a>
         </ContactInfo>
         <Education>
           <a>
             <div>
-              <span>Education</span>
-              <span>Concordia University</span>
+              <span>Educations</span>
+              <span>{props.user.educations}</span>
             </div>
           </a>
         </Education>
@@ -135,7 +123,7 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Work</span>
-              <span>Google</span>
+              <span>{props.user.works}</span>
             </div>
           </a>
         </Work>
@@ -144,7 +132,7 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Skills</span>
-              <span>Java, JS, Python</span>
+              <span>{props.user.skills}</span>
             </div>
           </a>
         </Skills>
@@ -153,7 +141,7 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Languages</span>
-              <span>French, English</span>
+              <span>{props.user.languages}</span>
             </div>
           </a>
         </Languages>
@@ -162,7 +150,7 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Courses</span>
-              <span>Databases,OS, OOP</span>
+              <span>{props.user.courses}</span>
             </div>
           </a>
         </Courses>
@@ -171,16 +159,24 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Projects</span>
-              <span>Website, website 2</span>
+              <span>{props.user.projects}</span>
             </div>
           </a>
         </Projects>
 
+        <Volunteerings>
+          <a>
+            <div>
+              <span>Volunteerings</span>
+              <span>{props.user.volunteerings}</span>
+            </div>
+          </a>
+        </Volunteerings>
         <Awards>
           <a>
             <div>
               <span>Awards</span>
-              <span>prize1, prize2</span>
+              <span>{props.user.awards}</span>
             </div>
           </a>
         </Awards>
@@ -189,7 +185,7 @@ KEc8gO7UzPKq5yAekSDu"
           <a>
             <div>
               <span>Recommandations</span>
-              <span>award1,award1</span>
+              <span>{props.user.recomandations}</span>
             </div>
           </a>
         </Recommandations>
@@ -517,6 +513,40 @@ const Awards = styled.div`
   }
 `;
 
+const Volunteerings = styled.div`
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
 const Projects = styled.div`
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   padding-top: 12px;
@@ -738,6 +768,7 @@ const CommunityCard = styled(ArtCard)`
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
+    educations: state.userState.educations,
   };
 };
 

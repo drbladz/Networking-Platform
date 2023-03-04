@@ -38,9 +38,11 @@ const EditForm = (props) => {
       languages: languages,
     };
     console.log("here2");
-    props.updateUserProfile(props.userId, updateUserData);
+    console.log("dddd", contactInfo);
+    props.updateUserProfile(props.userId, updateUserData, props.user);
   };
 
+  console.log(props.user);
   return (
     <div>
       <label>
@@ -171,8 +173,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  updateUserProfile: (userId, updatedUserData) =>
-    dispatch(updateUserProfile(userId, updatedUserData)),
+  updateUserProfile: (userId, updatedUserData, currentUserData) =>
+    dispatch(updateUserProfile(userId, updatedUserData, currentUserData)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditForm);
