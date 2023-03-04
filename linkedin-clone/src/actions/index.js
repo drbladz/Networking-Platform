@@ -42,12 +42,13 @@ export async function getUsers(){
 
 export async function addConnectionById(id){
   const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+  const currentUserDocument = await getDoc(currentUserRef);
   const otherUserRef = doc(db,"Users",id);
 
   //current user is pending and other user gets a request
   updateDoc(currentUserRef, {pending: arrayUnion(id)});
-  updateDoc(otherUserRef, {requests: arrayUnion(auth.currentUser.uid)});
-  console.log("Request has been sent!");
+  updateDoc(otherUserRef, {requests: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photo: currentUserDocument.data().photoURL})});
+  alert("Request has been sent!");
 }
 
 export async function acceptRequest(id){
@@ -57,7 +58,7 @@ export async function acceptRequest(id){
   //Both users get added in their connections
   updateDoc(currentUserRef, {connections: arrayUnion(id)});
   updateDoc(otherUserRef, {connections: arrayUnion(auth.currentUser.uid)});
-  console.log("accepted");
+  alert("accepted");
 }
 
 export async function declineRequest(id){
@@ -67,7 +68,7 @@ export async function declineRequest(id){
   //remove request and pending for other user
   updateDoc(currentUserRef, {requests: arrayRemove(id)});
   updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
-  console.log("declined");
+  alert("declined");
 }
 
 export async function removeConnectionById(id){
@@ -86,12 +87,6 @@ export async function getNameById(id){
   console.log("get name");
   return userDocument.data().displayName;
   
-}
-
-export async function getRequests(){
-  const userDocumentRef = doc(db,"Users",auth.currentUser.id);
-  const userDocument = await getDoc(userDocumentRef);
-  return userDocument.data().requests;
 }
 
 async function getUserDataById(userId){
