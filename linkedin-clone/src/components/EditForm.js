@@ -44,7 +44,7 @@ const EditForm = (props) => {
 
   console.log(props.user);
   return (
-    <div>
+    <Edit>
       <label>
         Education:
         <input
@@ -161,8 +161,8 @@ const EditForm = (props) => {
         />
       </label>
       <br />
-      <button onClick={() => handleSubmit()}>Save Changes</button>
-    </div>
+      <button type="submit" onClick={handleSubmit}>Save Changes</button>
+    </Edit>
   );
 };
 
@@ -179,7 +179,7 @@ const mapDispatchToProps = (dispatch) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditForm);
 
-const FormWrapper = styled.form`
+const Edit = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;

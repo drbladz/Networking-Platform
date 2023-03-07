@@ -31,7 +31,10 @@ function App(props) {
 }
 
 const mapStateToProps = (state) =>{
-  return {}
+  return {
+    user: state.userState.user,
+    jobPostings: state.jobPostingsState.jobPostings
+  }
 }
 
 const mapDispatchToProps = (dispatch) => ({
