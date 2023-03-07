@@ -1,6 +1,11 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore} from 'firebase/firestore';
-import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -10,16 +15,23 @@ const firebaseConfig = {
   storageBucket: "linkedin-clone-9fd09.appspot.com",
   messagingSenderId: "1035473589943",
   appId: "1:1035473589943:web:6bbb31759f0906592e1f32",
-  measurementId: "G-051EYS02K7"
+  measurementId: "G-051EYS02K7",
 };
 
-const firebaseApp = initializeApp(firebaseConfig)
-const db = getFirestore(firebaseApp)
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
-const auth = getAuth(firebaseApp)
-const provider = new GoogleAuthProvider()
+const auth = getAuth(firebaseApp);
+const provider = new GoogleAuthProvider();
 
-const storage = getStorage()
+const storage = getStorage();
 
-export {auth, storage, db, provider, signInWithPopup, createUserWithEmailAndPassword}
-export default db
+export {
+  auth,
+  storage,
+  db,
+  provider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+};
+export default db;
