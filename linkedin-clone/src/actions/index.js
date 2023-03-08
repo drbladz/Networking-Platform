@@ -5,28 +5,73 @@ import {SET_JOB_POSTINGS, SET_USER} from "./actionType"
 import {doc, getDoc, collection, getDocs, setDoc, addDoc, updateDoc, FieldValue, arrayUnion, arrayRemove} from "firebase/firestore"
 import { async } from "@firebase/util"
 
-
-
-export const setUser = (payload) =>({
+export const setUser = (payload) => ({
   type: SET_USER,
   user: payload,
-})
+});
 
 export const setJobPostings = (payload) =>({
   type: SET_JOB_POSTINGS,
   jobPostings: payload,
 })
 
-async function userExistsInDB(userId){
-   // Get the document reference
-   const userDocumentRef = doc(db,"Users",userId)
-   const userDocument = await getDoc(userDocumentRef);
-   console.log(userDocument)
-   if(userDocument.exists()){
-    return true
-   }
-   console.log("nop")
-   return false
+// Define a function to handle form submission and update user document
+export function updateUserProfile(userId, updatedUserData, currentUserData) {
+  // Update the user document in the "Users" collection
+  for (let property in currentUserData) {
+    if (
+      updatedUserData[property] == "" ||
+      !updatedUserData.hasOwnProperty(property)
+    ) {
+      updatedUserData[property] = currentUserData[property];
+    }
+  }
+
+  return async (dispatch) => {
+    console.log("got herrre");
+    const userDocumentRef = doc(db, `Users/${userId}`);
+
+    await setDoc(userDocumentRef, updatedUserData, {
+      merge: true,
+    });
+
+    dispatch(setUser(updatedUserData));
+  };
+}
+
+export function updateProfilePicture(userId, updatedPicture, file) {
+  return async (dispatch) => {
+    // Update the user document in the "Users" collection
+    const userDocumentRef = doc(db, `Users/${userId}`);
+
+    // If there is a file, convert it to base64 and store it in Firestore
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const fileData = reader.result;
+        updatedPicture.profilePicture = fileData;
+        await updateDoc(userDocumentRef, updatedPicture);
+        dispatch({ type: "UPDATE_USER_PROFILE", payload: updatedPicture });
+      };
+    } else {
+      // If there is no file, update the user document without profile picture
+      await updateDoc(userDocumentRef, updatedPicture);
+      dispatch({ type: "UPDATE_USER_PROFILE", payload: updatedPicture });
+    }
+  };
+}
+
+async function userExistsInDB(userId) {
+  // Get the document reference
+  const userDocumentRef = doc(db, "Users", userId);
+  const userDocument = await getDoc(userDocumentRef);
+  console.log(userDocument);
+  if (userDocument.exists()) {
+    return true;
+  }
+  console.log("nop");
+  return false;
 }
 
 export async function getUsers(){
@@ -89,70 +134,68 @@ export async function getNameById(id){
   
 }
 
-async function getUserDataById(userId){
+async function getUserDataById(userId) {
   // Get the document reference
-  const userDocumentRef = doc(db,`Users/${userId}`)
+  const userDocumentRef = doc(db, `Users/${userId}`);
   const userDocument = await getDoc(userDocumentRef);
-  return userDocument.data()
+  return userDocument.data();
 }
 
-async function createUserInDB(InitialUserData){
+async function createUserInDB(InitialUserData) {
   /*const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
   collectionSnap.forEach(doc => {
     console.log(doc.data());
   })*/
-    // Get the document reference
-    console.log("got herrre")
-    const userDocumentRef = doc(db,`Users/${InitialUserData.userId}`)
+  // Get the document reference
+  console.log("got herrre");
+  const userDocumentRef = doc(db, `Users/${InitialUserData.userId}`);
 
   // Get the document data
   //const documentSnapshot = await documentRef.get();
-   await setDoc(userDocumentRef, InitialUserData);
-  } 
+  await setDoc(userDocumentRef, InitialUserData);
+}
 
-export function signInAPI(){
- /* const collectionRef = collection(db, "Users");
+export function signInAPI() {
+  /* const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
   collectionSnap.forEach(doc => {
     console.log(doc.data());
 })*/
-  return (dispatch) =>{
-    signInWithPopup(auth , provider)
-    .then(async (payload) => {
-      let userExist = await userExistsInDB(payload.user.uid)
-      if(!userExist){
-        console.log("here")
-        const InitialDataToStore = {
-          userId: payload.user.uid,
-          displayName: payload.user.displayName,
-          photoURL: payload.user.photoURL,
-          contactInfo: payload.user.phoneNumber,
-          mail: payload.user.email,
-          volunteerings: [],
-          works: [],
-          courses: [],
-          educations: [],
-          languages: [],
-          projects: [],
-          recommendations: [],
-          skills: [],
-          awards: [],
-          bio: "",
-          connections: [],
-          requests: [],
-          pending: [],
+  return (dispatch) => {
+    signInWithPopup(auth, provider)
+      .then(async (payload) => {
+        let userExist = await userExistsInDB(payload.user.uid);
+        if (!userExist) {
+          console.log("here");
+          const InitialDataToStore = {
+            userId: payload.user.uid,
+            displayName: payload.user.displayName,
+            photoURL: payload.user.photoURL,
+            contactInfo: payload.user.phoneNumber,
+            mail: payload.user.email,
+            volunteerings: "",
+            works: "",
+            courses: "",
+            educations: "",
+            languages: "",
+            projects: "",
+            recommendations: "",
+            skills: "",
+            awards: "",
+            bio: "",
+            connections: [],
+          };
+          //can send more data from google to create the user
+          await createUserInDB(InitialDataToStore);
         }
-        //can send more data from google to create the user
-        await createUserInDB(InitialDataToStore)
-      }
-      const userData = await getUserDataById(payload.user.uid)
-      dispatch(setUser(userData))
-      const jobPostings = await getAllJobPostings()
-      console.log("wawawaw")
-      dispatch(setJobPostings(jobPostings))})
-    .catch((error) => alert(error.message))
-  }
+        const userData = await getUserDataById(payload.user.uid);
+        dispatch(setUser(userData));
+        const jobPostings = await getAllJobPostings()
+        dispatch(setJobPostings(jobPostings))
+      })
+      .catch((error) => alert(error.message));
+  };
 }
 
 export function createUserByEmail(email, password, fullName){
