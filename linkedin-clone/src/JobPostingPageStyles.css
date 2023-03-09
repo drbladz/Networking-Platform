@@ -1,0 +1,26 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+  }
+  
+  label {
+    font-weight: bold;
+  }
+  
+  input[type="file"] {
+    margin-top: 10px;
+  }
+
+  .fullName {
+    display: flex;
+    padding: 2px;
+    align-items: center;
+    
+  }
+  .fullName div{
+    margin: 0 4px;
+  }
