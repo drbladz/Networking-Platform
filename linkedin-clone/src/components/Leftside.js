@@ -60,7 +60,9 @@ const Leftside = (props) => {
             <Bio>{props.user.bio}</Bio>
           </a>
           <a>
-            <AddPhotoText onClick={handlePhotoClick}>Add a photo</AddPhotoText>
+            <AddPhotoText onClick={handlePhotoClick}>
+              Change Profile Picture
+            </AddPhotoText>
             <CustomModal isOpen={showPhotoModal} onRequestClose={handleClose}>
               {showPhotoModal && <UpdatePhoto userId={props.user.userId} />}
             </CustomModal>

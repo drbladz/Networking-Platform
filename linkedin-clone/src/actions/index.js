@@ -1,20 +1,34 @@
-import db, {auth, provider, storage, signInWithPopup, createUserWithEmailAndPassword} from "../firebase"
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
-import store from "../store"
-import {SET_JOB_POSTINGS, SET_USER} from "./actionType"
-import {doc, getDoc, collection, getDocs, setDoc, addDoc, updateDoc} from "firebase/firestore"
-import { async } from "@firebase/util"
-import { v4 as uuidv4 } from 'uuid';
+import db, {
+  auth,
+  provider,
+  storage,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+} from "../firebase";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import store from "../store";
+import { SET_JOB_POSTINGS, SET_USER } from "./actionType";
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { async } from "@firebase/util";
+import { v4 as uuidv4 } from "uuid";
 
 export const setUser = (payload) => ({
   type: SET_USER,
   user: payload,
 });
 
-export const setJobPostings = (payload) =>({
+export const setJobPostings = (payload) => ({
   type: SET_JOB_POSTINGS,
   jobPostings: payload,
-})
+});
 
 // Define a function to handle form submission and update user document
 export function updateUserProfile(userId, updatedUserData, currentUserData) {
@@ -40,28 +54,12 @@ export function updateUserProfile(userId, updatedUserData, currentUserData) {
   };
 }
 
-export function updateProfilePicture(userId, updatedPicture, file) {
-  return async (dispatch) => {
-    // Update the user document in the "Users" collection
-    const userDocumentRef = doc(db, `Users/${userId}`);
-
-    // If there is a file, convert it to base64 and store it in Firestore
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        const fileData = reader.result;
-        updatedPicture.profilePicture = fileData;
-        await updateDoc(userDocumentRef, updatedPicture);
-        dispatch({ type: "UPDATE_USER_PROFILE", payload: updatedPicture });
-      };
-    } else {
-      // If there is no file, update the user document without profile picture
-      await updateDoc(userDocumentRef, updatedPicture);
-      dispatch({ type: "UPDATE_USER_PROFILE", payload: updatedPicture });
-    }
+export const updateProfilePicture = (currentUser) => {
+  console.log("yuyu");
+  return (dispatch) => {
+    dispatch(setUser(currentUser));
   };
-}
+};
 
 async function userExistsInDB(userId) {
   // Get the document reference
@@ -132,8 +130,8 @@ export function signInAPI() {
         }
         const userData = await getUserDataById(payload.user.uid);
         dispatch(setUser(userData));
-        const jobPostings = await getAllJobPostings()
-        dispatch(setJobPostings(jobPostings))
+        const jobPostings = await getAllJobPostings();
+        dispatch(setJobPostings(jobPostings));
       })
       .catch((error) => alert(error.message));
   };
@@ -141,8 +139,8 @@ export function signInAPI() {
 
 export function createUserByEmail(email, password, fullName) {
   return (dispatch) => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(async (payload) => {
+    createUserWithEmailAndPassword(auth, email, password).then(
+      async (payload) => {
         console.log(payload);
         const InitialDataToStore = {
           userId: payload.user.uid,
@@ -161,125 +159,131 @@ export function createUserByEmail(email, password, fullName) {
           awards: [],
           bio: "",
           connections: [],
-
-        }
+        };
         //can send more data from google to create the user
-        await createUserInDB(InitialDataToStore)
-      
-      const userData = await getUserDataById(payload.user.uid)
-      dispatch(setUser(userData))
-      const jobPostings = await getAllJobPostings()
-      console.log("wawawaw")
-      dispatch(setJobPostings(jobPostings))})
-    .catch((error) => alert(error.message))
-  }
-}
-
-export function loginWithEmail(email, password){
-  return(dispatch) => {
-    signInWithEmailAndPassword(auth, email, password)
-  .then(async (userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    const userData = await getUserDataById(user.uid)
-    dispatch(setUser(userData))
-    const jobPostings = await getAllJobPostings()
-    console.log("wowowo")
-    dispatch(setJobPostings(jobPostings))
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    alert(errorMessage)
-  });
-  }
-}
-
-export function getUserAuth(){
-  return (dispatch) =>{
-    onAuthStateChanged(auth, async (user) =>{
-      if(user){
-        const userData = getUserDataById(user.uid)
-        dispatch(setUser(userData))
+        await createUserInDB(InitialDataToStore);
       }
-    })
-  }
+    );
+  };
 }
 
-export function signOutAPI(){
+export function createJobPosting(
+  userId,
+  postTitle,
+  postDescription,
+  currentPostingsList,
+  userPhotoURL,
+  displayName,
+  mandatoryResume,
+  mandatoryCoverLetter
+) {
   return (dispatch) => {
-    auth.signOut().then(() => {
-      dispatch(setUser(null))
-      dispatch(setJobPostings(null))
-    })
-    .catch((error) => console.log(error))
-  }
+    const newJobPostingData = {
+      id: uuidv4(),
+      userId: userId,
+      postTitle: postTitle,
+      postDescription: postDescription,
+      timeStamp: Date.now(),
+      photoURL: userPhotoURL,
+      displayName: displayName,
+      mandatoryResume: mandatoryResume,
+      mandatoryCoverLetter: mandatoryCoverLetter,
+    };
+    createJobPostingInDB(newJobPostingData)
+      .then(() => {
+        currentPostingsList.push(newJobPostingData);
+        const newPostingsList = currentPostingsList.map((ele) => ele);
+        dispatch(setJobPostings(newPostingsList));
+      })
+      .catch((error) => alert(error.message));
+  };
 }
 
-async function getAllJobPostings(){
-    console.log("here")
-    const jobPostingsRef = collection(db, "JobPostings");
-    const jobPostingsRaw = await getDocs(jobPostingsRef);
-    const jobPostingsData = []
-    jobPostingsRaw.forEach(doc => {
-    jobPostingsData.push(doc.data());
-  })
-  console.log("leaving")
-  return jobPostingsData
-  }
-
-  export function createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter){
-    return (dispatch) => {
-      const newJobPostingData = {
-        id: uuidv4(),
-        userId: userId,
-        postTitle: postTitle,
-        postDescription: postDescription,
-        timeStamp: Date.now(),
-        photoURL: userPhotoURL,
-        displayName: displayName,
-        mandatoryResume: mandatoryResume,
-        mandatoryCoverLetter: mandatoryCoverLetter
-      }
-      createJobPostingInDB(newJobPostingData).then(() => {
-        currentPostingsList.push(newJobPostingData);
-        const newPostingsList = currentPostingsList.map(ele => ele)
-        dispatch(setJobPostings(newPostingsList))
+export function loginWithEmail(email, password) {
+  return (dispatch) => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        const userData = await getUserDataById(user.uid);
+        dispatch(setUser(userData));
+        const jobPostings = await getAllJobPostings();
+        console.log("wowowo");
+        dispatch(setJobPostings(jobPostings));
+        // ...
       })
-      .catch((error) => console.log(error))
-    }
-  }
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        alert(errorMessage);
+      });
+  };
+}
 
-  async function createJobPostingInDB(newJobPostingData){
-    /*const collectionRef = collection(db, "Users");
+export function getUserAuth() {
+  return (dispatch) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userData = getUserDataById(user.uid);
+        dispatch(setUser(userData));
+      }
+    });
+  };
+}
+
+export function signOutAPI() {
+  return (dispatch) => {
+    auth
+      .signOut()
+      .then(() => {
+        dispatch(setUser(null));
+        dispatch(setJobPostings(null));
+      })
+      .catch((error) => console.log(error));
+  };
+}
+
+async function getAllJobPostings() {
+  console.log("here");
+  const jobPostingsRef = collection(db, "JobPostings");
+  const jobPostingsRaw = await getDocs(jobPostingsRef);
+  const jobPostingsData = [];
+  jobPostingsRaw.forEach((doc) => {
+    jobPostingsData.push(doc.data());
+  });
+  console.log("leaving");
+  return jobPostingsData;
+}
+
+async function createJobPostingInDB(newJobPostingData) {
+  /*const collectionRef = collection(db, "Users");
     const collectionSnap = await getDocs(collectionRef);
     collectionSnap.forEach(doc => {
       console.log(doc.data());
     })*/
-      // Get the document reference
-      console.log("got herrre" + newJobPostingData)
+  // Get the document reference
+  console.log("got herrre" + newJobPostingData);
 
-      // old code
-      // const jobPostingCollectionRef = collection(db,`JobPostings`)
-    
-      const jobPostingCollectionRef = collection(db, 'JobPostings');
-      const docRef = doc(jobPostingCollectionRef, newJobPostingData.id);
+  // old code
+  // const jobPostingCollectionRef = collection(db,`JobPostings`)
 
-    // Get the document data
-    //const documentSnapshot = await documentRef.get();
+  const jobPostingCollectionRef = collection(db, "JobPostings");
+  const docRef = doc(jobPostingCollectionRef, newJobPostingData.id);
 
-    if (newJobPostingData.mandatoryResume === undefined) {
-      newJobPostingData.mandatoryResume = false;
-    }
-    if (newJobPostingData.mandatoryCoverLetter === undefined) {
-      newJobPostingData.mandatoryCoverLetter = false;
-    }
-    // old code
-    //await addDoc(jobPostingCollectionRef, newJobPostingData);
+  // Get the document data
+  //const documentSnapshot = await documentRef.get();
 
-     await setDoc(docRef, newJobPostingData);
-    } 
+  if (newJobPostingData.mandatoryResume === undefined) {
+    newJobPostingData.mandatoryResume = false;
+  }
+  if (newJobPostingData.mandatoryCoverLetter === undefined) {
+    newJobPostingData.mandatoryCoverLetter = false;
+  }
+  // old code
+  //await addDoc(jobPostingCollectionRef, newJobPostingData);
+
+  await setDoc(docRef, newJobPostingData);
+}
 
 /*
 export function createPosting(jobName, jobField, experience){

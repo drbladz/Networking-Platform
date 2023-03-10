@@ -1,19 +1,20 @@
 import { SET_USER } from "../actions/actionType";
 
-const INITIAL_STATE ={
+const INITIAL_STATE = {
   user: null,
-}
+};
 
 const userReducer = (state = INITIAL_STATE, action) => {
-  switch (action.type){
+  switch (action.type) {
     case SET_USER:
+      console.log(action);
       return {
         ...state,
-        user:action.user
-      }
-    default: 
+        user: action.user,
+      };
+    default:
       return state;
   }
-}
+};
 
-export default userReducer
+export default userReducer;
