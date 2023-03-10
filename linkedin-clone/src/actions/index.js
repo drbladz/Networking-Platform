@@ -4,6 +4,7 @@ import store from "../store"
 import {SET_JOB_POSTINGS, SET_USER} from "./actionType"
 import {doc, getDoc, collection, getDocs, setDoc, addDoc, updateDoc, FieldValue, arrayUnion, arrayRemove} from "firebase/firestore"
 import { async } from "@firebase/util"
+import { v4 as uuidv4 } from 'uuid';
 
 export const setUser = (payload) => ({
   type: SET_USER,
@@ -289,15 +290,18 @@ async function getAllJobPostings(){
   return jobPostingsData
   }
 
-  export function createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName){
+  export function createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter){
     return (dispatch) => {
       const newJobPostingData = {
+        id: uuidv4(),
         userId: userId,
         postTitle: postTitle,
         postDescription: postDescription,
         timeStamp: Date.now(),
         photoURL: userPhotoURL,
-        displayName: displayName
+        displayName: displayName,
+        mandatoryResume: mandatoryResume,
+        mandatoryCoverLetter: mandatoryCoverLetter
       }
       createJobPostingInDB(newJobPostingData).then(() => {
         currentPostingsList.push(newJobPostingData);
@@ -315,12 +319,27 @@ async function getAllJobPostings(){
       console.log(doc.data());
     })*/
       // Get the document reference
-      console.log("got herrre")
-      const jobPostingCollectionRef = collection(db,`JobPostings`)
-  
+      console.log("got herrre" + newJobPostingData)
+
+      // old code
+      // const jobPostingCollectionRef = collection(db,`JobPostings`)
+    
+      const jobPostingCollectionRef = collection(db, 'JobPostings');
+      const docRef = doc(jobPostingCollectionRef, newJobPostingData.id);
+
     // Get the document data
     //const documentSnapshot = await documentRef.get();
-     await addDoc(jobPostingCollectionRef, newJobPostingData);
+
+    if (newJobPostingData.mandatoryResume === undefined) {
+      newJobPostingData.mandatoryResume = false;
+    }
+    if (newJobPostingData.mandatoryCoverLetter === undefined) {
+      newJobPostingData.mandatoryCoverLetter = false;
+    }
+    // old code
+    //await addDoc(jobPostingCollectionRef, newJobPostingData);
+
+     await setDoc(docRef, newJobPostingData);
     } 
 
 /*
