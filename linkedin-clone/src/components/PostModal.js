@@ -7,7 +7,8 @@ const PostModal = (props) =>{
   console.log(props.jobPostings)
   const [postTitle, setPostTitle] = useState("")
   const [postDescription, setPostDescription] = useState("")
-
+  const [mandatoryResume, setMandatoryResume] = useState(false);
+  const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(false);
   const reset = (e)=>{
     setPostDescription("")
     setPostTitle("")
@@ -41,11 +42,24 @@ const PostModal = (props) =>{
           value={postDescription}
           placeholder="Job Description"
           onChange={(e) => setPostDescription(e.target.value)}/>
+
+
+
           </Editor>
+          <div>
+            <label>
+              <input type="checkbox" checked={mandatoryResume} onChange={() => setMandatoryResume(!mandatoryResume)} />
+                Resume
+            </label>
+            <label>
+              <input type="checkbox" checked={mandatoryCoverLetter} onChange={() => setMandatoryCoverLetter(!mandatoryCoverLetter)} />
+                Cover Letter
+            </label>
+          </div>
         </SharedContent>
         <SharedCreation>
           <PostButton onClick={(e)=>{
-            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName)
+            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName, mandatoryResume, mandatoryCoverLetter)
             reset(e)
             }}>
             Post
@@ -65,7 +79,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName))
+  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PostModal)
