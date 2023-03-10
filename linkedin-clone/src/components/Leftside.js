@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { connect } from "react-redux";
 import { useSelector } from "react-redux";
 import UpdatePhoto from "./UpdatePhoto";
+import UploadDocuments from "./UploadDocuments";
 import EditForm from "./EditForm";
 import Modal from "react-modal";
 import UpdateConnections from "./UpdateConnections";
@@ -19,6 +20,11 @@ const Leftside = (props) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+
+  const handleDocumentClick = () => {
+    setShowDocumentsModal(true);
+  };
 
   const handleConnectionClick = () => {
     setShowConnectionModal(true);
@@ -36,6 +42,7 @@ const Leftside = (props) => {
     setShowPhotoModal(false);
     setShowEditModal(false);
     setShowConnectionModal(false);
+    setShowDocumentsModal(false);
   };
 
   console.log(props.user);
@@ -63,10 +70,26 @@ const Leftside = (props) => {
             <AddPhotoText onClick={handlePhotoClick}>
               Change Profile Picture
             </AddPhotoText>
+
             <CustomModal isOpen={showPhotoModal} onRequestClose={handleClose}>
               {showPhotoModal && <UpdatePhoto userId={props.user.userId} />}
             </CustomModal>
           </a>
+          <a>
+            <ViewDocumentsText onClick={handleDocumentClick}>
+              My Stored Documents
+            </ViewDocumentsText>
+
+            <CustomModal4
+              isOpen={showDocumentsModal}
+              onRequestClose={handleClose}
+            >
+              {showDocumentsModal && (
+                <UploadDocuments userId={props.user.userId} />
+              )}
+            </CustomModal4>
+          </a>
+
           {/*
            */}
 
@@ -249,6 +272,19 @@ const EditInfo = styled.div`
 `;
 
 const CustomModal = styled(Modal)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const CustomModal4 = styled(Modal)`
   position: fixed;
   top: 50%;
   left: 50%;
@@ -677,6 +713,14 @@ const Link = styled.div`
 `;
 
 const AddPhotoText = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
+
+const ViewDocumentsText = styled.div`
   color: #0a66c2;
   margin-top: 4px;
   font-size: 12px;
