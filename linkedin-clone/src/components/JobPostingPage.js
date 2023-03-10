@@ -3,10 +3,28 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import React, { useState, useEffect } from 'react';
 import '../JobPostingPageStyles.css';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { storage } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { getAuth } from "firebase/auth";
+import { getDocs } from 'firebase/firestore';
+import {  deleteDoc,query, where } from 'firebase/firestore';
+import Header from './Header';
+
+const checkIfApplicationExists = async (jobId, userId) => {
+  const applicationsRef = collection(db, 'Applications');
+  const applicationsQuery = query(applicationsRef, where('jobId', '==', jobId), where('userId', '==', userId));
+  const querySnapshot = await getDocs(applicationsQuery);
+  return !querySnapshot.empty;
+};
 
 const JobPostingPage = () => {
+
+  const auth = getAuth();
+
+
   const { id } = useParams();
-  
+
   const [jobPosting, setJobPosting] = useState(null);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -14,24 +32,180 @@ const JobPostingPage = () => {
   const [phone, setPhone] = useState('');
   const [resume, setResume] = useState(null);
   const [coverLetter, setCoverLetter] = useState(null);
+  const [applied, setApplied] = useState(false);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  const uploadFile = async (file, path) => {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+  
+    return downloadURL;
+  };
+  // const handleApply = async (e) => {
+  //   const userId = auth.currentUser.uid;
+  //   e.preventDefault();
+  
+  //   if (jobPosting.mandatoryResume && !resume) {
+  //     alert('Resume is required!');
+  //     return;
+  //   }
+  
+  //   if (jobPosting.mandatoryCoverLetter && !coverLetter) {
+  //     alert('Cover letter is required!');
+  //     return;
+  //   }
+  
+  //   const resumeRequired = jobPosting.mandatoryResume;
+  //   const coverLetterRequired = jobPosting.mandatoryCoverLetter;
+  
+  //   let resumeUrl = '';
+  //   let coverLetterUrl = '';
+  //   const resumePath = `resumes/${userId}_${resume.name}`;
+  // const coverLetterPath = `coverLetters/${userId}_${coverLetter.name}`;
+  //   if (resume) {
+  //     resumeUrl = await uploadFile(resume, resume.name);
+  //   }
+  
+  //   if (coverLetter) {
+  //     coverLetterUrl = await uploadFile(coverLetter, coverLetter.name);
+  //   }
+
+  //   const applicationData = {
+  //     jobId: id,
+  //     userId: userId,
+  //     applicantName: `${firstName} ${lastName}`,
+  //     applicantEmail: email,
+  //     applicantPhone: phone,
+  //     resumeUrl,
+  //     coverLetterUrl
+  //   };
+  
+  //   const applicationsRef = collection(db, 'Applications');
+  //   await addDoc(applicationsRef, applicationData);
+  
+  //   alert('Application submitted successfully!');
+  // };
+
+  // const handleApply = async (e) => {
+  //   const userId = auth.currentUser.uid;
+  //   e.preventDefault();
+
+
+  // const applicationExists = await checkIfApplicationExists(id, userId);
+  // if (applicationExists) {
+  //   setApplied(true);
+  //   return;
+  // }
+  
+  //   if (jobPosting.mandatoryResume && !resume) {
+  //     alert('Resume is required!');
+  //     return;
+  //   }
+  
+  //   if (jobPosting.mandatoryCoverLetter && !coverLetter) {
+  //     alert('Cover letter is required!');
+  //     return;
+  //   }
+  
+  //   const resumeRequired = jobPosting.mandatoryResume;
+  //   const coverLetterRequired = jobPosting.mandatoryCoverLetter;
+  
+  //   let resumeUrl = '';
+  //   let coverLetterUrl = '';
+  //   const resumePath = `resumes/${userId}_${resume?.name}`;
+  //   const coverLetterPath = `coverLetters/${userId}_${coverLetter?.name}`;
+  //   if (resume) {
+  //     resumeUrl = await uploadFile(resume, resumePath);
+  //   }
+  
+  //   if (coverLetter) {
+  //     coverLetterUrl = await uploadFile(coverLetter, coverLetterPath);
+  //   }
+  
+  //   const applicationData = {
+  //     jobId: id,
+  //     userId: userId,
+  //     applicantName: `${firstName} ${lastName}`,
+  //     applicantEmail: email,
+  //     applicantPhone: phone,
+  //     resumeUrl,
+  //     coverLetterUrl
+  //   };
+  
+  //   const applicationsRef = collection(db, 'Applications');
+  //   await addDoc(applicationsRef, applicationData);
+  
+  //   alert('Application submitted successfully!');
+  // };
+
+
+
+
+  const handleRemoveApplication = async () => {
+    const userId = auth.currentUser.uid;
+    const applicationsRef = collection(db, 'Applications');
+    const querySnapshot = await getDocs(query(applicationsRef, where('jobId', '==', id), where('userId', '==', userId)));
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+      setAlreadyApplied(false); // add this line
+      alert('Application removed successfully!');
+    });
+  };
 
 
   const handleApply = async (e) => {
+    const userId = auth.currentUser.uid;
     e.preventDefault();
-    // Upload the files to Firebase Storage
-    // Then submit the form data to the database
-
-
-    if (jobPosting.mandatoryResume && !resume) {
-        alert('Resume is required!');
-        return;
-      }
+  
+    const applicationExists = await checkIfApplicationExists(id, userId);
+    if (applicationExists) {
+      setApplied(true);
+      setAlreadyApplied(true); // add this line
+      return;
+    }
     
-      // Check if the mandatoryCoverLetter field is set to true
-      if (jobPosting.mandatoryCoverLetter && !coverLetter) {
-        alert('Cover letter is required!');
-        return;
-      }
+    if (jobPosting.mandatoryResume && !resume) {
+      alert('Resume is required!');
+      return;
+    }
+    
+    if (jobPosting.mandatoryCoverLetter && !coverLetter) {
+      alert('Cover letter is required!');
+      return;
+    }
+    
+    const resumeRequired = jobPosting.mandatoryResume;
+    const coverLetterRequired = jobPosting.mandatoryCoverLetter;
+    
+    let resumeUrl = '';
+    let coverLetterUrl = '';
+    const resumePath = `resumes/${userId}_${resume?.name}`;
+    const coverLetterPath = `coverLetters/${userId}_${coverLetter?.name}`;
+    if (resume) {
+      resumeUrl = await uploadFile(resume, resumePath);
+    }
+    
+    if (coverLetter) {
+      coverLetterUrl = await uploadFile(coverLetter, coverLetterPath);
+    }
+    
+    const applicationData = {
+      jobId: id,
+      userId: userId,
+      applicantName: `${firstName} ${lastName}`,
+      applicantEmail: email,
+      applicantPhone: phone,
+      resumeUrl,
+      coverLetterUrl
+    };
+    
+    const applicationsRef = collection(db, 'Applications');
+    await addDoc(applicationsRef, applicationData);
+  
+    setAlreadyApplied(true); // add this line
+    alert('Application submitted successfully!');
   };
 
 
@@ -53,7 +227,13 @@ const JobPostingPage = () => {
       console.log(docSnap.exists());
       if (docSnap.exists()) {
         setJobPosting(docSnap.data());
-        console.log("JOB DATA " ,docSnap.data())
+
+        const userId = auth.currentUser.uid;
+        const applicationExists = await checkIfApplicationExists(id, userId);
+        if (applicationExists) {
+          setApplied(true);
+          setAlreadyApplied(true); // add this line
+        }
       }
     }
     fetchJobPosting();
@@ -72,12 +252,16 @@ const JobPostingPage = () => {
 
 
   return (
+    
     <div>
-        <h2>{jobPosting.postTitle}</h2>
+      <Header />
+
+  <div style={{ marginTop: '80px' }} className='jobPostingContainer'>
+        <h2 style={{ textAlign: "center" }}>{jobPosting.postTitle}</h2>
         <p>{jobPosting.postDescription}</p>
-        <form onSubmit={handleApply}>
-        <div>
-          <label htmlFor="email">Email*</label>
+        <form onSubmit={(e) => handleApply(e)}>
+        <div className='formControl'>
+          <label className='label' htmlFor="email">Email*</label>
           <input
             type="email"
             id="email"
@@ -87,8 +271,8 @@ const JobPostingPage = () => {
           />
         </div>
         <div className='fullName'>
-        <div>
-          <label htmlFor="firstName">First Name*</label>
+        <div className='formControl'>
+          <label className='label' htmlFor="firstName">First Name*</label>
           <input
             type="text"
             id="firstName"
@@ -97,8 +281,8 @@ const JobPostingPage = () => {
             onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
-        <div>
-          <label htmlFor="lastName">Last Name*</label>
+        <div className='formControl'>
+          <label className='label' htmlFor="lastName">Last Name*</label>
           <input
             type="text"
             id="lastName"
@@ -108,8 +292,8 @@ const JobPostingPage = () => {
           />
         </div>
         </div>
-        <div>
-          <label htmlFor="phone">Phone</label>
+        <div className='formControl'>
+          <label className='label' htmlFor="phone">Phone</label>
           <input
             type="tel"
             id="phone"
@@ -117,8 +301,8 @@ const JobPostingPage = () => {
             onChange={(e) => setPhone(e.target.value)}
           />
         </div>
-        <div>
-        <label htmlFor="resume">Resume{resumeRequired && '*'}</label>
+        <div className='formControl'>
+        <label className='label' htmlFor="resume">Resume{resumeRequired && '*'}</label>
           <input
             type="file"
             id="resume"
@@ -127,8 +311,8 @@ const JobPostingPage = () => {
             required={resumeRequired}
           />
         </div>
-        <div>
-        <label htmlFor="coverLetter">Cover Letter{coverLetterRequired && '*'}</label>
+        <div className='formControl'>
+        <label className='label' htmlFor="coverLetter">Cover Letter{coverLetterRequired && '*'}</label>
           <input
             type="file"
             id="coverLetter"
@@ -137,9 +321,15 @@ const JobPostingPage = () => {
             required={coverLetterRequired}
           />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={alreadyApplied} className={`submitButton ${alreadyApplied ? "disabledButton" : ""}`}>
+  {alreadyApplied ? "Application Already Submitted" : "Submit Application"}
+</button>
+      {alreadyApplied && <button className='deleteButton' onClick={handleRemoveApplication}>Remove Application</button>}
       </form>
     </div>
+    </div>
+
+
   );
 }
 
