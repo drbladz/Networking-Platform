@@ -6,6 +6,7 @@ import Login from "./components/Login.js";
 import { useEffect } from "react";
 import { getUserAuth } from "./actions";
 import { connect } from "react-redux";
+import JobPostingPage from './components/JobPostingPage';
 
 function App(props) {
 
@@ -24,6 +25,7 @@ function App(props) {
             <Header />
             <Home />
           </Route>
+          <Route path="/job-posting/:id" component={JobPostingPage} />
         </Switch>
       </Router>
     </div>

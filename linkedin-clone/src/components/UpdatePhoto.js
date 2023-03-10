@@ -4,6 +4,7 @@ import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { updateProfilePicture } from "../actions";
+import { setUser } from "../actions";
 import styled from "styled-components";
 
 const UpdatePhoto = (props) => {
@@ -13,7 +14,7 @@ const UpdatePhoto = (props) => {
 
   const imagesFolderRef = ref(storage, `images/`);
 
-  const uploadFile = async () => {
+  const uploadFile = async (dispatch) => {
     if (!selectedFile) return;
     const imageRef = ref(imagesFolderRef, selectedFile.name);
     try {
@@ -26,8 +27,14 @@ const UpdatePhoto = (props) => {
       await updateDoc(userDocumentRef, {
         photoURL: url,
       });
+      props.user.photoURL = url;
 
-      props.updateProfilePicture(props.userId, url);
+      console.log("yaya");
+      const updatedUser = {};
+      for (let property in props.user) {
+        updatedUser[property] = props.user[property];
+      }
+      props.updateProfilePicture(updatedUser);
     } catch (err) {
       console.log(err);
     }
@@ -60,8 +67,8 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  updateProfilePicture: (userId, selectedFile) =>
-    dispatch(updateProfilePicture(userId, selectedFile)),
+  updateProfilePicture: (currentUser) =>
+    dispatch(updateProfilePicture(currentUser)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(UpdatePhoto);

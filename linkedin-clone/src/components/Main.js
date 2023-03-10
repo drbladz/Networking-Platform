@@ -3,6 +3,7 @@ import { getAllJobPostings } from "../actions";
 import { connect } from "react-redux";
 import PostModal from "./PostModal";
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 const Main = (props) => {
   const [showModal, setShowModal] = useState("close");
@@ -25,6 +26,13 @@ const Main = (props) => {
     }
   };
   console.log(props.jobPostings);
+
+  const history = useHistory();
+
+  const handleApply = (jobPostingId) => {
+    history.push(`/job-posting/${jobPostingId}`);
+  };
+
   return (
     <Container>
       <Sharebox>
@@ -43,7 +51,7 @@ const Main = (props) => {
           {props.jobPostings ? (
             props.jobPostings.map((job) => {
               return (
-                <div>
+                <div key={job.id}>
                   <SharedActor>
                     <a>
                       <img src={job.photoURL} />
@@ -64,10 +72,15 @@ const Main = (props) => {
                     </button>
                   </SocialCounts>
                   <SocialActions>
-                    <button>
-                      <img src="/images/apply.svg" />
-                      <span>Apply!</span>
-                    </button>
+                    {/* <button onClick={() => handleApply(job.id)}>
+
+          </button> */}
+                    <a href={`/job-posting/${job.id}`} target="_blank">
+                      <button>
+                        <img src="/images/apply.svg" />
+                        <span>Apply!</span>
+                      </button>
+                    </a>
                   </SocialActions>
                 </div>
               );
