@@ -7,7 +7,7 @@ import db, {
 } from "../firebase";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import store from "../store";
-import { SET_JOB_POSTINGS, SET_USER } from "./actionType";
+import { SET_JOB_POSTINGS, SET_USER, SET_USER_JOB_POSTINGS } from "./actionType";
 import {
   doc,
   getDoc,
@@ -29,6 +29,11 @@ export const setJobPostings = (payload) => ({
   type: SET_JOB_POSTINGS,
   jobPostings: payload,
 });
+
+export const setUserJobPostings = (payload) => ({
+  type: SET_USER_JOB_POSTINGS,
+  userJobPostings: payload
+})
 
 // Define a function to handle form submission and update user document
 export function updateUserProfile(userId, updatedUserData, currentUserData) {
@@ -132,6 +137,8 @@ export function signInAPI() {
         dispatch(setUser(userData));
         const jobPostings = await getAllJobPostings();
         dispatch(setJobPostings(jobPostings));
+        const userJobPostings = jobPostings.filter(job => job.userId == userData.userId)
+        dispatch(setUserJobPostings(userJobPostings))
       })
       .catch((error) => alert(error.message));
   };
@@ -193,7 +200,14 @@ export function createJobPosting(
       .then(() => {
         currentPostingsList.push(newJobPostingData);
         const newPostingsList = currentPostingsList.map((ele) => ele);
+        const newUserPostingsList = []
+        for(let i in newPostingsList){
+          if(newPostingsList[i].userId == userId){
+            newUserPostingsList.push(newPostingsList[i])
+          }
+        }
         dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList))
       })
       .catch((error) => alert(error.message));
   };
