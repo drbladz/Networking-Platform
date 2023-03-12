@@ -169,6 +169,12 @@ export function createUserByEmail(email, password, fullName) {
         };
         //can send more data from google to create the user
         await createUserInDB(InitialDataToStore);
+        const userData = await getUserDataById(payload.user.uid)
+        dispatch(setUser(userData))
+        const jobPostings = await getAllJobPostings();
+        dispatch(setJobPostings(jobPostings));
+        const userJobPostings = jobPostings.filter(job => job.userId == userData.userId)
+        dispatch(setUserJobPostings(userJobPostings))
       }
     );
   };
@@ -214,6 +220,7 @@ export function createJobPosting(
 }
 
 export function loginWithEmail(email, password) {
+  console.log("here")
   return (dispatch) => {
     signInWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
@@ -224,11 +231,14 @@ export function loginWithEmail(email, password) {
         const jobPostings = await getAllJobPostings();
         console.log("wowowo");
         dispatch(setJobPostings(jobPostings));
+        const userJobPostings = jobPostings.filter(job => job.userId == userData.userId)
+        dispatch(setUserJobPostings(userJobPostings))
         // ...
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
+        console.log(errorMessage)
         alert(errorMessage);
       });
   };
