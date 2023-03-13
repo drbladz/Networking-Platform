@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 
 const Main = (props) => {
   const [showModal, setShowModal] = useState("close");
+  const [showMyJobs, setShowMyJobs] = useState(false)
   const handleClick = (e) => {
     console.log("herrr");
     e.preventDefault();
@@ -25,7 +26,7 @@ const Main = (props) => {
         break;
     }
   };
-  console.log(props.jobPostings);
+  console.log(props.userJobPostings);
 
   const history = useHistory();
 
@@ -35,8 +36,8 @@ const Main = (props) => {
 
   return (
     <Container>
+      <button onClick={()=>setShowMyJobs(!showMyJobs)}>myJobs</button>
       <Sharebox>
-        Share
         <div>
           {props.user && props.user.photoURL ? (
             <img src={props.user.photoURL} referrerPolicy="no-referrer" />
@@ -46,7 +47,8 @@ const Main = (props) => {
           <button onClick={handleClick}>Post Job</button>
         </div>
       </Sharebox>
-      <div>
+      {!showMyJobs ?
+       <div>
         <Articles>
           {props.jobPostings ? (
             props.jobPostings.map((job) => {
@@ -86,10 +88,56 @@ const Main = (props) => {
               );
             })
           ) : (
-            <></>
+            <>None</>
           )}
         </Articles>
       </div>
+      :
+      <div>
+        <Articles>
+          {props.jobPostings ? (
+            props.userJobPostings.map((job) => {
+              return (
+                <div key={job.id}>
+                  <SharedActor>
+                    <a>
+                      <img src={job.photoURL} />
+                      <div>
+                        <span>{job.postTitle}</span>
+                        <span>{job.displayName}</span>
+                        <span>2023-02-24</span>
+                      </div>
+                    </a>
+                    <button>
+                      <img src="/images/ellipsis.svg" />
+                    </button>
+                  </SharedActor>
+                  <Description>{job.postDescription}</Description>
+                  <SocialCounts>
+                    <button>
+                      <a>44 Applicants</a>
+                    </button>
+                  </SocialCounts>
+                  <SocialActions>
+                    {/* <button onClick={() => handleApply(job.id)}>
+
+          </button> */}
+                    <a href={`/job-posting/${job.id}`} target="_blank">
+                      <button>
+                        <img src="/images/apply.svg" />
+                        <span>Apply!</span>
+                      </button>
+                    </a>
+                  </SocialActions>
+                </div>
+              );
+            })
+          ) : (
+            <>None</>
+          )}
+        </Articles>
+      </div>  }
+      
       <PostModal showModal={showModal} handleClick={handleClick} />
     </Container>
   );
@@ -252,9 +300,11 @@ const SocialActions = styled.div`
 `;
 
 const mapStateToProps = (state) => {
+  console.log(state)
   return {
     user: state.userState.user,
     jobPostings: state.jobPostingsState.jobPostings,
+    userJobPostings: state.jobPostingsState.userJobPostings
   };
 };
 

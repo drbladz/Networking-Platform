@@ -17,3 +17,5 @@ export const updateProfilePictureUrl = (url) => ({
   type: "UPDATE_PROFILE_PICTUR_URL",
   payload: url,
 });
+
+export const SET_USER_JOB_POSTINGS = "SET_USER_JOB_POSTINGS"
