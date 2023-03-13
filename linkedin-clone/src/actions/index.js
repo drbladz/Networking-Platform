@@ -66,6 +66,14 @@ export const updateProfilePicture = (currentUser) => {
   };
 };
 
+/*
+export const updateDocuments = (currentUser) => {
+  return (dispatch) => {
+    dispatch(setUser(currentUser));
+  };
+};
+*/
+
 async function userExistsInDB(userId) {
   // Get the document reference
   const userDocumentRef = doc(db, "Users", userId);

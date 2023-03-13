@@ -292,8 +292,8 @@ const CustomModal4 = styled(Modal)`
   background-color: white;
   border-radius: 10px;
   padding: 20px;
-  width: 400px;
-  height: 300px;
+  width: 800px;
+  height: 600px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
