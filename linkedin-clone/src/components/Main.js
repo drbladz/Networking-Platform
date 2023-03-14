@@ -30,13 +30,13 @@ const Main = (props) => {
 
   const history = useHistory();
 
-  const handleApply = (jobPostingId) => {
-    history.push(`/job-posting/${jobPostingId}`);
-  };
+  // const handleApply = (jobPostingId) => {
+  //   history.push(`/job-posting/${jobPostingId}`);
+  // };
 
   return (
     <Container>
-      <button onClick={()=>setShowMyJobs(!showMyJobs)}>myJobs</button>
+      <button onClick={()=>setShowMyJobs(!showMyJobs)}>My Job Postings</button>
       <Sharebox>
         <div>
           {props.user && props.user.photoURL ? (
@@ -122,12 +122,12 @@ const Main = (props) => {
                     {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
-                    <a href={`/job-posting/${job.id}`} target="_blank">
-                      <button>
-                        <img src="/images/apply.svg" />
-                        <span>Apply!</span>
-                      </button>
-                    </a>
+<a href={`/job-applications/job/${job.id}`} target="_blank">
+  <button>
+    
+    <span>View Applications</span>
+  </button>
+</a>
                   </SocialActions>
                 </div>
               );
