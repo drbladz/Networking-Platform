@@ -1,0 +1,127 @@
+.job-applications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px;
+  }
+  
+  .job-applications h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+  
+  .job-applications button {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #0077b6;
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .job-applications button:hover {
+    background-color: #023e8a;
+  }
+  
+  .job-applications .application {
+    width: 70%;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  
+
+  
+  .job-applications .application button {
+    margin-right: 10px;
+  }
+  
+  .job-applications .application label {
+    font-weight: bold;
+    display: inline-block;
+    width: 100px;
+  }
+  
+  .job-applications .application p {
+    display: inline-block;
+    margin: 0;
+  }
+  
+  .job-applications .application a {
+    margin-right: 10px;
+  }
+  
+  .application-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .expand-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #0077b6;
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .expand-button:hover {
+    background-color: #023e8a;
+  }
+  
+  .job-applications .application .details {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .job-applications .application .details label {
+    font-weight: bold;
+    width: 100px;
+  }
+  
+  .job-applications .application .details p {
+    margin: 0;
+  }
+  
+  .contact-details {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .contact-details .detail {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+  .file-details {
+    margin-bottom: 10px;
+  }
+  
+  .file-details label {
+    font-weight: bold;
+  }
+  
+  .file-details a {
+    margin-left: 5px;
+  }
+
+
+  .application-header h2 {
+    font-size: 18px;
+    margin-bottom: 0px;
+  }
+  
+  .application-header button {
+    font-size: 14px;
+    padding: 3px 5px;
+  }
