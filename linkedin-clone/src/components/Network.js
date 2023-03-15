@@ -12,7 +12,6 @@ const Network = (props) => {
   getUsers().then(data => {
     setUsers(data);
   });
-  console.log("getusers");
   return () => {
     setUsers([]);
   }
