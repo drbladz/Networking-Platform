@@ -16,7 +16,9 @@ import {
   setDoc,
   addDoc,
   updateDoc,
-, FieldValue, arrayUnion, arrayRemove} from "firebase/firestore";
+  arrayUnion, 
+  arrayRemove,
+} from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
 
@@ -258,6 +260,8 @@ export function createUserByEmail(email, password, fullName) {
           awards: [],
           bio: "",
           connections: [],
+          requests: [],
+          pending: [],
         };
         //can send more data from google to create the user
         await createUserInDB(InitialDataToStore);
