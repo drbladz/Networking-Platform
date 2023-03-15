@@ -1,8 +1,26 @@
 import styled from "styled-components";
 import {connect } from "react-redux";
-import { signOutAPI } from "../actions";
+import { signOutAPI, getUsers } from "../actions";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 const Header = (props) => {
+  const [value, setValue] = useState("");
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+  getUsers().then(data => {
+    setUsers(data);
+  });
+  console.log("get users");
+  return () => {
+    setUsers([]);
+  }
+  }, [])
+
+  const onChange = (event) => {
+    setValue(event.target.value);
+  };
+
   return (
     <Container>
       <Content>
@@ -13,11 +31,41 @@ const Header = (props) => {
         </Logo>
         <Search>
           <div>
-            <input type="text" placeholder="Search" />
+            <input type="text" placeholder="Search" value={value} onChange={onChange} />
           </div>
           <SearchIcon>
             <img src="/images/search-icon.svg" alt="" />
           </SearchIcon>
+          <Dropdown>
+            {users.filter(user => {
+              const searchTerm = value.toLowerCase();
+              let fullName;
+              if (user.displayName){
+                fullName = user.displayName.toLowerCase();
+              }
+              else{
+                fullName = "No name";
+              }
+              return (
+                searchTerm &&
+                fullName.startsWith(searchTerm)
+              );
+            }).slice(0, 10)
+            .map(user => (
+              <DropdownRow key={user.userId}>
+                <Link to={{
+                  pathname: `/user/${user.userId}`,
+                  state: user
+                }}
+                  style={{ textDecoration: 'none', color: 'black' }} 
+                  onClick={() => setValue("")}>
+                {user.photoURL ? <UserPhoto src={user.photoURL} alt="" width={30} height={30} /> : <UserPhoto src="/images/user.svg" alt="" width={30} height={30} />}
+                {user.displayName}
+                </Link>
+              </DropdownRow>
+            ))
+            }
+          </Dropdown>
         </Search>
         <Nav>
           <NavListWrap>
@@ -149,6 +197,35 @@ const SearchIcon = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const Dropdown = styled.div`
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  &:empty {
+    display: none;
+  }
+`;
+
+const DropdownRow = styled.div`
+  cursor: pointer;
+  text-align: start;
+  margin: 2px 0;
+  padding: 5px;
+  &:hover {
+    background-color: Gainsboro;
+  }
+`;
+
+const UserPhoto = styled.img`
+  margin-right: 5px;
+  border-radius: 50%;
 `;
 
 const Nav = styled.nav`
