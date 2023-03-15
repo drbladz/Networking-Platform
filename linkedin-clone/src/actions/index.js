@@ -86,52 +86,74 @@ export async function getUsers(){
   return users
 }
 
-export async function addConnectionById(id){
-  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-  const currentUserDocument = await getDoc(currentUserRef);
-  const otherUserRef = doc(db,"Users",id);
+export function addConnectionById(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
 
-  //current user is pending and other user gets a request
-  updateDoc(currentUserRef, {pending: arrayUnion(id)});
-  updateDoc(otherUserRef, {requests: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photo: currentUserDocument.data().photoURL})});
-  alert("Request has been sent!");
+    //current user is pending and other user gets a request
+    updateDoc(currentUserRef, {pending: arrayUnion(id)});
+    updateDoc(otherUserRef, {requests: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    console.log("Request has been sent!");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
 }
 
-export async function acceptRequest(id){
-  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-  const otherUserRef = doc(db,"Users",id);
+export function acceptRequest(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
 
-  //Both users get added in their connections
-  updateDoc(currentUserRef, {connections: arrayUnion(id)});
-  updateDoc(otherUserRef, {connections: arrayUnion(auth.currentUser.uid)});
-  alert("accepted");
+    //Both users get added in their connections
+    updateDoc(currentUserRef, {connections: arrayUnion({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {connections: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    //Clear their pending and request
+    updateDoc(currentUserRef, {requests: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    console.log("accepted");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
+  
 }
 
-export async function declineRequest(id){
-  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-  const otherUserRef = doc(db,"Users",id);
+export function declineRequest(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
 
-  //remove request and pending for other user
-  updateDoc(currentUserRef, {requests: arrayRemove(id)});
-  updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
-  alert("declined");
+    //remove request and pending for other user
+    updateDoc(currentUserRef, {requests: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    console.log("declined");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
 }
 
-export async function removeConnectionById(id){
-  const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-  const otherUserRef = doc(db,"Users",id);
+export function removeConnectionById(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
 
-  //Remove connections for both users
-  updateDoc(currentUserRef, {connections: arrayRemove(id)});
-  updateDoc(otherUserRef, {connections: arrayRemove(auth.currentUser.uid)});
-  console.log("removed");
-}
+    //Remove connections for both users
+    updateDoc(currentUserRef, {connections: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {connections: arrayRemove({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    console.log("removed");
 
-export async function getNameById(id){
-  const userDocumentRef = doc(db,"Users",id);
-  const userDocument = await getDoc(userDocumentRef);
-  console.log("get name");
-  return userDocument.data().displayName;
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
   
 }
 
@@ -186,6 +208,8 @@ export function signInAPI() {
             awards: "",
             bio: "",
             connections: [],
+            requests: [],
+            pending: [],
           };
           //can send more data from google to create the user
           await createUserInDB(InitialDataToStore);

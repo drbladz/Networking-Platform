@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { getUserAuth } from "./actions";
 import { connect } from "react-redux";
 import JobPostingPage from './components/JobPostingPage';
+import Network from "./components/Network";
 
 function App(props) {
 
@@ -17,13 +18,16 @@ function App(props) {
   return (
     <div className="App">
       <Router>
+        {props.user && <Header />}
         <Switch>
           <Route exact path="/">
             <Login />
           </Route>
           <Route path="/home">
-            <Header />
             <Home />
+          </Route>
+          <Route path="/network">
+            <Network />
           </Route>
           <Route path="/job-posting/:id" component={JobPostingPage} />
         </Switch>

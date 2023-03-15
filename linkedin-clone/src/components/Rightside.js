@@ -1,21 +1,7 @@
-import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../actions";
 import { connect } from "react-redux";
 
-const Rightside = (props) => {
-  const [users, setUsers] = useState([]);
-  const[pending, setPending] = useState([]);
-
-  useEffect(() => {
-  getUsers().then(data => {
-    setUsers(data);
-  });
-  return () => {
-    setUsers([]);
-  }
-  }, [])
-
+const Rightside = () => {
   return (
     <Container>
       <FollowCard>
@@ -56,37 +42,6 @@ const Rightside = (props) => {
           alt=""
         />
       </BannerCard>
-      <table>
-        <caption>Users</caption>
-        <tbody>
-        {users.map((user, index) => (
-          <tr key={user.userId}>
-            {user.displayName}
-            {(props.user && props.user.pending && props.user.pending.includes(user.userId)) || pending.includes(user.userId) ? <button disabled>Pending</button> : 
-            <button onClick={() => {
-              addConnectionById(user.userId);
-              setPending(pending.concat(user.userId));
-              }}>Connect</button>}
-          </tr>
-      ))} 
-      </tbody>
-      </table>
-      <br/>
-      <table>
-        <caption>Requests</caption>
-        {props.user && props.user.requests ? props.user.requests.map((req, index) => (
-          <tr key={req.id}>
-            {req.photoURL ?
-              <img src={req.photoURL} width={30} height={30} />
-              :<div></div>
-            }
-            {req.name}
-            <button onClick={() => acceptRequest(req.id)}>Accept</button>
-            <button onClick={() => declineRequest(req.id)}>Decline</button>
-          </tr>   
-        )
-        ) : <div></div>}
-      </table>
     </Container>
   );
 };
