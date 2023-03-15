@@ -53,7 +53,7 @@ const Leftside = (props) => {
           <CardBackground />
           <a>
             {props.user && props.user.photoURL ? (
-              <img src={props.user.photoURL} referrerPolicy="no-referrer" />
+              <img src={props.user.photoURL} referrerPolicy="no-referrer" style={{ width: "120px", height: "110px", objectFit: "cover"  }} />
             ) : (
               <Photo />
             )}
