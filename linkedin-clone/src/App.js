@@ -8,6 +8,7 @@ import { getUserAuth } from "./actions";
 import { connect } from "react-redux";
 import JobPostingPage from './components/JobPostingPage';
 import Network from "./components/Network";
+import JobApplications from "./components/JobApplications";
 
 function App(props) {
 
@@ -30,6 +31,7 @@ function App(props) {
             <Network />
           </Route>
           <Route path="/job-posting/:id" component={JobPostingPage} />
+          <Route path="/job-applications/job/:jobId" component={JobApplications} />
         </Switch>
       </Router>
     </div>
