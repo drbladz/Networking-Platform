@@ -47,6 +47,7 @@ const PostModal = (props) =>{
 
           </Editor>
           <div>
+            <h3>Required Documents (If Applicable)</h3>
             <label>
               <input type="checkbox" checked={mandatoryResume} onChange={() => setMandatoryResume(!mandatoryResume)} />
                 Resume
