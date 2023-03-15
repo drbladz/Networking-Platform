@@ -30,6 +30,7 @@ const JobPostingPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [applied, setApplied] = useState(false);
   const [resume, setResume] = useState(null);
   const [coverLetter, setCoverLetter] = useState(null);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
