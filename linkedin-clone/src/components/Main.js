@@ -2,12 +2,17 @@ import styled from "styled-components";
 import { getAllJobPostings } from "../actions";
 import { connect } from "react-redux";
 import PostModal from "./PostModal";
+import EditPostModal from "./EditPostModal";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 
 const Main = (props) => {
   const [showModal, setShowModal] = useState("close");
+  const [showEditPostModal, setShowEditPostModal] = useState(false)
   const [showMyJobs, setShowMyJobs] = useState(false)
+  const [jobToEdit, setJobToEdit] = useState({
+
+  })
   const handleClick = (e) => {
     console.log("herrr");
     e.preventDefault();
@@ -26,6 +31,17 @@ const Main = (props) => {
         break;
     }
   };
+
+  const handleJobEditOpen = (job) =>{
+    setJobToEdit(job)
+    setShowEditPostModal(true)
+  }
+
+  const handleJobEditClose = () =>{
+    console.log("close")
+    setJobToEdit({})
+    setShowEditPostModal(false)
+  }
   console.log(props.userJobPostings);
 
   const history = useHistory();
@@ -63,9 +79,6 @@ const Main = (props) => {
                         <span>2023-02-24</span>
                       </div>
                     </a>
-                    <button>
-                      <img src="/images/ellipsis.svg" />
-                    </button>
                   </SharedActor>
                   <Description>{job.postDescription}</Description>
                   <SocialCounts>
@@ -108,7 +121,7 @@ const Main = (props) => {
                         <span>2023-02-24</span>
                       </div>
                     </a>
-                    <button>
+                    <button onClick={()=>handleJobEditOpen(job)}>
                       <img src="/images/ellipsis.svg" />
                     </button>
                   </SharedActor>
@@ -139,6 +152,7 @@ const Main = (props) => {
       </div>  }
       
       <PostModal showModal={showModal} handleClick={handleClick} />
+      <EditPostModal job={jobToEdit} showEditPostModal={showEditPostModal} handleClick={handleJobEditClose}></EditPostModal>
     </Container>
   );
 };
@@ -244,7 +258,6 @@ const SharedActor = styled.div`
     }
   }
   button {
-    position: absolute;
     right: 12px;
     top: 0;
     background: transparent;

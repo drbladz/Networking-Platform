@@ -16,6 +16,7 @@ import {
   setDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   arrayUnion, 
   arrayRemove,
 } from "firebase/firestore";
@@ -275,6 +276,54 @@ export function createUserByEmail(email, password, fullName) {
     );
   };
 }
+
+export function editJobPosting(
+ editedJobPosting,
+ currentPostingsList
+) {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, `JobPostings/${editedJobPosting.id}`);
+      await setDoc(jobDocumentRef, editedJobPosting)
+      .then(() => {
+       currentPostingsList = currentPostingsList.filter((job) => job.id != editedJobPosting.id)
+        currentPostingsList.push(editedJobPosting);
+        const newPostingsList = currentPostingsList.map((job) => job);
+        const newUserPostingsList = []
+        for(let i in newPostingsList){
+          if(newPostingsList[i].userId == editedJobPosting.userId){
+            newUserPostingsList.push(newPostingsList[i])
+          }
+        }
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList))
+      })
+      .catch((error) => alert(error.message));
+  };
+}
+
+export function deleteJobPosting(
+  jobPostingId,
+  userId,
+  currentPostingsList
+ ) {
+   return async (dispatch) => {
+     const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
+       await deleteDoc(jobDocumentRef)
+       .then(() => {
+        currentPostingsList = currentPostingsList.filter((job) => job.id != jobPostingId)
+         const newPostingsList = currentPostingsList.map((job) => job);
+         const newUserPostingsList = []
+         for(let i in newPostingsList){
+           if(newPostingsList[i].userId == userId){
+             newUserPostingsList.push(newPostingsList[i])
+           }
+         }
+         dispatch(setJobPostings(newPostingsList));
+         dispatch(setUserJobPostings(newUserPostingsList))
+       })
+       .catch((error) => alert(error.message));
+   };
+ }
 
 export function createJobPosting(
   userId,
