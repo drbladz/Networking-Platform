@@ -15,17 +15,8 @@ const UserProfile = (props) => {
         <Card><div className="header">
           {user.photoURL ? <img src={user.photoURL} alt="profilepic" /> : <img src="/images/user.svg" alt="" />}
           <h1>{user.displayName}</h1>
-          {user.works.length !== 0 ?
-            <div>
-              <h3>{user.works[0].title}</h3>
-              <p>{user.works[0].location}</p>
-            </div>
-            :
-            <div>
-              <h3>Software Engineer</h3>
-              <p>Montreal, QC</p>
-            </div>
-          }
+          {user.works.length !== 0 ? <h3>{user.works[0].title}</h3> : <h3>Software Engineer</h3>}
+          {user.works.length !== 0 ? <p>{user.works[0].location}</p> : <p>Montreal, QC</p>}
 
           {props.user && props.user.userId !== user.userId &&
             <div>
