@@ -1,6 +1,7 @@
 import styled from "styled-components";
+import { connect } from "react-redux";
 
-const Rightside = (props) => {
+const Rightside = () => {
   return (
     <Container>
       <FollowCard>
@@ -125,4 +126,13 @@ const BannerCard = styled(FollowCard)`
   }
 `;
 
-export default Rightside;
+const mapStateToProps = (state) =>{
+  return {
+    user: state.userState.user
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Rightside)

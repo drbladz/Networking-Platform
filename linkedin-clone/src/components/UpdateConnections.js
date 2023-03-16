@@ -1,26 +1,19 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { removeConnectionById } from "../actions";
+import { connect } from "react-redux";
 
-const UpdateConnections = () => {
-  const [connections, setConnections] = useState([
-    { id: 1, name: "Momo" },
-    { id: 2, name: "Diane" },
-  ]);
-
-  const handleDeleteConnection = (id) => {
-    setConnections((prevConnections) =>
-      prevConnections.filter((connection) => connection.id !== id)
-    );
-  };
-
+const UpdateConnections = (props) => {
   return (
     <ConnectionsContainer>
       <ConnectionsHeader>Connections</ConnectionsHeader>
       <ConnectionsList>
-        {connections.map((connection) => (
+        {props.user && props.user.connections.map((connection) => (
           <ConnectionItem key={connection.id}>
+            {connection.photoURL ? <ConnectionPhoto src={connection.photoURL} alt=""/> : <ConnectionPhoto src="/images/user.svg" alt=""/>}
             <ConnectionName>{connection.name}</ConnectionName>
-            <DeleteButton onClick={() => handleDeleteConnection(connection.id)}>
+            <DeleteButton onClick={() => {
+              props.removeConnectionById(connection.id);
+            }}>
               Delete
             </DeleteButton>
           </ConnectionItem>
@@ -29,8 +22,6 @@ const UpdateConnections = () => {
     </ConnectionsContainer>
   );
 };
-
-export default UpdateConnections;
 
 const ConnectionsContainer = styled.div`
   background-color: #f0f0f0;
@@ -66,6 +57,12 @@ const ConnectionName = styled.p`
   font-size: 16px;
 `;
 
+const ConnectionPhoto = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+`;
+
 const DeleteButton = styled.button`
   background-color: #f44336;
   color: #fff;
@@ -83,3 +80,15 @@ const DeleteButton = styled.button`
     background-color: #b71c1c;
   }
 `;
+
+const mapStateToProps = (state) =>{
+  return {
+    user: state.userState.user
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  removeConnectionById: (id) => dispatch(removeConnectionById(id)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(UpdateConnections)

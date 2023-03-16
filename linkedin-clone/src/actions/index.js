@@ -16,7 +16,9 @@ import {
   setDoc,
   addDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  arrayUnion, 
+  arrayRemove,
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
@@ -67,6 +69,14 @@ export const updateProfilePicture = (currentUser) => {
   };
 };
 
+/*
+export const updateDocuments = (currentUser) => {
+  return (dispatch) => {
+    dispatch(setUser(currentUser));
+  };
+};
+*/
+
 async function userExistsInDB(userId) {
   // Get the document reference
   const userDocumentRef = doc(db, "Users", userId);
@@ -77,6 +87,88 @@ async function userExistsInDB(userId) {
   }
   console.log("nop");
   return false;
+}
+
+export async function getUsers(){
+  const collectionRef = collection(db,"Users");
+  const collectionSnap = await getDocs(collectionRef);
+  console.log(collectionSnap);
+  let users = [];
+  collectionSnap.forEach(doc => {
+    users.push(doc.data());
+  })
+  return users
+}
+
+export function addConnectionById(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
+
+    //current user is pending and other user gets a request
+    updateDoc(currentUserRef, {pending: arrayUnion(id)});
+    updateDoc(otherUserRef, {requests: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    console.log("Request has been sent!");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
+}
+
+export function acceptRequest(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
+
+    //Both users get added in their connections
+    updateDoc(currentUserRef, {connections: arrayUnion({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {connections: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    //Clear their pending and request
+    updateDoc(currentUserRef, {requests: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    console.log("accepted");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
+  
+}
+
+export function declineRequest(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
+
+    //remove request and pending for other user
+    updateDoc(currentUserRef, {requests: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    console.log("declined");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
+}
+
+export function removeConnectionById(id){
+  return async (dispatch) => {
+    const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const otherUserRef = doc(db,"Users",id);
+    const otherUserDocument = await getDoc(otherUserRef);
+
+    //Remove connections for both users
+    updateDoc(currentUserRef, {connections: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
+    updateDoc(otherUserRef, {connections: arrayRemove({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+    console.log("removed");
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  }
+  
 }
 
 async function getUserDataById(userId) {
@@ -130,6 +222,8 @@ export function signInAPI() {
             awards: "",
             bio: "",
             connections: [],
+            requests: [],
+            pending: [],
           };
           //can send more data from google to create the user
           await createUserInDB(InitialDataToStore);
@@ -167,6 +261,8 @@ export function createUserByEmail(email, password, fullName) {
           awards: [],
           bio: "",
           connections: [],
+          requests: [],
+          pending: [],
         };
         //can send more data from google to create the user
         await createUserInDB(InitialDataToStore);
