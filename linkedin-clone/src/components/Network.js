@@ -22,7 +22,7 @@ const Network = (props) => {
       {!props.user && <Redirect to="/" />}
       <table className="center">
         <caption><b>Requests</b></caption>
-        {(props.user && props.user.requests.length === 0) && <div>No requests</div>}
+        {(props.user && props.user.requests && props.user.requests.length === 0) && <div>No requests</div>}
         {props.user && props.user.requests ? props.user.requests.map((req, index) => (
           <tr className="reqRow" key={req.id}>
             <td>
@@ -54,7 +54,7 @@ const Network = (props) => {
         <h1>Add Connections</h1>
         <div className="row">
           <div className="column">
-        {props.user && users.filter(user => user.userId !== props.user.userId && !props.user.requests.some(c => c.id === user.userId) && !props.user.connections.some(c => c.id === user.userId)).map((user, index) => (
+        {props.user && props.user.requests && users.filter(user => user.userId !== props.user.userId && !props.user.requests.some(c => c.id === user.userId) && !props.user.connections.some(c => c.id === user.userId)).map((user, index) => (
             <div className="card" key={user.userId}>
 
             <Link to={{
