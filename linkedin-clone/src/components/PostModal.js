@@ -9,6 +9,8 @@ const PostModal = (props) =>{
   const [postDescription, setPostDescription] = useState("")
   const [mandatoryResume, setMandatoryResume] = useState(false);
   const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(false);
+  const [isExternal, setIsExternal] = useState(false)
+
   const reset = (e)=>{
     setPostDescription("")
     setPostTitle("")
@@ -40,7 +42,7 @@ const PostModal = (props) =>{
           onChange={(e) => setPostTitle(e.target.value)}/>
           <textarea
           value={postDescription}
-          placeholder="Job Description"
+          placeholder="Job Description or External link"
           onChange={(e) => setPostDescription(e.target.value)}/>
 
 
@@ -56,11 +58,15 @@ const PostModal = (props) =>{
               <input type="checkbox" checked={mandatoryCoverLetter} onChange={() => setMandatoryCoverLetter(!mandatoryCoverLetter)} />
                 Cover Letter
             </label>
+            <label>
+              <input type="checkbox" checked={isExternal} onChange={() =>  setIsExternal(!isExternal)} />
+                Is External
+            </label>
           </div>
         </SharedContent>
         <SharedCreation>
           <PostButton onClick={(e)=>{
-            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName, mandatoryResume, mandatoryCoverLetter)
+            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName, mandatoryResume, mandatoryCoverLetter, isExternal)
             reset(e)
             }}>
             Post
@@ -80,7 +86,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter))
+  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PostModal)

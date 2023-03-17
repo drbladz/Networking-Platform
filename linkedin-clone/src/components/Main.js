@@ -76,26 +76,38 @@ const Main = (props) => {
                       <div>
                         <span>{job.postTitle}</span>
                         <span>{job.displayName}</span>
-                        <span>2023-02-24</span>
+                        <span>{Date(job.timeStamp)}</span>
                       </div>
                     </a>
                   </SharedActor>
-                  <Description>{job.postDescription}</Description>
+                  <Description>
+                  {job.isExternal ? "Be redirected with the Apply button !" : job.postDescription }
+                    </Description>
+                  {/*
                   <SocialCounts>
                     <button>
                       <a>44 Applicants</a>
-                    </button>
-                  </SocialCounts>
+              </button> 
+                  </SocialCounts> */}
                   <SocialActions>
                     {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
+                  { job.isExternal ?
+                    (<a href={`${job.postDescription}`} target="_blank">
+                      <button>
+                        <img src="/images/apply.svg" />
+                        <span>Apply!</span>
+                      </button>
+                    </a>)
+                    :
                     <a href={`/job-posting/${job.id}`} target="_blank">
                       <button>
                         <img src="/images/apply.svg" />
                         <span>Apply!</span>
                       </button>
                     </a>
+            }
                   </SocialActions>
                 </div>
               );
@@ -118,29 +130,30 @@ const Main = (props) => {
                       <div>
                         <span>{job.postTitle}</span>
                         <span>{job.displayName}</span>
-                        <span>2023-02-24</span>
+                        <span>{Date(job.timeStamp)}</span>
                       </div>
                     </a>
                     <button onClick={()=>handleJobEditOpen(job)}>
                       <img src="/images/ellipsis.svg" />
                     </button>
                   </SharedActor>
-                  <Description>{job.postDescription}</Description>
+                  <Description> {job.isExternal ? (<a href={`${job.postDescription}`} target="_blank">link to external job</a>) : job.postDescription }</Description>
+                   {/*
                   <SocialCounts>
                     <button>
                       <a>44 Applicants</a>
-                    </button>
-                  </SocialCounts>
+              </button> 
+                  </SocialCounts> */}
                   <SocialActions>
                     {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
-<a href={`/job-applications/job/${job.id}`} target="_blank">
-  <button>
-    
-    <span>View Applications</span>
-  </button>
-</a>
+          {!job.isExternal && (
+            <a href={`/job-applications/job/${job.id}`} target="_blank">
+              <button>    
+                <span>View Applications</span>
+              </button>
+            </a> )}
                   </SocialActions>
                 </div>
               );
