@@ -55,7 +55,7 @@ const UpdatePhoto = (props) => {
       <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
       <button onClick={uploadFile}>Update Photo</button>
 
-      {lastImageUrl && <img src={lastImageUrl} />}
+      {/* {lastImageUrl && <img src={lastImageUrl} />} */}
     </div>
   );
 };

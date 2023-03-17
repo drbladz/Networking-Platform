@@ -1,0 +1,241 @@
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.header img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+.header h1 {
+    margin: 10px 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.header p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #777;
+}
+
+.about {
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.about h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.about p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.experience {
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.experience h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.skills {
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.skills ul {
+    margin: 0;
+    padding: 0 0 0 20px;
+    list-style: square;
+}
+
+.skills li {
+    margin: 5px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.skills h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.job {
+    margin-bottom: 20px;
+}
+
+.job h4 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.job p {
+    margin: 0;
+    font-size: 14px;
+    color: #777;
+}
+
+.job ul {
+    margin: 0;
+    padding: 0 0 0 20px;
+    list-style: square;
+}
+
+.job li {
+    margin: 5px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.education {
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.education h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.courses {
+    padding: 20px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.courses h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.school {
+    margin-bottom: 20px;
+}
+
+.school h4 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.school p {
+    margin: 0;
+    font-size: 16px;
+    color: #777;
+}
+
+.buttonc{
+    margin: 1rem;
+    margin-top: 10px;
+    border: 2px solid rgb(79, 117, 220);
+    color: rgb(79, 117, 220);
+    padding: 0.6rem;
+    border-radius: 30px;
+    background-color: white;
+}
+
+.buttonc:hover{
+    font-weight: bold;
+    background-color: rgb(207, 216, 239);
+    transform: scale(1.1);
+    transition-duration: 200ms;
+}
+
+.buttonp{
+    margin: 1rem;
+    margin-top: 10px;
+    border: 2px solid grey;
+    padding: 0.6rem;
+    border-radius: 30px;
+}
+
+.message-btn{
+    margin: 1rem;
+    margin-top: 10px;
+    border: 2px solid rgb(79, 117, 220);
+    color: white;
+    padding: 0.6rem;
+    border-radius: 30px;
+    background-color:rgb(79, 117, 220);
+}
+
+.message-btn:hover{
+    font-weight: bold;
+    background-color: rgb(40, 84, 193);
+    transform: scale(1.1);
+    transition-duration: 200ms;
+}
+
+.accept{
+    background-color: white; 
+    color: black; 
+    border: 2px solid #4CAF50;
+    border-radius: 20px;
+    margin-top: 10px;
+    margin-right: 5px;
+    padding: 0.6rem;
+}
+
+.accept:hover {
+    background-color: #4CAF50;
+    color: white;
+    transition-duration: 200ms;
+  }
+
+.decline{
+    background-color: white; 
+    color: black; 
+    border: 2px solid #f44336;
+    border-radius: 20px;
+    margin-top: 10px;
+    padding: 0.6rem;
+}
+
+.decline:hover {
+    background-color: #f44336;
+    color: white;
+    transition-duration: 200ms;
+}
