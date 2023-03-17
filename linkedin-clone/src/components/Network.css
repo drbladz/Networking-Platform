@@ -1,7 +1,7 @@
-/* * {
+*{
     box-sizing: border-box;
+}
 
-  } */
 .container{
     width: 100%;
     border: 1px solid gray;
@@ -52,6 +52,7 @@
     padding: 0.6rem;
     border-radius: 30px;
     background-color: white;
+    cursor: pointer;
 }
 
 .buttonc:hover{
@@ -87,6 +88,7 @@
     color: black; 
     border: 2px solid #4CAF50;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .accept:hover {
@@ -100,6 +102,7 @@
     color: black; 
     border: 2px solid #f44336;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .decline:hover {

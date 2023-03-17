@@ -175,6 +175,7 @@
     padding: 0.6rem;
     border-radius: 30px;
     background-color: white;
+    cursor: pointer;
 }
 
 .buttonc:hover{
@@ -200,6 +201,7 @@
     padding: 0.6rem;
     border-radius: 30px;
     background-color:rgb(79, 117, 220);
+    cursor: pointer;
 }
 
 .message-btn:hover{
@@ -217,6 +219,7 @@
     margin-top: 10px;
     margin-right: 5px;
     padding: 0.6rem;
+    cursor: pointer;
 }
 
 .accept:hover {
@@ -232,6 +235,7 @@
     border-radius: 20px;
     margin-top: 10px;
     padding: 0.6rem;
+    cursor: pointer;
 }
 
 .decline:hover {

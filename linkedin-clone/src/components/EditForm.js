@@ -37,6 +37,7 @@ const EditForm = (props) => {
     };
     props.updateUserProfile(props.userId, updateUserData, props.user);
     console.log("updated");
+    alert("Updated Successfully!");
   };
 
   const handleAddWorkExperience = () => {
@@ -190,7 +191,7 @@ const EditForm = (props) => {
   }
 
   return (
-    <form>
+    <form className="form">
       <h2>About</h2>
       <div>
         <label>
