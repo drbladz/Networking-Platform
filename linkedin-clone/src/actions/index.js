@@ -333,7 +333,8 @@ export function createJobPosting(
   userPhotoURL,
   displayName,
   mandatoryResume,
-  mandatoryCoverLetter
+  mandatoryCoverLetter,
+  isExternal
 ) {
   return (dispatch) => {
     const newJobPostingData = {
@@ -346,6 +347,7 @@ export function createJobPosting(
       displayName: displayName,
       mandatoryResume: mandatoryResume,
       mandatoryCoverLetter: mandatoryCoverLetter,
+      isExternal: isExternal
     };
     createJobPostingInDB(newJobPostingData)
       .then(() => {

@@ -9,12 +9,14 @@ const EditPostModal = (props) =>{
   const [postDescription, setPostDescription] = useState(props.job.postDescription)
   const [mandatoryResume, setMandatoryResume] = useState(props.job.mandatoryResume);
   const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(props.job.mandatoryCoverLetter);
+  const [isExternal, setIsExternal] = useState(props.job.isExternal)
 
   useEffect(() => {
     setPostTitle(props.job.postTitle)
     setPostDescription(props.job.postDescription)
     setMandatoryResume(props.job.mandatoryResume)
     setMandatoryCoverLetter(props.job.mandatoryCoverLetter)
+    setIsExternal(props.job.isExternal)
   }, [props])
 
   const reset = () =>{
@@ -63,6 +65,10 @@ const EditPostModal = (props) =>{
               <input type="checkbox" checked={mandatoryCoverLetter} onChange={() => setMandatoryCoverLetter(!mandatoryCoverLetter)} />
                 Cover Letter
             </label>
+            <label>
+              <input type="checkbox" checked={isExternal} onChange={() =>  setIsExternal(!isExternal)} />
+                Is External
+            </label>
           </div>
         </SharedContent>
         <SharedCreation>
@@ -73,6 +79,7 @@ const EditPostModal = (props) =>{
               id: props.job.id,
               mandatoryCoverLetter: mandatoryCoverLetter,
               mandatoryResume: mandatoryResume,
+              isExternal: isExternal,
               photoURL: props.user.photoURL,
               postDescription: postDescription,
               postTitle: postTitle,
