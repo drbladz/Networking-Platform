@@ -1,3 +1,4 @@
+.form 
 input,
 textarea {
     margin: 5px 0;
@@ -8,7 +9,7 @@ textarea {
     width: 100%;
 }
 
- h2 {
+.form h2 {
     margin-top: 20px;
 }
 
