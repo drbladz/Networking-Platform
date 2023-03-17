@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../actions";
 import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import './Network.css';
 
 const Network = (props) => {
@@ -54,15 +54,26 @@ const Network = (props) => {
         <h1>Add Connections</h1>
         <div className="row">
           <div className="column">
-        {props.user && users.filter(user => user.userId !== props.user.userId && !props.user.connections.some(c => c.id === user.userId)).map((user, index) => (
-          <div className="card" key={user.userId}>
+        {props.user && users.filter(user => user.userId !== props.user.userId && !props.user.requests.some(c => c.id === user.userId) && !props.user.connections.some(c => c.id === user.userId)).map((user, index) => (
+            <div className="card" key={user.userId}>
+
+            <Link to={{
+            pathname: `/user/${user.userId}`,
+            state: user
+            }}  style={{ textDecoration: 'none', color: 'black' }}> 
+            <div>
             {user.photoURL ? <img src={user.photoURL} alt="" height="100" width="100"/> : <img src="/images/user.svg" alt="" height="100" width="100"/>}
+            </div>
+            </Link>
+
             <h2>{user.displayName}</h2>
             {(props.user && props.user.pending && props.user.pending.includes(user.userId)) ? <button className="buttonp" disabled>Pending</button> : 
             <button className="buttonc" onClick={() => {
               props.addConnectionById(user.userId);
               }}>Connect</button>}
           </div>
+
+          
       ))} 
       </div>
       </div>
