@@ -139,7 +139,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Educations</span>
-              {props.user.education && props.user.education.map(e => (
+              {props.user.educations && props.user.educations.map(e => (
                 <span key={e.program}> - {e.school}</span>
               ))}
             </div>
@@ -329,6 +329,7 @@ const CustomModal2 = styled(Modal)`
   width: 800px;
   height: 800px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
 `;
 
 const ContactInfo = styled.div`
