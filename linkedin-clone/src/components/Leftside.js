@@ -140,7 +140,7 @@ const Leftside = (props) => {
             <div>
               <span>Educations</span>
               {props.user.educations && props.user.educations.map(e => (
-                <span key={e.program}> - {e.school}</span>
+                <span key={e.program}>{e.school}</span>
               ))}
             </div>
           </a>
@@ -151,7 +151,7 @@ const Leftside = (props) => {
             <div>
               <span>Work</span>
               {props.user.works && props.user.works.map(work => (
-                <span key={work.company}> - {work.title}</span>
+                <span key={work.company}>{work.title}</span>
               ))}
             </div>
           </a>
@@ -162,7 +162,7 @@ const Leftside = (props) => {
             <div>
               <span>Skills</span>
               {props.user.skills && props.user.skills.map(skill => (
-                <span key={skill}> - {skill}</span>
+                <span key={skill}>{skill}</span>
               ))}
             </div>
           </a>
@@ -173,7 +173,7 @@ const Leftside = (props) => {
             <div>
               <span>Languages</span>
               {props.user.languages && props.user.languages.map(lang => (
-                <span key={lang}> - {lang}</span>
+                <span key={lang}>{lang}</span>
               ))}
             </div>
           </a>
@@ -184,7 +184,7 @@ const Leftside = (props) => {
             <div>
               <span>Courses</span>
               {props.user.courses && props.user.courses.map(course => (
-                <span key={course.school}> - {course.title}</span>
+                <span key={course.school}>{course.title}</span>
               ))}
             </div>
           </a>
@@ -195,7 +195,7 @@ const Leftside = (props) => {
             <div>
               <span>Projects</span>
               {props.user.projects && props.user.projects.map(project => (
-                <span key={project.title}> - {project.title}</span>
+                <span key={project.title}>{project.title}</span>
               ))}
             </div>
           </a>
@@ -206,7 +206,7 @@ const Leftside = (props) => {
             <div>
               <span>Volunteerings</span>
               {props.user.volunteerings && props.user.volunteerings.map(v => (
-                <span key={v.company}> - {v.title}</span>
+                <span key={v.company}>{v.title}</span>
               ))}
             </div>
           </a>
@@ -216,7 +216,7 @@ const Leftside = (props) => {
             <div>
               <span>Awards</span>
               {props.user.awards && props.user.awards.map(award => (
-                <span key={award.issuer}> - {award.title}</span>
+                <span key={award.issuer}>{award.title}</span>
               ))}
             </div>
           </a>
@@ -227,7 +227,7 @@ const Leftside = (props) => {
             <div>
               <span>Recommendations</span>
               {props.user.recommendations && props.user.recommendations.map(rec => (
-                <span key={rec}> - {rec}</span>
+                <span key={rec}>{rec}</span>
               ))}
             </div>
           </a>
