@@ -7,6 +7,7 @@ import UploadDocuments from "./UploadDocuments";
 import EditForm from "./EditForm";
 import Modal from "react-modal";
 import UpdateConnections from "./UpdateConnections";
+import { Link } from 'react-router-dom';
 
 Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -58,9 +59,9 @@ const Leftside = (props) => {
               <Photo />
             )}
             {props.user && props.user.displayName ? (
-              <Link>Welcome {props.user.displayName}</Link>
+              <StyledLink>Welcome {props.user.displayName}</StyledLink>
             ) : (
-              <Link>Welcome User</Link>
+              <StyledLink>Welcome User</StyledLink>
             )}
           </a>
           <a>
@@ -89,7 +90,11 @@ const Leftside = (props) => {
               )}
             </CustomModal4>
           </a>
-
+          <a href="/job-preferences" target="_blank">
+            <SetPreferencesText>
+              Set Job Searching Preferences
+            </SetPreferencesText>
+          </a>
           {/*
            */}
 
@@ -724,7 +729,7 @@ const Photo = styled.div`
   border-radius: 50%;
 `;
 
-const Link = styled.div`
+const StyledLink = styled.div`
   font-size: 16px;
   line-height: 1.5;
   color: rgba(0, 0, 0, 0.9);
@@ -828,6 +833,15 @@ const CommunityCard = styled(ArtCard)`
       }
     }
   }
+`;
+const SetPreferencesText = styled.span`
+
+color: #0a66c2;
+margin-top: 4px;
+font-size: 12px;
+line-height: 1.33;
+font-weight: 400;
+cursor: pointer;
 `;
 
 const mapStateToProps = (state) => {

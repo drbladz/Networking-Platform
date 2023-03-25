@@ -10,6 +10,7 @@ import JobPostingPage from './components/JobPostingPage';
 import Network from "./components/Network";
 import JobApplications from "./components/JobApplications";
 import UserProfile from "./components/UserProfile";
+import SearchingPreferences from "./components/SearchingPreferences";
 
 function App(props) {
 
@@ -34,6 +35,7 @@ function App(props) {
           <Route path="/user/:id" component={UserProfile} />
           <Route path="/job-posting/:id" component={JobPostingPage} />
           <Route path="/job-applications/job/:jobId" component={JobApplications} />
+          <Route path="/job-preferences" component={SearchingPreferences} />
         </Switch>
       </Router>
     </div>
