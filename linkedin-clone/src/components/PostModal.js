@@ -18,6 +18,13 @@ const PostModal = (props) =>{
   const reset = (e)=>{
     setPostDescription("")
     setPostTitle("")
+    setMandatoryResume(false);
+    setMandatoryCoverLetter(false);
+    setIsExternal(false);
+    setJobType("");
+    setIndustry("");
+    setExperienceLevel("");
+    setRemoteWorkOption("");
     props.handleClick(e)
   }
   
@@ -187,7 +194,8 @@ const PostModal = (props) =>{
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
-    jobPostings: state.jobPostingsState.jobPostings
+    jobPostings: state.jobPostingsState.jobPostings,
+    
   }
 }
 
