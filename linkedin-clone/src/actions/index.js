@@ -334,7 +334,8 @@ export function createJobPosting(
   displayName,
   mandatoryResume,
   mandatoryCoverLetter,
-  isExternal
+  isExternal,
+  jobParameters
 ) {
   return (dispatch) => {
     const newJobPostingData = {
@@ -347,7 +348,8 @@ export function createJobPosting(
       displayName: displayName,
       mandatoryResume: mandatoryResume,
       mandatoryCoverLetter: mandatoryCoverLetter,
-      isExternal: isExternal
+      isExternal: isExternal,
+      jobParameters: jobParameters
     };
     createJobPostingInDB(newJobPostingData)
       .then(() => {
@@ -425,7 +427,7 @@ async function getAllJobPostings() {
   console.log("leaving");
   return jobPostingsData;
 }
-
+export { getAllJobPostings };
 async function createJobPostingInDB(newJobPostingData) {
   /*const collectionRef = collection(db, "Users");
     const collectionSnap = await getDocs(collectionRef);

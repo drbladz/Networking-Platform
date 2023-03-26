@@ -10,6 +10,10 @@ const PostModal = (props) =>{
   const [mandatoryResume, setMandatoryResume] = useState(false);
   const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(false);
   const [isExternal, setIsExternal] = useState(false)
+  const [jobType, setJobType] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [experienceLevel, setExperienceLevel] = useState("");
+  const [remoteWorkOption, setRemoteWorkOption] = useState("");
 
   const reset = (e)=>{
     setPostDescription("")
@@ -63,10 +67,112 @@ const PostModal = (props) =>{
                 Is External
             </label>
           </div>
+          <div>
+  <h3>Job Type</h3>
+  <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
+    <option value="">Select Job Type</option>
+    <option value="full-time">Full-Time</option>
+    <option value="part-time">Part-Time</option>
+    <option value="contract">Contract</option>
+  </select>
+</div>
+<div>
+  <h3>Industry / Sector</h3>
+  <select value={industry} onChange={(e) => setIndustry(e.target.value)}>
+  <option value="">Select an industry</option>
+<option value="accounting">Accounting</option>
+<option value="advertising">Advertising</option>
+<option value="aerospace">Aerospace</option>
+<option value="agriculture">Agriculture</option>
+<option value="architecture">Architecture</option>
+<option value="art">Art</option>
+<option value="automotive">Automotive</option>
+<option value="banking">Banking</option>
+<option value="beauty">Beauty</option>
+<option value="biotech">Biotech</option>
+<option value="childcare">Childcare</option>
+<option value="construction">Construction</option>
+<option value="consulting">Consulting</option>
+<option value="customer service">Customer Service</option>
+<option value="defense">Defense</option>
+<option value="e-commerce">E-commerce</option>
+<option value="education">Education</option>
+<option value="energy">Energy</option>
+<option value="engineering">Engineering</option>
+<option value="entertainment">Entertainment</option>
+<option value="environmental">Environmental</option>
+<option value="fashion">Fashion</option>
+<option value="finance">Finance</option>
+<option value="fitness">Fitness</option>
+<option value="food and beverage">Food and Beverage</option>
+<option value="gaming">Gaming</option>
+<option value="government">Government</option>
+<option value="healthcare">Healthcare</option>
+<option value="hospitality">Hospitality</option>
+<option value="human resources">Human Resources</option>
+<option value="humanitarian">Humanitarian</option>
+<option value="insurance">Insurance</option>
+<option value="interior design">Interior Design</option>
+<option value="internet">Internet</option>
+<option value="IT">IT</option>
+<option value="legal">Legal</option>
+<option value="logistics">Logistics</option>
+<option value="manufacturing">Manufacturing</option>
+<option value="marketing">Marketing</option>
+<option value="media">Media</option>
+<option value="music">Music</option>
+<option value="nonprofit">Nonprofit</option>
+<option value="outsourcing">Outsourcing</option>
+<option value="pharmaceuticals">Pharmaceuticals</option>
+<option value="photography">Photography</option>
+<option value="public relations">Public Relations</option>
+<option value="publishing">Publishing</option>
+<option value="real estate">Real Estate</option>
+<option value="recruitment">Recruitment</option>
+<option value="retail">Retail</option>
+<option value="sales">Sales</option>
+<option value="science">Science</option>
+<option value="security">Security</option>
+<option value="social media">Social Media</option>
+<option value="software development">Software Development</option>
+<option value="sports">Sports</option>
+<option value="telecom">Telecom</option>
+<option value="telecommunications">Telecommunications</option>
+<option value="transportation">Transportation</option>
+<option value="travel">Travel</option>
+<option value="other">Other</option>
+  
+  </select>
+    
+</div>
+<div>
+  <h3>Experience Level</h3>
+  <select value={experienceLevel} onChange={(e) => setExperienceLevel(e.target.value)}>
+    <option value="">Select Experience Level</option>
+    <option value="entry-level">Entry-Level</option>
+    <option value="intermediate">Intermediate</option>
+    <option value="senior-level">Senior-Level</option>
+  </select>
+</div>
+<div>
+  <h3>Remote Work Options</h3>
+  <select value={remoteWorkOption} onChange={(e) => setRemoteWorkOption(e.target.value)}>
+    <option value="">Select Remote Work Option</option>
+    <option value="remote">Remote Work</option>
+    <option value="in-person">In-Person Work</option>
+    <option value="both">Open to Both</option>
+  </select>
+</div>
         </SharedContent>
         <SharedCreation>
           <PostButton onClick={(e)=>{
-            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName, mandatoryResume, mandatoryCoverLetter, isExternal)
+            props.createJobPosting(props.user.userId, postTitle, postDescription, props.jobPostings,props.user.photoURL, props.user.displayName, mandatoryResume, mandatoryCoverLetter, isExternal,
+              {
+                jobType,
+                industry,
+                experienceLevel,
+                remoteWorkOption,
+              })
             reset(e)
             }}>
             Post
@@ -86,7 +192,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal))
+  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal, jobParameters) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, isExternal, jobParameters))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PostModal)
