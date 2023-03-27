@@ -4,12 +4,9 @@ import { signOutAPI, getUsers} from "../actions";
 import { getAllJobPostings } from "../actions/index";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getAuth } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import db from '../firebase';
 import 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faCog} from '@fortawesome/free-solid-svg-icons';
 import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
 
 
