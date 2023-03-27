@@ -254,14 +254,17 @@ const JobPostingPage = () => {
   if (!jobPosting) {
     return <div>Loading...</div>;
   }
-  // Fetch job posting data from database using the ID
+
 
   const resumeRequired = jobPosting?.mandatoryResume;
   const coverLetterRequired = jobPosting?.mandatoryCoverLetter;
 
   const resumeInputLabel = `Resume${resumeRequired ? '*' : ''}`;
   const coverLetterInputLabel = `Cover Letter${coverLetterRequired ? '*' : ''}`;
-
+  const experienceLevel = jobPosting.jobParameters?.experienceLevel;
+  const industry = jobPosting.jobParameters?.industry;
+  const jobType = jobPosting.jobParameters?.jobType;
+  const remoteWorkOption = jobPosting.jobParameters?.remoteWorkOption;
 
   return (
     
@@ -272,6 +275,14 @@ const JobPostingPage = () => {
   <div style={{ marginTop: '80px' }} className='jobPostingContainer'>
         <h2 style={{ textAlign: "center" }}>{jobPosting.postTitle}</h2>
         <p>{jobPosting.postDescription}</p>
+        {jobPosting.jobParameters && (
+        <div className='parametersContainer'>
+          <p className='jobParameter'><span>Experience Level:</span> {jobPosting.jobParameters.experienceLevel}</p>
+          <p className='jobParameter'><span>Industry:</span> {jobPosting.jobParameters.industry}</p>
+          <p className='jobParameter'><span>Job Type:</span> {jobPosting.jobParameters.jobType}</p>
+          <p className='jobParameter'><span>Remote Work Option:</span> {jobPosting.jobParameters.remoteWorkOption}</p>
+        </div>
+      )}
         <form onSubmit={(e) => handleApply(e)}>
         <div className='formControl'>
           <label className='label' htmlFor="email">Email*</label>

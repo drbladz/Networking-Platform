@@ -8,12 +8,12 @@
 }
 
 .jobPostingContainer h2 {
-  font-size: 2.5rem;
+  font-size: 2.6rem;
   margin-bottom: 20px;
 }
 
 .jobPostingContainer p {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   margin-bottom: 30px;
 }
 
@@ -132,4 +132,23 @@
 }
 .disabledButton:hover {
   background-color: gray;
+}
+
+
+.parametersContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.jobPostingContainer .parametersContainer .jobParameter {
+  font-size: 1.1rem;
+  padding: 0.2rem 0.5rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.jobPostingContainer .parametersContainer .jobParameter span{
+  font-weight: bold;
 }
