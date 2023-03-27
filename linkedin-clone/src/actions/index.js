@@ -398,8 +398,13 @@ export function getUserAuth() {
   return (dispatch) => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userData = getUserDataById(user.uid);
+        const userData = await getUserDataById(user.uid);
+        const jobPostings = await getAllJobPostings();
+        const userJobPostings = jobPostings.filter(job => job.userId === userData.userId);
+        
         dispatch(setUser(userData));
+        dispatch(setJobPostings(jobPostings));
+        dispatch(setUserJobPostings(userJobPostings));
       }
     });
   };

@@ -65,7 +65,7 @@ const Leftside = (props) => {
             )}
           </a>
           <a>
-            <Bio>{props.user.bio}</Bio>
+            <Bio>{props.user && props.user.bio}</Bio>
           </a>
           <a>
             <AddPhotoText onClick={handlePhotoClick}>
@@ -90,7 +90,7 @@ const Leftside = (props) => {
               )}
             </CustomModal4>
           </a>
-          <a href="/job-preferences" target="_blank">
+          <a href="/job-preferences" target="_blank" style={{ textDecoration: 'none' }}>
             <SetPreferencesText>
               Set Job Searching Preferences
             </SetPreferencesText>
@@ -136,7 +136,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Contact Information</span>
-              <span>{props.user.contactInfo}</span>
+              <span>{props.user && props.user.contactInfo}</span>
             </div>
           </a>
         </ContactInfo>
@@ -144,7 +144,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Educations</span>
-              {props.user.educations && props.user.educations.map(e => (
+              {props.user && props.user.educations && props.user.educations.map(e => (
                 <span key={e.program}>{e.school}</span>
               ))}
             </div>
@@ -155,7 +155,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Work</span>
-              {props.user.works && props.user.works.map(work => (
+              {props.user && props.user.works && props.user.works.map(work => (
                 <span key={work.company}>{work.title}</span>
               ))}
             </div>
@@ -166,7 +166,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Skills</span>
-              {props.user.skills && props.user.skills.map(skill => (
+              {props.user && props.user.skills && props.user.skills.map(skill => (
                 <span key={skill}>{skill}</span>
               ))}
             </div>
@@ -177,7 +177,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Languages</span>
-              {props.user.languages && props.user.languages.map(lang => (
+              {props.user && props.user.languages && props.user.languages.map(lang => (
                 <span key={lang}>{lang}</span>
               ))}
             </div>
@@ -188,7 +188,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Courses</span>
-              {props.user.courses && props.user.courses.map(course => (
+              {props.user && props.user.courses && props.user.courses.map(course => (
                 <span key={course.school}>{course.title}</span>
               ))}
             </div>
@@ -199,7 +199,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Projects</span>
-              {props.user.projects && props.user.projects.map(project => (
+              {props.user && props.user.projects && props.user.projects.map(project => (
                 <span key={project.title}>{project.title}</span>
               ))}
             </div>
@@ -210,7 +210,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Volunteerings</span>
-              {props.user.volunteerings && props.user.volunteerings.map(v => (
+              {props.user && props.user.volunteerings && props.user.volunteerings.map(v => (
                 <span key={v.company}>{v.title}</span>
               ))}
             </div>
@@ -220,7 +220,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Awards</span>
-              {props.user.awards && props.user.awards.map(award => (
+              {props.user && props.user.awards && props.user.awards.map(award => (
                 <span key={award.issuer}>{award.title}</span>
               ))}
             </div>
@@ -231,7 +231,7 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Recommendations</span>
-              {props.user.recommendations && props.user.recommendations.map(rec => (
+              {props.user && props.user.recommendations && props.user.recommendations.map(rec => (
                 <span key={rec}>{rec}</span>
               ))}
             </div>
