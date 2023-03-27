@@ -5,6 +5,7 @@ import db, {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "../firebase";
+import { getAuth } from "firebase/auth";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import store from "../store";
 import { SET_JOB_POSTINGS, SET_USER, SET_USER_JOB_POSTINGS } from "./actionType";
@@ -334,7 +335,8 @@ export function createJobPosting(
   displayName,
   mandatoryResume,
   mandatoryCoverLetter,
-  isExternal
+  isExternal,
+  jobParameters
 ) {
   return (dispatch) => {
     const newJobPostingData = {
@@ -347,7 +349,8 @@ export function createJobPosting(
       displayName: displayName,
       mandatoryResume: mandatoryResume,
       mandatoryCoverLetter: mandatoryCoverLetter,
-      isExternal: isExternal
+      isExternal: isExternal,
+      jobParameters: jobParameters
     };
     createJobPostingInDB(newJobPostingData)
       .then(() => {
@@ -425,7 +428,7 @@ async function getAllJobPostings() {
   console.log("leaving");
   return jobPostingsData;
 }
-
+export { getAllJobPostings };
 async function createJobPostingInDB(newJobPostingData) {
   /*const collectionRef = collection(db, "Users");
     const collectionSnap = await getDocs(collectionRef);
@@ -463,3 +466,45 @@ export function createPosting(jobName, jobField, experience){
     dispatch(addPosting(payload))
   }
 }*/
+
+
+export const filterJobsByPreferences = (jobs, preferences) => {
+  return jobs.filter((job) => {
+    if (!job.jobParameters) {
+      return false;
+    }
+
+    const {
+      experienceLevel,
+      industry,
+      jobType,
+      remoteWorkOption,
+    } = job.jobParameters;
+
+    return (
+      experienceLevel === preferences.experienceLevel &&
+      industry === preferences.industry &&
+      jobType === preferences.jobType &&
+      remoteWorkOption === preferences.remoteWorkOption
+    );
+  });
+};
+
+export   const getUserSearchingPreferences = async () => {
+  try {
+    const currentUser = getAuth().currentUser;
+    const userDocRef = doc(db, 'Users', currentUser.uid);
+    const docSnap = await getDoc(userDocRef);
+    
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      return userData.searchingPreferences;
+    } else {
+      console.log('No user found with this userId:', currentUser.uid);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching user preferences:', error);
+    return null;
+  }
+};
