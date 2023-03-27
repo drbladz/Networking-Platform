@@ -1,3 +1,4 @@
+// Import the required firebase modules, actions and other external dependencies.
 import db, {
   auth,
   provider,
@@ -23,17 +24,17 @@ import {
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
-
+// Define an action creator to set the current user in the store.
 export const setUser = (payload) => ({
   type: SET_USER,
   user: payload,
 });
-
+// Define an action creator to set the job postings in the store.
 export const setJobPostings = (payload) => ({
   type: SET_JOB_POSTINGS,
   jobPostings: payload,
 });
-
+// Define an action creator to set the user job postings in the store.
 export const setUserJobPostings = (payload) => ({
   type: SET_USER_JOB_POSTINGS,
   userJobPostings: payload
@@ -50,6 +51,7 @@ export function updateUserProfile(userId, updatedUserData, currentUserData) {
       updatedUserData[property] = currentUserData[property];
     }
   }
+  // Async function to update the user document and dispatch the updated user data to the store.
 
   return async (dispatch) => {
     console.log("got herrre");
@@ -62,7 +64,7 @@ export function updateUserProfile(userId, updatedUserData, currentUserData) {
     dispatch(setUser(updatedUserData));
   };
 }
-
+// Define an action creator to set the updated profile picture in the store.
 export const updateProfilePicture = (currentUser) => {
   console.log("yuyu");
   return (dispatch) => {
@@ -89,7 +91,7 @@ async function userExistsInDB(userId) {
   console.log("nop");
   return false;
 }
-
+// Async function to get all the users from the database.
 export async function getUsers(){
   const collectionRef = collection(db,"Users");
   const collectionSnap = await getDocs(collectionRef);
@@ -100,7 +102,7 @@ export async function getUsers(){
   })
   return users
 }
-
+// Async function to add a connection by id.
 export function addConnectionById(id){
   return async (dispatch) => {
     const currentUserRef = doc(db,"Users",auth.currentUser.uid);
@@ -108,6 +110,7 @@ export function addConnectionById(id){
     const otherUserRef = doc(db,"Users",id);
 
     //current user is pending and other user gets a request
+    // Add pending and request for the current user and other user, respectively.
     updateDoc(currentUserRef, {pending: arrayUnion(id)});
     updateDoc(otherUserRef, {requests: arrayUnion({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
     console.log("Request has been sent!");
@@ -116,11 +119,14 @@ export function addConnectionById(id){
     dispatch(setUser(userData));
   }
 }
-
+// This function accepts a request by updating the current user's document and the document of the user with the specified ID
+// It takes in an "id" parameter which is the ID of the user whose request is being accepted
 export function acceptRequest(id){
   return async (dispatch) => {
+    // Get the document of the current user
     const currentUserRef = doc(db,"Users",auth.currentUser.uid);
     const currentUserDocument = await getDoc(currentUserRef);
+    // Get the document of the other user
     const otherUserRef = doc(db,"Users",id);
     const otherUserDocument = await getDoc(otherUserRef);
 
@@ -137,7 +143,8 @@ export function acceptRequest(id){
   }
   
 }
-
+// This function declines a request by removing it from the current user's document and the document of the user with the specified ID
+// It takes in an "id" parameter which is the ID of the user whose request is being declined
 export function declineRequest(id){
   return async (dispatch) => {
     const currentUserRef = doc(db,"Users",auth.currentUser.uid);
@@ -148,24 +155,28 @@ export function declineRequest(id){
     updateDoc(currentUserRef, {requests: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
     updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
     console.log("declined");
-
+ // Retrieve the current user's data and dispatch it using the "setUser" function
     const userData = await getUserDataById(auth.currentUser.uid);
     dispatch(setUser(userData));
   }
 }
-
+// Defines the `removeConnectionById` function that takes an `id` parameter
 export function removeConnectionById(id){
+    // Returns an asynchronous function that takes a `dispatch` parameter
   return async (dispatch) => {
+        // Gets the current user's document from the database
     const currentUserRef = doc(db,"Users",auth.currentUser.uid);
     const currentUserDocument = await getDoc(currentUserRef);
+        // Gets the document of the user to remove the connection with from the database
     const otherUserRef = doc(db,"Users",id);
     const otherUserDocument = await getDoc(otherUserRef);
 
     //Remove connections for both users
     updateDoc(currentUserRef, {connections: arrayRemove({id: id, name: otherUserDocument.data().displayName, photoURL: otherUserDocument.data().photoURL})});
     updateDoc(otherUserRef, {connections: arrayRemove({id: auth.currentUser.uid, name: currentUserDocument.data().displayName, photoURL: currentUserDocument.data().photoURL})});
+        // Logs a message to the console indicating that the connection has been removed
     console.log("removed");
-
+ // Gets the current user's data from the database and dispatches it to the Redux store using the `setUser` action
     const userData = await getUserDataById(auth.currentUser.uid);
     dispatch(setUser(userData));
   }
