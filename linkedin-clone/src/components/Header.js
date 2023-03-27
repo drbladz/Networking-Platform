@@ -10,50 +10,18 @@ import db from '../firebase';
 import 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog, faSearch } from '@fortawesome/free-solid-svg-icons';
-
-const getUserSearchingPreferences = async () => {
-  try {
-    const currentUser = getAuth().currentUser;
-    const userDocRef = doc(db, 'Users', currentUser.uid);
-    const docSnap = await getDoc(userDocRef);
-    
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      return userData.searchingPreferences;
-    } else {
-      console.log('No user found with this userId:', currentUser.uid);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error fetching user preferences:', error);
-    return null;
-  }
-};
+import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
 
 
-const filterJobsByPreferences = (jobs, preferences) => {
-  return jobs.filter((job) => {
-    if (!job.jobParameters) {
-      return false;
-    }
 
-    const {
-      experienceLevel,
-      industry,
-      jobType,
-      remoteWorkOption,
-    } = job.jobParameters;
 
-    return (
-      experienceLevel === preferences.experienceLevel &&
-      industry === preferences.industry &&
-      jobType === preferences.jobType &&
-      remoteWorkOption === preferences.remoteWorkOption
-    );
-  });
-};
 
 const Header = (props) => {
+
+
+
+
+
   const [value, setValue] = useState("");
   const [users, setUsers] = useState([]);
   const [jobPostings, setJobPostings] = useState([]);
