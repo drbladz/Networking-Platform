@@ -1,48 +1,34 @@
 import styled from "styled-components";
 import {connect } from "react-redux";
 import { signOutAPI, getUsers} from "../actions";
-import { getAllJobPostings } from "../actions/index";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog} from '@fortawesome/free-solid-svg-icons';
 import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
 
-
-
-
-
 const Header = (props) => {
-
-
-
-
 
   const [value, setValue] = useState("");
   const [users, setUsers] = useState([]);
-  const [jobPostings, setJobPostings] = useState([]);
   const [searchPreferences, setSearchPreferences] = useState(null);
   const [usePreferences, setUsePreferences] = useState(false);
+
   useEffect(() => {
-  getUsers().then(data => {
-    setUsers(data);
-  });
-
-  getAllJobPostings().then(data => {
-    setJobPostings(data);
-  });
-
-  if (props.user) {
-    getUserSearchingPreferences(props.user.userId).then(searchingPreferences => {
-      setSearchPreferences(searchingPreferences);
+    getUsers().then(data => {
+      setUsers(data);
     });
-  }
-  console.log("get users and job postings");
-  return () => {
-    setUsers([]);
-    setJobPostings([]);
-  }
+
+    if (props.user) {
+      getUserSearchingPreferences(props.user.userId).then(searchingPreferences => {
+        setSearchPreferences(searchingPreferences);
+      });
+    }
+    console.log("get users and search preferences");
+
+    return () => {
+      setUsers([]);
+    }
   }, [])
 
   const onChange = (event) => {
@@ -60,16 +46,12 @@ const Header = (props) => {
       <SearchContainer>
       <Search>
         <div>
-        <input type="text" placeholder="Search" value={value} onChange={onChange} style={{width: '1100px'}} />
+        <input type="text" placeholder="Search" value={value} onChange={onChange} />
         </div>
         <SearchIcon>
           <img src="/images/search-icon.svg" alt="" />
         </SearchIcon>
-        <ToggleButtonContainer>
-        <ToggleButton usePreferences={usePreferences} onClick={() => setUsePreferences(!usePreferences)}>
-  {usePreferences ? <><FontAwesomeIcon icon={faCog} /> Search with Preferences</> : <> Search All Jobs</>}
-</ToggleButton>
-        </ToggleButtonContainer>
+        
         <Dropdown show={value}>
   {value && (
     <>
@@ -153,20 +135,25 @@ const Header = (props) => {
 </Dropdown>
         </Search>
       </SearchContainer>
+      <ToggleButtonContainer>
+        <ToggleButton usePreferences={usePreferences} onClick={() => setUsePreferences(!usePreferences)}>
+  {usePreferences ? <><FontAwesomeIcon icon={faCog} /> Search with Preferences</> : <> Search All Jobs</>}
+        </ToggleButton>
+        </ToggleButtonContainer>
         <Nav>
           <NavListWrap>
             <NavList className="active">
-              <Link to="/home">
+              <NavLink to="/home">
                 <img src="/images/nav-home.svg" alt="" />
                 <span>Home</span>
-              </Link>
+              </NavLink>
             </NavList>
 
             <NavList>
-              <Link to="/network">
+              <NavLink to="/network">
                 <img src="/images/nav-network.svg" alt="" />
                 <span>My Network</span>
-              </Link>
+              </NavLink>
             </NavList>
 
             <NavList>
@@ -278,10 +265,6 @@ const SearchContainer = styled.div`
   position: relative;
 `;
 const ToggleButtonContainer = styled.div`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 0.5rem;
 `;
 
 const SearchIcon = styled.div`
@@ -306,7 +289,7 @@ const Dropdown = styled.div`
   border-radius: 5px;
   position: absolute;
   z-index: 2;
-  width: 100%;
+  width: 150%;
   top: 50px;
 `;
 const UserSection = styled.div`
@@ -379,7 +362,7 @@ const NavListWrap = styled.ul`
   flex-wrap: nowrap;
   list-style-type: none;
 
-  .active {
+  a.active {
     span:after {
       content: "";
       transform: scaleX(1);
