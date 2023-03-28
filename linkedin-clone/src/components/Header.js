@@ -8,13 +8,15 @@ import { faCog} from '@fortawesome/free-solid-svg-icons';
 import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
 
 const Header = (props) => {
-
+  // useState hook to manage the search input value
   const [value, setValue] = useState("");
+    // useState hook to manage the list of users returned by the API call
   const [users, setUsers] = useState([]);
   const [searchPreferences, setSearchPreferences] = useState(null);
   const [usePreferences, setUsePreferences] = useState(false);
-
+  // useEffect hook to call the getUsers function from the actions file on component mount
   useEffect(() => {
+        // getUsers returns a promise that resolves to an array of user objects
     getUsers().then(data => {
       setUsers(data);
     });
@@ -24,17 +26,19 @@ const Header = (props) => {
         setSearchPreferences(searchingPreferences);
       });
     }
-    console.log("get users and search preferences");
+        // console.log statement to show when the component is mounted
 
+    console.log("get users and search preferences");
+    // return statement to clean up the users state on component unmount
     return () => {
       setUsers([]);
     }
   }, [])
-
+  // function to update the search input value when the user types
   const onChange = (event) => {
     setValue(event.target.value);
   };
-
+  // component JSX for the Header
   return (
     <Container>
     <Content>
@@ -209,7 +213,7 @@ const Header = (props) => {
     </Container>
   );
 };
-
+// Styles for the main container
 const Container = styled.div`
   background-color: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -220,7 +224,7 @@ const Container = styled.div`
   width: 100vw;
   z-index: 100;
 `;
-
+// Styles for the content inside the container
 const Content = styled.div`
   display: flex;
   align-items: center;
@@ -228,12 +232,12 @@ const Content = styled.div`
   min-height: 100%;
   max-width: 1128px;
 `;
-
+// Styles for the logo
 const Logo = styled.span`
   margin-right: 8px;
   font-size: 0px;
 `;
-
+// Styles for the search input
 const Search = styled.div`
   opacity: 1;
   flex-grow: 1;
@@ -266,7 +270,7 @@ const SearchContainer = styled.div`
 `;
 const ToggleButtonContainer = styled.div`
 `;
-
+// Styles for the search icon
 const SearchIcon = styled.div`
   width: 40px;
   position: absolute;
@@ -280,7 +284,7 @@ const SearchIcon = styled.div`
   justify-content: center;
   align-items: center;
 `;
-
+// Styles for the dropdown menu
 const Dropdown = styled.div`
   background-color: white;
   display: ${({ show }) => (show ? 'flex' : 'none')};
@@ -311,7 +315,7 @@ const JobSection = styled.div`
   display: flex;
   flex-direction: column;
 `;
-
+// Styles for the rows in the dropdown menu
 const DropdownRow = styled.div`
   cursor: pointer;
   text-align: start;
@@ -321,12 +325,12 @@ const DropdownRow = styled.div`
     background-color: Gainsboro;
   }
 `;
-
+// Styles for the user photo
 const UserPhoto = styled.img`
   margin-right: 5px;
   border-radius: 50%;
 `;
-
+// Styles for the navigation bar
 const Nav = styled.nav`
   margin-left: auto;
   display: block;
@@ -357,6 +361,7 @@ const ToggleButton = styled.button`
     fill: ${({ usePreferences }) => usePreferences ? '#0E6AFF' : 'rgba(0, 0, 0, 0.6)'};
   }
 `;
+// Styles for the navigation list wrapper
 const NavListWrap = styled.ul`
   display: flex;
   flex-wrap: nowrap;
