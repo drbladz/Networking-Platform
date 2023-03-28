@@ -4,8 +4,9 @@ import Main from "./Main";
 import Rightside from "./Rightside";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-
+// defining Home component
 const Home = (props) => {
+    // checking if user is not authenticated, redirect to the homepage
   return (
     <Container>
       {!props.user && <Redirect to="/" />}
@@ -26,18 +27,18 @@ const Home = (props) => {
     </Container>
   );
 };
-
+// styling the container
 const Container = styled.div`
   padding-top: 52px;
   max-width: 100%;
 `;
-
+// styling the content section
 const Content = styled.div`
   max-width: 1128px;
   margin-left: auto;
   margin-right: auto;
 `;
-
+// styling the section
 const Section = styled.section`
   min-height: 50px;
   padding: 16px 0;
@@ -63,7 +64,7 @@ const Section = styled.section`
     padding: 0 5px;
   }
 `;
-
+// styling the layout
 const Layout = styled.div`
   display: grid;
   grid-template-areas: "leftside main rightside";
@@ -78,11 +79,11 @@ const Layout = styled.div`
     padding: 0 5px;
   }
 `;
-
+// mapping the state to the Home component's props
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
   };
 };
-
+// exporting the Home component connected to the Redux store
 export default connect(mapStateToProps)(Home);
