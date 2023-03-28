@@ -4,13 +4,15 @@ import { createJobPosting, deleteJobPosting, editJobPosting } from "../actions";
 import { connect } from "react-redux";
 
 const EditPostModal = (props) =>{
+    // logging props object to console
   console.log(props)
+    // Initializing state variables using useState hook
   const [postTitle, setPostTitle] = useState(props.job.postTitle)
   const [postDescription, setPostDescription] = useState(props.job.postDescription)
   const [mandatoryResume, setMandatoryResume] = useState(props.job.mandatoryResume);
   const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(props.job.mandatoryCoverLetter);
   const [isExternal, setIsExternal] = useState(props.job.isExternal)
-
+  // useEffect hook to update state variables when props change
   useEffect(() => {
     setPostTitle(props.job.postTitle)
     setPostDescription(props.job.postDescription)
@@ -18,7 +20,7 @@ const EditPostModal = (props) =>{
     setMandatoryCoverLetter(props.job.mandatoryCoverLetter)
     setIsExternal(props.job.isExternal)
   }, [props])
-
+  // reset function to close modal
   const reset = () =>{
     props.handleClick()
   }
@@ -103,14 +105,14 @@ const EditPostModal = (props) =>{
 }
   </>)
 }
-
+// Maps state to props
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
     jobPostings: state.jobPostingsState.jobPostings
   }
 }
-
+// Maps dispatch to props
 const mapDispatchToProps = (dispatch) => ({
   createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter)),
   editJobPosting: (editedJobData, currentPostingsList) => dispatch(editJobPosting(editedJobData, currentPostingsList)),
