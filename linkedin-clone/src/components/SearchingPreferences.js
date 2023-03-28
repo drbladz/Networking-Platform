@@ -118,7 +118,7 @@ const SearchingPreferences = () => {
     jobType: '',
     industry: '',
     experienceLevel: '',
-    remoteWork: '',
+    remoteWorkOption: '',
   });
   const [successMessage, setSuccessMessage] = useState('');
   const [currentPreferencesText, setCurrentPreferencesText] = useState('');
@@ -149,7 +149,7 @@ const SearchingPreferences = () => {
         jobType: '',
         industry: '',
         experienceLevel: '',
-        remoteWork: '',
+        remoteWorkOption: '',
       };
   
       await setDoc(userDocRef, {
@@ -199,7 +199,7 @@ const handleSubmit = async (event) => {
           <Bold>Experience Level:</Bold> {preferences.experienceLevel || 'Not set'}
         </FieldWrapper>
         <FieldWrapper>
-          <Bold>Remote Work Options:</Bold> {preferences.remoteWork || 'Not set'}
+          <Bold>Remote Work Options:</Bold> {preferences.remoteWorkOption || 'Not set'}
         </FieldWrapper>
       </>
     );
@@ -233,7 +233,7 @@ useEffect(() => {
                   <Bold>Experience Level:</Bold> {preferencesFromDB.experienceLevel || 'Not set'}
                 </FieldWrapper>
                 <FieldWrapper>
-                  <Bold>Remote Work Options:</Bold> {preferencesFromDB.remoteWork || 'Not set'}
+                  <Bold>Remote Work Options:</Bold> {preferencesFromDB.remoteWorkOption || 'Not set'}
                 </FieldWrapper>
               </>
             );
@@ -352,7 +352,7 @@ return (
 
   <FieldContainer>
     <Label htmlFor="remoteWork">Remote Work Options</Label>
-    <Select name="remoteWork" id="remoteWork" value={preferences.remoteWork} onChange={handleChange}>
+    <Select name="remoteWorkOption" id="remoteWork" value={preferences.remoteWork} onChange={handleChange}>
       <option value="">Select a remote work option</option>
       <option value="remote">Remote Work</option>
       <option value="in-person">In-Person Work</option>
