@@ -6,14 +6,14 @@ import { db, storage } from "../firebase";
 import { updateProfilePicture } from "../actions";
 import { setUser } from "../actions";
 import styled from "styled-components";
-
+// Component for updating profile picture
 const UpdatePhoto = (props) => {
   //File Upload State
   const [selectedFile, setSelectedFile] = useState(null);
   const [lastImageUrl, setLastImageUrl] = useState(null);
-
+  // Reference to images folder in Firebase storage
   const imagesFolderRef = ref(storage, `images/`);
-
+  // Function to upload file to Firebase storage and update user document in Firestore
   const uploadFile = async (dispatch) => {
     if (!selectedFile) return;
     const imageRef = ref(imagesFolderRef, selectedFile.name);
@@ -28,7 +28,7 @@ const UpdatePhoto = (props) => {
         photoURL: url,
       });
       props.user.photoURL = url;
-
+      // Update Redux store with updated user object
       console.log("yaya");
       const updatedUser = {};
       for (let property in props.user) {
@@ -39,7 +39,7 @@ const UpdatePhoto = (props) => {
       console.log(err);
     }
   };
-
+  // useEffect hook to set last image URL state variable when component mounts
   useEffect(() => {
     listAll(imagesFolderRef).then((response) => {
       if (response.items.length === 0) return;
@@ -49,7 +49,7 @@ const UpdatePhoto = (props) => {
       });
     });
   }, []);
-
+  // JSX for rendering component
   return (
     <div>
       <input type="file" onChange={(e) => setSelectedFile(e.target.files[0])} />
@@ -59,18 +59,18 @@ const UpdatePhoto = (props) => {
     </div>
   );
 };
-
+// Function to map Redux store state to component props
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
   };
 };
-
+// Function to map Redux store dispatch to component props
 const mapDispatchToProps = (dispatch) => ({
   updateProfilePicture: (currentUser) =>
     dispatch(updateProfilePicture(currentUser)),
 });
-
+// Export component after connecting to Redux store
 export default connect(mapStateToProps, mapDispatchToProps)(UpdatePhoto);
 
 /*const handleUpload = async () => {
@@ -86,7 +86,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(UpdatePhoto);
   }
 };
 */
-
+// CSS-in-JS using styled-components library
 styled.img`
   box-shadow: none;
   background-image: url("/images/photo.svg");
