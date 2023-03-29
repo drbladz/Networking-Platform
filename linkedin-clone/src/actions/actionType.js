@@ -1,8 +1,10 @@
+// Constants for different types of actions
 export const SET_USER = "SET_USER";
 
 export const SET_JOB_POSTINGS = "SET_JOB_POSTINGS";
 export const ADD_POST = "ADD_POST";
 
+// Action creators for updating profile picture
 export const updateProfilePictureError = (error) => ({
   type: "UPDATE_PROFILE_PICTURE_ERROR",
   payload: error,
