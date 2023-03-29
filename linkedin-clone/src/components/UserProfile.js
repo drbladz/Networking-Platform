@@ -4,11 +4,13 @@ import { useLocation, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { addConnectionById, acceptRequest, declineRequest } from '../actions';
 import './UserProfile.css';
-
+// Define a functional component called UserProfile
 const UserProfile = (props) => {
+    // Get the user data from the location object provided by react-router-dom
   const location = useLocation();
   const user = location.state;
   return (
+         // Render the user profile container
     <Container>
       {!props.user && <Redirect to="/" />}
       <div className="profile-container">
@@ -183,29 +185,29 @@ const UserProfile = (props) => {
     </Container>
   )
 }
-
+// Defines a container component with padding and maximum width.
 const Container = styled.div`
   padding-top: 72px;
   max-width: 100%;
 `;
-
+// Defines a card component with a background image, rounded corners, and other styling.
 const Card = styled.div`
   background-image: url("/images/card-bg.svg");
   background-repeat: no-repeat;
   background-size: 100% 40%;
   border-radius: 10px;
 `;
-
+// Maps Redux store state and dispatch to props for the UserProfile component.
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user
   }
 }
-
+// Maps dispatch functions to props for the UserProfile component.
 const mapDispatchToProps = (dispatch) => ({
   addConnectionById: (id) => dispatch(addConnectionById(id)),
   acceptRequest: (id) => dispatch(acceptRequest(id)),
   declineRequest: (id) => dispatch(declineRequest(id))
 })
-
+// Connects the UserProfile component to the Redux store with the mapped state and dispatch functions.
 export default connect(mapStateToProps, mapDispatchToProps)(UserProfile)
