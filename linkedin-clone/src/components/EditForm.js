@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import './EditForm.css';
 
 const EditForm = (props) => {
-
+// use useState hook to initialize states and their respective setter functions
   const [contactInfo, setContactInfo] = useState("");
   const [bio, setBio] = useState("");
   const [connections, setConnections] = useState([]);
@@ -18,9 +18,10 @@ const EditForm = (props) => {
   const [awards, setAwards] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
-
+// create a function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    // create an object to hold updated user data
     const updateUserData = {
       educations: education,
       works: works,
@@ -35,20 +36,24 @@ const EditForm = (props) => {
       awards: awards,
       languages: languages,
     };
+    // call the updateUserProfile action creator to update user profile with new data
     props.updateUserProfile(props.userId, updateUserData, props.user);
     console.log("updated");
+    // display an alert to indicate successful update
     alert("Updated Successfully!");
   };
-
+// create functions to handle adding and removing work experiences, and changing the values
   const handleAddWorkExperience = () => {
     setWorkExperience([...works, { title: '', company: '', startDate: '', endDate: '', location: '', description: '' }]);
   }
+  // This function removes a work experience from the works array based on its index
 
   const handleRemoveWorkExperience = (index) => {
     const updatedWorkExperience = [...works];
     updatedWorkExperience.splice(index, 1);
     setWorkExperience(updatedWorkExperience);
   }
+  // This function updates the value of a specific property in a work experience object inside the works array
 
   const handleWorkExperienceChange = (event, index) => {
     const { name, value } = event.target;
@@ -56,16 +61,19 @@ const EditForm = (props) => {
     updatedWorkExperience[index][name] = value;
     setWorkExperience(updatedWorkExperience);
   }
+  // create functions to handle adding and removing education, and changing the values
 
   const handleAddEducation = () => {
     setEducation([...education, { school: '', program: '', startDate: '', endDate: '' }]);
   }
+  // This function removes an education item from the education array based on its index
 
   const handleRemoveEducation = (index) => {
     const updatedEducation = [...education];
     updatedEducation.splice(index, 1);
     setEducation(updatedEducation);
   }
+  // This function updates the education array with the new values entered in the education form fields
 
   const handleEducationChange = (event, index) => {
     const { name, value } = event.target;
@@ -73,117 +81,122 @@ const EditForm = (props) => {
     updatedEducation[index][name] = value;
     setEducation(updatedEducation);
   }
+  // create functions to handle adding and removing volunteering experiences, and changing the values
 
   const handleAddVolunteering = () => {
     setVolunteering([...volunteering, { title: '', company: '', startDate: '', endDate: '', description: '' }]);
   }
+  // Define a function called handleRemoveVolunteering that takes an index as an argument
 
   const handleRemoveVolunteering = (index) => {
+        // Create a copy of the volunteering array using the spread operator, and store it in updatedVolunteering
     const updatedVolunteering = [...volunteering];
+        // Remove one element from updatedVolunteering starting at the index provided as an argument
     updatedVolunteering.splice(index, 1);
+        // Update the state of the volunteering array with the modified copy
     setVolunteering(updatedVolunteering);
   }
-
+  // This function updates a volunteering experience based on the user's input
   const handleVolunteeringChange = (event, index) => {
     const { name, value } = event.target;
     const updatedVolunteering = [...volunteering];
     updatedVolunteering[index][name] = value;
     setVolunteering(updatedVolunteering);
   }
-
+  // This function adds an empty skill to the skills array
   const handleAddSkill = () => {
     setSkills([...skills, '']);
   }
-
+  // This function removes a skill from the skills array based on its index
   const handleRemoveSkill = (index) => {
     const updatedSkills = [...skills];
     updatedSkills.splice(index, 1);
     setSkills(updatedSkills);
   }
-
+  // This function updates a skill based on the user's input
   const handleSkillChange = (event, index) => {
     const updatedSkills = [...skills];
     updatedSkills[index] = event.target.value;
     setSkills(updatedSkills);
   }
-
+  // This function adds an empty course to the courses array
   const handleAddCourse = () => {
     setCourses([...courses, { title: '', school: '' }]);
   }
-
+  // This function removes a course from the courses array based on its index
   const handleRemoveCourse = (index) => {
     const updatedCourses = [...courses];
     updatedCourses.splice(index, 1);
     setCourses(updatedCourses);
   }
-
+  // This function updates a course based on the user's input
   const handleCourseChange = (event, index) => {
     const { name, value } = event.target;
     const updatedCourses = [...courses];
     updatedCourses[index][name] = value;
     setCourses(updatedCourses);
   }
-
+  // This function adds an empty project to the projects array
   const handleAddProject = () => {
     setProjects([...projects, { title: '', startDate: '', endDate: '', description: '' }]);
   }
-
+  // This function removes a project from the projects array based on its index
   const handleRemoveProject = (index) => {
     const updatedProjects = [...projects];
     updatedProjects.splice(index, 1);
     setProjects(updatedProjects);
   }
-
+  // This function updates a project based on the user's input
   const handleProjectChange = (event, index) => {
     const { name, value } = event.target;
     const updatedProjects = [...projects];
     updatedProjects[index][name] = value;
     setProjects(updatedProjects);
   }
-
+  // This function adds an empty award to the awards array
   const handleAddAward = () => {
     setAwards([...awards, { title: '', issuer: '', date: '', description: '' }]);
   }
-
+  // This function removes an award from the awards array based on its index
   const handleRemoveAward = (index) => {
     const updatedAwards = [...awards];
     updatedAwards.splice(index, 1);
     setAwards(updatedAwards);
   }
-
+  // This function updates an award based on the user's input
   const handleAwardChange = (event, index) => {
     const { name, value } = event.target;
     const updatedAwards = [...awards];
     updatedAwards[index][name] = value;
     setAwards(updatedAwards);
   }
-
+  // This function adds an empty language to the languages array
   const handleAddLanguage = () => {
     setLanguages([...languages, '']);
   }
-
+  // This function removes a language from the languages array based on its index
   const handleRemoveLanguage = (index) => {
     const updatedLanguages = [...languages];
     updatedLanguages.splice(index, 1);
     setLanguages(updatedLanguages);
   }
-
+  // This function updates the value of a specific language in the languages array based on its index
   const handleLanguageChange = (event, index) => {
     const updatedLanguages = [...languages];
     updatedLanguages[index] = event.target.value;
     setLanguages(updatedLanguages);
   }
-
+  // This function adds an empty string to the end of the recommendations array
   const handleAddRecommendation = () => {
     setRecommendations([...recommendations, '']);
   }
-
+  // This function removes a recommendation from the recommendations array based on its index
   const handleRemoveRecommendation = (index) => {
     const updatedRecommendations = [...recommendations];
     updatedRecommendations.splice(index, 1);
     setRecommendations(updatedRecommendations);
   }
-
+  // This function updates the value of a specific recommendation in the recommendations array based on its index
   const handleRecommendationChange = (event, index) => {
     const updatedRecommendations = [...recommendations];
     updatedRecommendations[index] = event.target.value;
@@ -387,18 +400,18 @@ const Button = styled.button`
     background-color: #0062cc;
   }
 `;
-
+// This function maps the state variables to the props of the component
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
   };
 };
-
+// This function maps the dispatch actions to the props of the component
 const mapDispatchToProps = (dispatch) => ({
   updateUserProfile: (userId, updatedUserData, currentUserData) =>
     dispatch(updateUserProfile(userId, updatedUserData, currentUserData)),
 });
-
+// This function connects the EditForm component to the Redux store and passes the mapped props
 export default connect(mapStateToProps, mapDispatchToProps)(EditForm);
 
 
