@@ -28,7 +28,7 @@ const UploadDocuments = (props) => {
     storage,
     `${props.userId}/storedUserCoverLetter/`
   );
-
+  // Upload the selected resume to Firebase Storage
   const uploadResume = async () => {
     if (!selectedResume) return;
     const resumeFolderRef = ref(
@@ -57,7 +57,7 @@ const UploadDocuments = (props) => {
       console.error(err);
     }
   };
-
+  // Upload the selected cover letter to Firebase Storage
   const uploadCoverLetter = async () => {
     if (!selectedCoverLetter) return;
     const coverLetterFolderRef = ref(
@@ -87,7 +87,7 @@ const UploadDocuments = (props) => {
       console.error(err);
     }
   };
-
+  // Fetch the list of uploaded resumes and cover letters
   useEffect(() => {
     console.log("single");
     listAll(resumeListRef).then((response) => {
@@ -112,7 +112,7 @@ const UploadDocuments = (props) => {
       });
     });
   }, []);
-
+  // Delete the selected resume from Firebase Storage and the user document
   const deleteResume = async (resumeName) => {
     const resumeFolderRef = ref(
       storage,

@@ -1,8 +1,22 @@
 import styled from "styled-components";
 import { removeConnectionById } from "../actions";
 import { connect } from "react-redux";
+import { useState } from "react";
+import DmModal from "./DmModal";
 
 const UpdateConnections = (props) => {
+  const [showDm, setShowDm] = useState(false)
+  const [recipientId, setRecipientId] = useState("")
+
+  const handleDmOpen = (recipientId)=>{
+    setRecipientId(recipientId)
+    setShowDm(true)
+  }
+
+  const handleDmClose = ()=>{
+    setRecipientId("")
+    setShowDm(false)
+  }
   return (
     <ConnectionsContainer>
       <ConnectionsHeader>Connections</ConnectionsHeader>
@@ -11,6 +25,7 @@ const UpdateConnections = (props) => {
           <ConnectionItem key={connection.id}>
             {connection.photoURL ? <ConnectionPhoto src={connection.photoURL} alt=""/> : <ConnectionPhoto src="/images/user.svg" alt=""/>}
             <ConnectionName>{connection.name}</ConnectionName>
+            <DmButton onClick={()=> handleDmOpen(connection.id)}>Message</DmButton>
             <DeleteButton onClick={() => {
               props.removeConnectionById(connection.id);
             }}>
@@ -19,6 +34,7 @@ const UpdateConnections = (props) => {
           </ConnectionItem>
         ))}
       </ConnectionsList>
+      {showDm && <DmModal currentUserId={props.user.userId} recipientId={recipientId}></DmModal> }
     </ConnectionsContainer>
   );
 };
@@ -64,6 +80,24 @@ const ConnectionPhoto = styled.img`
 `;
 
 const DeleteButton = styled.button`
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #d32f2f;
+  }
+
+  &:active {
+    background-color: #b71c1c;
+  }
+`;
+
+const DmButton = styled.button`
   background-color: #f44336;
   color: #fff;
   border: none;
