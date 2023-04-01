@@ -79,10 +79,8 @@ const Messages = (props) => {
             <br/>
             <p>"{flaggedMessage.message}"</p>
             <button className="buttonc" onClick={() => {
-              props.addConnectionById();
               }}>Ban</button>
             <button className="buttonc" onClick={() => {
-              props.addConnectionById();
               }}>Tolerate</button>
           </div>
       ))} 
