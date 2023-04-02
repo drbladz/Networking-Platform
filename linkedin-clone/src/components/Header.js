@@ -168,10 +168,12 @@ const Header = (props) => {
             </NavList>
 
             <NavList>
+            <NavLink to="/messages">
               <a>
                 <img src="/images/nav-messaging.svg" alt="" />
                 <span>Messaging</span>
               </a>
+            </NavLink>
             </NavList>
 
             <NavList>
