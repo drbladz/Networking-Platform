@@ -7,42 +7,30 @@ import {
   addDoc,
   getDoc,
 } from "firebase/firestore";
+import { useParams } from "react-router-dom";
 import { storage, db, auth } from "../firebase";
-import { connect } from "react-redux";
-import { updateGroup } from "../actions";
 
-function GroupCreationForm(props) {
+const EditGroupForm = () => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [groupLocation, setGroupLocation] = useState("");
   const [groupRules, setGroupRules] = useState("");
 
-  const createGroup = async (e) => {
+  const { groupId } = useParams();
+
+  const updateGroup = async (e) => {
     e.preventDefault();
-    const userId = auth.currentUser.uid;
     const updateGroupData = {
       groupName: groupName,
       groupDescription: groupDescription,
       groupLocation: groupLocation,
       groupRules: groupRules,
-      createdBy: userId,
     };
 
-    const groupsRef = collection(db, "Groups");
-
-    // Get the new group's ID
-    const newGroupRef = await addDoc(groupsRef, updateGroupData);
-    const newGroupId = newGroupRef.id;
-
-    // Update the user's groupOwned field
-    const userRef = doc(db, "Users", userId);
-    const userDoc = await getDoc(userRef);
-    const groupOwned = userDoc.data().groupOwned || {}; // fetch existing groupOwned or use an empty object
-    const updatedGroupOwned = {
-      ...groupOwned,
-      [newGroupId]: groupName,
-    };
-    await updateDoc(userRef, { groupOwned: updatedGroupOwned });
+    const groupRef = doc(db, "Groups", groupId);
+    await updateDoc(groupRef, updateGroupData, {
+      merge: true,
+    });
   };
 
   return (
@@ -81,9 +69,9 @@ function GroupCreationForm(props) {
           onChange={(e) => setGroupRules(e.target.value)}
         />
       </label>
-      <button onClick={createGroup}>Create Group</button>
+      <button onClick={updateGroup}>Update Group</button>
     </form>
   );
-}
+};
 
-export default GroupCreationForm;
+export default EditGroupForm;
