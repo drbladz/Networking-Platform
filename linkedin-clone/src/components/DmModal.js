@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from 'react';
 import firebase from 'firebase/app';
-import { collection, query, where, getDocs, orderBy, addDoc }from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, addDoc, updateDoc, doc, setDoc }from 'firebase/firestore';
 import db, {
   auth,
   provider,
@@ -10,6 +10,10 @@ import db, {
   createUserWithEmailAndPassword,
 } from "../firebase";
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { FaFlag } from 'react-icons/fa';
+import { TiWarning } from "react-icons/ti";
+import { v4 as uuidv4 } from "uuid";
+
 
 const DmModal = ({ currentUserId, recipientId }) => {
   
@@ -23,16 +27,31 @@ const DmModal = ({ currentUserId, recipientId }) => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
+    const id = uuidv4()
 
     if (message.trim() !== '') {
-      await addDoc(collection(db, "Messages"), {
+      await setDoc(doc(collection(db, "Messages"), id), {
+        id: id,
         sender: currentUserId,
         recipient: recipientId,
         message,
         createdAt: new Date(),
+        flagged: false
       })
       setMessage('');
     }
+  };
+
+  const flagMessage = async (id) => {
+    await updateDoc(doc(db, "Messages", id), {
+      flagged: true
+    })
+  };
+
+  const unflagMessage = async (id) => {
+    await updateDoc(doc(db, "Messages", id), {
+      flagged: false
+    })
   };
 
   useEffect(() => {
@@ -56,6 +75,16 @@ const DmModal = ({ currentUserId, recipientId }) => {
               }`}
             >
               {msg.message}
+              {msg.sender === recipientId && !msg.flagged && (
+               <div className="direct-message-flag">
+               <FaFlag onClick={() => flagMessage(msg.id)} />
+             </div>
+              )}
+              {msg.sender === recipientId && msg.flagged && (
+               <div className="direct-message-offense">
+               <TiWarning onClick={() => unflagMessage(msg.id)} />
+             </div>
+              )}
             </div>
           ))}
       </DirectMessageChatWindow>
@@ -83,23 +112,49 @@ const DirectMessageContainer = styled.div`
 `
 
 const DirectMessageChatWindow = styled.div`
-flex: 1;
-overflow-y: auto;
-.direct-message{
-  border-radius: 4px;
-  padding: 8px;
-  margin: 8px;
-  max-width: 80%;
-}
-.sent {
-  background-color: #dcf8c6;
-  align-self: flex-end;
+.direct-message {
+  width: auto;
+  max-width: 70%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  word-wrap: break-word;
+  background-color: #e6e6e6;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  display: flex;
+  flex-direction: column;
 }
 
-.received {
-  background-color: #fff;
-  align-self: flex-start;
+.direct-message.sent {
+  align-self: end;
+  background-color: #007bff;
+  color: #fff;
 }
+
+.direct-message.received {
+  align-self: start;
+}
+
+.direct-message-flag {
+  display: none;
+  top: 0;
+  right: 20;
+  color: yellow;
+}
+.direct-message-offense {
+  top: 0;
+  right: 20;
+  color: red;
+}
+
+.direct-message:hover .direct-message-flag {
+  display: block;
+}
+
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
 `
 
 const Container = styled.div`
