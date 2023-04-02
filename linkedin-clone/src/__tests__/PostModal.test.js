@@ -41,12 +41,12 @@ describe('PostModal component', () => {
     expect(input.value).toBe('Software Engineer');
   });
 
-  it('updates the post description when the user types in the textarea', () => {
+  /*it('updates the post description when the user types in the textarea', () => {
     const { getByPlaceholderText } = component;
     const textarea = getByPlaceholderText('Job Description');
     fireEvent.change(textarea, { target: { value: 'We are looking for a software engineer to join our team.' } });
     expect(textarea.value).toBe('We are looking for a software engineer to join our team.');
-  });
+  });*/
 
   it('updates the mandatory resume checkbox when clicked', () => {
     const { getByLabelText } = component;

@@ -25,6 +25,47 @@ describe('SignUpForm', () => {
 
     expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Full Name")).toBeInTheDocument();
+    expect(screen.getByText("Sign Up")).toBeInTheDocument();
+  });
+
+  it("updates state on input change", () => {
+    const { getByPlaceholderText } = render(
+      <Provider store={store}>
+        <SignUpForm />
+      </Provider>
+    );
+    const emailInput = getByPlaceholderText("Email");
+    const fullNameInput = getByPlaceholderText("Full Name");
+    const passwordInput = getByPlaceholderText("Password");
+    fireEvent.change(emailInput, { target: { value: "test@test.com" } });
+    fireEvent.change(fullNameInput, { target: { value: "John Smith" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
+    expect(emailInput.value).toBe("test@test.com");
+    expect(fullNameInput.value).toBe("John Smith");
+    expect(passwordInput.value).toBe("password123");
+  });
+
+  it("submits form on button click", () => {
+    const mockSignUp = jest.fn();
+    const { getByPlaceholderText, getByText } = render(
+      <Provider store={store}>
+        <SignUpForm SignUp={mockSignUp} />
+      </Provider>
+    );
+    const emailInput = getByPlaceholderText("Email");
+    const fullNameInput = getByPlaceholderText("Full Name");
+    const passwordInput = getByPlaceholderText("Password");
+    const signUpButton = getByText("Sign Up");
+    fireEvent.change(emailInput, { target: { value: "test@test.com" } });
+    fireEvent.change(fullNameInput, { target: { value: "John Smith" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
+    fireEvent.click(signUpButton);
+    expect(mockSignUp).toHaveBeenCalledWith(
+      "test@test.com",
+      "password123",
+      "John Smith"
+    );
   });
 
   /*it('dispatches sign up action on form submission', () => {
