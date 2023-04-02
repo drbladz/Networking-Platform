@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useSelector } from "react-redux";
 import UpdatePhoto from "./UpdatePhoto";
@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import UpdateConnections from "./UpdateConnections";
 import GroupCreationForm from "./GroupCreationForm";
 import { Link } from "react-router-dom";
+import { db } from "../firebase";
 
 Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -140,7 +141,26 @@ const Leftside = (props) => {
               </div>
             </a>
           </GroupList>
-
+          <GroupList2>
+            <a>
+              <div>
+                <span>My Connections' groups:</span>
+                {props.user &&
+                  props.user.groupMemberOf &&
+                  props.user.groupMemberOf.map((group) => (
+                    <div key={group.groupId}>
+                      <a
+                        href={`/groups/${group.groupId}`}
+                        target="_blank"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <span>{group.group}</span>
+                      </a>
+                    </div>
+                  ))}
+              </div>
+            </a>
+          </GroupList2>
           <EditInfo>
             <img
               onClick={handleEditClick}
@@ -568,6 +588,39 @@ const Skills = styled.div`
 `;
 
 const GroupList = styled.div`
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          text align: center
+          color: black;
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+const GroupList2 = styled.div`
   padding-top: 12px;
   padding-bottom: 12px;
   & > a {

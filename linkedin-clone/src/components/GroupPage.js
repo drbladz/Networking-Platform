@@ -3,7 +3,7 @@ import Header from "./Header";
 import Main from "./Main";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { storage, db } from "../firebase";
+import { storage, db, auth } from "../firebase";
 import EditGroupForm from "./EditGroupForm";
 import Modal from "react-modal";
 import {
@@ -14,6 +14,7 @@ import {
   addDoc,
   getDoc,
 } from "firebase/firestore";
+import InviteToGroup from "./InviteToGroup";
 
 const GroupPage = (props) => {
   const { groupId } = useParams();
@@ -21,7 +22,13 @@ const GroupPage = (props) => {
   const [error, setError] = useState(null);
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminId, setAdminId] = useState("");
+
   const [showEditForm, setShowEditForm] = useState(false);
+  const [groupMembers, setGroupMembers] = useState([]);
 
   const handleEditClick = () => {
     setShowEditForm(true);
@@ -29,6 +36,7 @@ const GroupPage = (props) => {
 
   const handleClose = () => {
     setShowEditForm(false);
+    setShowConnectionModal(false);
   };
 
   useEffect(() => {
@@ -63,30 +71,119 @@ const GroupPage = (props) => {
     getGroupDescription();
   }, [groupId]);
 
+  useEffect(() => {
+    const getAdminName = async () => {
+      try {
+        // Create a reference to the job posting document in Firestore
+        const groupRef = doc(db, "Groups", groupId);
+        // Get the job posting document from Firestore
+        const groupDoc = await getDoc(groupRef);
+        // Set the job title state variable to the title of the job posting
+        setAdminName(groupDoc.data().adminName);
+      } catch (error) {
+        setError(error);
+      }
+    };
+    getAdminName();
+  }, [groupId]);
+
+  useEffect(() => {
+    const getGroupMembers = async () => {
+      try {
+        const groupRef = doc(db, "Groups", groupId);
+        const groupDoc = await getDoc(groupRef);
+        const membersArray = groupDoc.data().groupMembers;
+        setGroupMembers(membersArray);
+      } catch (error) {
+        setError(error);
+      }
+    };
+    getGroupMembers();
+  }, [groupId]);
+
+  useEffect(() => {
+    const getAdminName = async () => {
+      try {
+        const groupRef = doc(db, "Groups", groupId);
+        const groupDoc = await getDoc(groupRef);
+        setAdminName(groupDoc.data().adminName);
+
+        // Check if the current user is the admin
+        if (groupDoc.data().createdBy === props.currentUser.uid) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        setError(error);
+      }
+    };
+    getAdminName();
+  }, [groupId, props.currentUser]);
+
+  useEffect(() => {
+    const getGroupData = async () => {
+      try {
+        const groupRef = doc(db, "Groups", groupId);
+        const groupDoc = await getDoc(groupRef);
+        setGroupName(groupDoc.data().groupName);
+        setGroupDescription(groupDoc.data().groupDescription);
+        setAdminId(groupDoc.data().createdBy);
+        setGroupMembers(groupDoc.data().groupMembers);
+      } catch (error) {
+        setError(error);
+      }
+    };
+    getGroupData();
+  }, [groupId]);
+
+  const currentUser = auth.currentUser;
+
   return (
     <>
       <Header />
       <Banner>
-        <BannerTitle>Group Title {groupName}</BannerTitle>
-        <BannerAdmin>Admin: John Doe</BannerAdmin>
-        <EditGroupButton>
-          <button onClick={handleEditClick}>Edit Group Informations</button>
-        </EditGroupButton>
-        <CustomModal5 isOpen={showEditForm} onRequestClose={handleClose}>
-          {showEditForm && <EditGroupForm />}
-        </CustomModal5>
+        <BannerTitle>{groupName}</BannerTitle>
+        <BannerAdmin>
+          <h3>Admin Name: {adminName}</h3>
+          <h4>Admin Id: {adminId}</h4>
+        </BannerAdmin>
+        {currentUser && adminId === currentUser.uid && (
+          <>
+            <EditGroupButton>
+              <button onClick={handleEditClick}>Edit Group Informations</button>
+              <CustomModal5 isOpen={showEditForm} onRequestClose={handleClose}>
+                {showEditForm && <EditGroupForm />}
+              </CustomModal5>
+            </EditGroupButton>
+            <InviteButton>
+              <button onClick={() => setShowConnectionModal(true)}>
+                Invite People
+              </button>
+              <CustomModal6
+                isOpen={showConnectionModal}
+                onRequestClose={handleClose}
+              >
+                {showConnectionModal && <InviteToGroup />}
+              </CustomModal6>
+            </InviteButton>
+          </>
+        )}
       </Banner>
 
       <Content>
         <Leftside>
           <Card>
             <h4>Group Members</h4>
-            <ul>
-              <li>Member 1</li>
-              <li>Member 2</li>
-              <li>Member 3</li>
-              <li>Member 4</li>
-            </ul>
+            {groupMembers.length > 0 ? (
+              <ul>
+                {groupMembers.map((member) => (
+                  <li key={member}>{member}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No members in this group yet.</p>
+            )}
           </Card>
         </Leftside>
         <GroupFeed>
@@ -121,7 +218,27 @@ const CustomModal5 = styled(Modal)`
   overflow-y: auto;
 `;
 
+const CustomModal6 = styled(Modal)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
 const EditGroupButton = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
+const InviteButton = styled.div`
   color: #0a66c2;
   margin-top: 4px;
   font-size: 12px;
@@ -147,6 +264,8 @@ const BannerTitle = styled.h1`
 const BannerAdmin = styled.p`
   font-size: 18px;
   color: gray;
+  align-items: center;
+  padding-bottom: 10px;
 `;
 
 const Content = styled.div`

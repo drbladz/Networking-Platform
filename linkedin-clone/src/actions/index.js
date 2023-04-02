@@ -44,7 +44,7 @@ export const setUserJobPostings = (payload) => ({
   userJobPostings: payload,
 });
 
-export function updateGroup(userId, updatedGroupData, currentGroupData) {
+/* export function updateGroup(userId, updatedGroupData, currentGroupData) {
   for (let property in currentGroupData) {
     if (
       updatedGroupData[property] == "" ||
@@ -72,7 +72,8 @@ export function updateGroup(userId, updatedGroupData, currentGroupData) {
 
     dispatch(setUser(updatedGroupData));
   };
-}
+} */
+
 // Define a function to handle form submission and update user document
 export function updateUserProfile(userId, updatedUserData, currentUserData) {
   // Update the user document in the "Users" collection

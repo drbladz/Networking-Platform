@@ -5,36 +5,51 @@ import { useState } from "react";
 import DmModal from "./DmModal";
 
 const UpdateConnections = (props) => {
-  const [showDm, setShowDm] = useState(false)
-  const [recipientId, setRecipientId] = useState("")
+  const [showDm, setShowDm] = useState(false);
+  const [recipientId, setRecipientId] = useState("");
 
-  const handleDmOpen = (recipientId)=>{
-    setRecipientId(recipientId)
-    setShowDm(true)
-  }
+  const handleDmOpen = (recipientId) => {
+    setRecipientId(recipientId);
+    setShowDm(true);
+  };
 
-  const handleDmClose = ()=>{
-    setRecipientId("")
-    setShowDm(false)
-  }
+  const handleDmClose = () => {
+    setRecipientId("");
+    setShowDm(false);
+  };
+
   return (
     <ConnectionsContainer>
       <ConnectionsHeader>Connections</ConnectionsHeader>
       <ConnectionsList>
-        {props.user && props.user.connections.map((connection) => (
-          <ConnectionItem key={connection.id}>
-            {connection.photoURL ? <ConnectionPhoto src={connection.photoURL} alt=""/> : <ConnectionPhoto src="/images/user.svg" alt=""/>}
-            <ConnectionName>{connection.name}</ConnectionName>
-            <DmButton onClick={()=> handleDmOpen(connection.id)}>Message</DmButton>
-            <DeleteButton onClick={() => {
-              props.removeConnectionById(connection.id);
-            }}>
-              Delete
-            </DeleteButton>
-          </ConnectionItem>
-        ))}
+        {props.user &&
+          props.user.connections.map((connection) => (
+            <ConnectionItem key={connection.id}>
+              {connection.photoURL ? (
+                <ConnectionPhoto src={connection.photoURL} alt="" />
+              ) : (
+                <ConnectionPhoto src="/images/user.svg" alt="" />
+              )}
+              <ConnectionName>{connection.name}</ConnectionName>
+              <DmButton onClick={() => handleDmOpen(connection.id)}>
+                Message
+              </DmButton>
+              <DeleteButton
+                onClick={() => {
+                  props.removeConnectionById(connection.id);
+                }}
+              >
+                Delete
+              </DeleteButton>
+            </ConnectionItem>
+          ))}
       </ConnectionsList>
-      {showDm && <DmModal currentUserId={props.user.userId} recipientId={recipientId}></DmModal> }
+      {showDm && (
+        <DmModal
+          currentUserId={props.user.userId}
+          recipientId={recipientId}
+        ></DmModal>
+      )}
     </ConnectionsContainer>
   );
 };
@@ -115,14 +130,14 @@ const DmButton = styled.button`
   }
 `;
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
-    user: state.userState.user
-  }
-}
+    user: state.userState.user,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   removeConnectionById: (id) => dispatch(removeConnectionById(id)),
-})
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(UpdateConnections)
+export default connect(mapStateToProps, mapDispatchToProps)(UpdateConnections);

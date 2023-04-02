@@ -18,7 +18,7 @@ const EditGroupForm = () => {
 
   const { groupId } = useParams();
 
-  const updateGroup = async (e) => {
+  /*   const updateGroup = async (e) => {
     e.preventDefault();
     const updateGroupData = {
       groupName: groupName,
@@ -31,6 +31,27 @@ const EditGroupForm = () => {
     await updateDoc(groupRef, updateGroupData, {
       merge: true,
     });
+  }; */
+
+  const updateGroup = async (e) => {
+    e.preventDefault();
+    const groupRef = doc(db, "Groups", groupId);
+
+    const existingGroup = await getDoc(groupRef);
+    const existingGroupData = existingGroup.data();
+
+    const updatedGroupData = {
+      groupName: groupName !== "" ? groupName : existingGroupData.groupName,
+      groupDescription:
+        groupDescription !== ""
+          ? groupDescription
+          : existingGroupData.groupDescription,
+      groupLocation:
+        groupLocation !== "" ? groupLocation : existingGroupData.groupLocation,
+      groupRules: groupRules !== "" ? groupRules : existingGroupData.groupRules,
+    };
+
+    await updateDoc(groupRef, updatedGroupData, { merge: true });
   };
 
   return (
