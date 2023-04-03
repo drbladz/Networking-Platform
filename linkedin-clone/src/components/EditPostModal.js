@@ -6,12 +6,27 @@ import { connect } from "react-redux";
 const EditPostModal = (props) =>{
     // logging props object to console
   console.log(props)
+  console.log(props.job)
     // Initializing state variables using useState hook
   const [postTitle, setPostTitle] = useState(props.job.postTitle)
   const [postDescription, setPostDescription] = useState(props.job.postDescription)
   const [mandatoryResume, setMandatoryResume] = useState(props.job.mandatoryResume);
   const [mandatoryCoverLetter, setMandatoryCoverLetter] = useState(props.job.mandatoryCoverLetter);
   const [isExternal, setIsExternal] = useState(props.job.isExternal)
+  const [jobParameters, setJobParameters] = useState(props.job.jobParameters)
+
+  const initialJobType = props.job?.jobParameters?.jobType ?? '';
+  const initialIindustry = props.job?.jobParameters?.industry ?? '';
+  const initialExperienceLevel = props.job?.jobParameters?.experienceLevel ?? '';
+  const initialRemoteWorkOption = props.job?.jobParameters?.remoteWorkOption ?? '';
+
+  const [jobType, setJobType] = useState(initialJobType)
+  const [industry, setIndustry] = useState(initialIindustry)
+  const [experienceLevel, setExperienceLevel] = useState(initialExperienceLevel)
+  const [remoteWorkOption, setRemoteWorkOption] = useState(initialRemoteWorkOption)
+  
+  
+
   // useEffect hook to update state variables when props change
   useEffect(() => {
     setPostTitle(props.job.postTitle)
@@ -19,6 +34,20 @@ const EditPostModal = (props) =>{
     setMandatoryResume(props.job.mandatoryResume)
     setMandatoryCoverLetter(props.job.mandatoryCoverLetter)
     setIsExternal(props.job.isExternal)
+
+
+    if (props.job) {
+      const initialJobType = props.job?.jobParameters?.jobType ?? '';
+      const initialIndustry = props.job?.jobParameters?.industry ?? '';
+      const initialExperienceLevel = props.job?.jobParameters?.experienceLevel ?? '';
+      const initialRemoteWorkOption = props.job?.jobParameters?.remoteWorkOption ?? '';
+
+      setJobType(initialJobType);
+      setIndustry(initialIndustry);
+      setExperienceLevel(initialExperienceLevel);
+      setRemoteWorkOption(initialRemoteWorkOption);
+    }
+
   }, [props])
   // reset function to close modal
   const reset = () =>{
@@ -72,6 +101,102 @@ const EditPostModal = (props) =>{
               <input type="checkbox" checked={isExternal} onChange={() =>  setIsExternal(!isExternal)} />
                 Is External
             </label>
+            <div>
+  <h3>Job Type</h3>
+  <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
+    <option value="">Select Job Type</option>
+    <option value="full-time">Full-Time</option>
+    <option value="part-time">Part-Time</option>
+    <option value="contract">Contract</option>
+  </select>
+</div>
+<div>
+  <h3>Industry / Sector</h3>
+  <select value={industry} onChange={(e) => setIndustry(e.target.value)}>
+  <option value="">Select an industry</option>
+<option value="accounting">Accounting</option>
+<option value="advertising">Advertising</option>
+<option value="aerospace">Aerospace</option>
+<option value="agriculture">Agriculture</option>
+<option value="architecture">Architecture</option>
+<option value="art">Art</option>
+<option value="automotive">Automotive</option>
+<option value="banking">Banking</option>
+<option value="beauty">Beauty</option>
+<option value="biotech">Biotech</option>
+<option value="childcare">Childcare</option>
+<option value="construction">Construction</option>
+<option value="consulting">Consulting</option>
+<option value="customer service">Customer Service</option>
+<option value="defense">Defense</option>
+<option value="e-commerce">E-commerce</option>
+<option value="education">Education</option>
+<option value="energy">Energy</option>
+<option value="engineering">Engineering</option>
+<option value="entertainment">Entertainment</option>
+<option value="environmental">Environmental</option>
+<option value="fashion">Fashion</option>
+<option value="finance">Finance</option>
+<option value="fitness">Fitness</option>
+<option value="food and beverage">Food and Beverage</option>
+<option value="gaming">Gaming</option>
+<option value="government">Government</option>
+<option value="healthcare">Healthcare</option>
+<option value="hospitality">Hospitality</option>
+<option value="human resources">Human Resources</option>
+<option value="humanitarian">Humanitarian</option>
+<option value="insurance">Insurance</option>
+<option value="interior design">Interior Design</option>
+<option value="internet">Internet</option>
+<option value="IT">IT</option>
+<option value="legal">Legal</option>
+<option value="logistics">Logistics</option>
+<option value="manufacturing">Manufacturing</option>
+<option value="marketing">Marketing</option>
+<option value="media">Media</option>
+<option value="music">Music</option>
+<option value="nonprofit">Nonprofit</option>
+<option value="outsourcing">Outsourcing</option>
+<option value="pharmaceuticals">Pharmaceuticals</option>
+<option value="photography">Photography</option>
+<option value="public relations">Public Relations</option>
+<option value="publishing">Publishing</option>
+<option value="real estate">Real Estate</option>
+<option value="recruitment">Recruitment</option>
+<option value="retail">Retail</option>
+<option value="sales">Sales</option>
+<option value="science">Science</option>
+<option value="security">Security</option>
+<option value="social media">Social Media</option>
+<option value="software development">Software Development</option>
+<option value="sports">Sports</option>
+<option value="telecom">Telecom</option>
+<option value="telecommunications">Telecommunications</option>
+<option value="transportation">Transportation</option>
+<option value="travel">Travel</option>
+<option value="other">Other</option>
+  
+  </select>
+    
+</div>
+<div>
+  <h3>Experience Level</h3>
+  <select value={experienceLevel} onChange={(e) => setExperienceLevel(e.target.value)}>
+    <option value="">Select Experience Level</option>
+    <option value="entry-level">Entry-Level</option>
+    <option value="intermediate">Intermediate</option>
+    <option value="senior-level">Senior-Level</option>
+  </select>
+</div>
+<div>
+  <h3>Remote Work Options</h3>
+  <select value={remoteWorkOption} onChange={(e) => setRemoteWorkOption(e.target.value)}>
+    <option value="">Select Remote Work Option</option>
+    <option value="remote">Remote Work</option>
+    <option value="in-person">In-Person Work</option>
+    <option value="both">Open to Both</option>
+  </select>
+</div>
           </div>
         </SharedContent>
         <SharedCreation>
@@ -87,7 +212,13 @@ const EditPostModal = (props) =>{
               postDescription: postDescription,
               postTitle: postTitle,
               timeStamp: props.job.timeStamp,
-              userId: props.job.userId
+              userId: props.job.userId,
+              jobParameters: {
+                jobType: jobType,
+                industry: industry,
+                experienceLevel: experienceLevel,
+                remoteWorkOption: remoteWorkOption,
+              },
             },
             props.jobPostings)
             reset()
@@ -114,7 +245,7 @@ const mapStateToProps = (state) => {
 }
 // Maps dispatch to props
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter)),
+  createJobPosting: (userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, jobParameters) => dispatch(createJobPosting(userId, postTitle, postDescription, currentPostingsList, userPhotoURL,displayName, mandatoryResume, mandatoryCoverLetter, jobParameters)),
   editJobPosting: (editedJobData, currentPostingsList) => dispatch(editJobPosting(editedJobData, currentPostingsList)),
   deleteJobPosting: (jobPostingId, userId ,currentPostingsList) => dispatch(deleteJobPosting(jobPostingId, userId , currentPostingsList)) 
 })
