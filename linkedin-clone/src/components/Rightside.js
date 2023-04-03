@@ -51,7 +51,7 @@ const Rightside = () => {
     
       currentUserSkills.forEach((currentUserSkill) => {
         otherUserSkills.forEach((otherUserSkill) => {
-          if (currentUserSkill && otherUserSkill && currentUserSkill === otherUserSkill) {
+          if (currentUserSkill && otherUserSkill && currentUserSkill.toLowerCase() === otherUserSkill.toLowerCase()) {
             console.log('currentUserSkill: ' + currentUserSkill)
             console.log('OtherUserSkill: ' + otherUserSkill)
             score += 1;
@@ -63,6 +63,23 @@ const Rightside = () => {
     };
 
 
+    const languagesMatchScore = (currentUserLanguages, otherUserLanguages) => {
+      let score = 0;
+      if (!Array.isArray(currentUserLanguages) || !Array.isArray(otherUserLanguages)) {
+        return score;
+      }
+    
+      currentUserLanguages.forEach((currentUserLanguage) => {
+        otherUserLanguages.forEach((otherUserLanguage) => {
+          if (currentUserLanguage && otherUserLanguage && currentUserLanguage.toLowerCase() === otherUserLanguage.toLowerCase()) {
+            score += 1;
+          }
+        });
+      });
+    
+      return score;
+    };
+
 const fetchSuggestedUsers = async (userId) => {
   const usersRef = collection(db, 'Users');
   const usersSnapshot = await getDocs(usersRef);
@@ -73,16 +90,17 @@ const fetchSuggestedUsers = async (userId) => {
   const currentUserDoc = await getDoc(doc(db, 'Users', userId));
   const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
   console.log("Current user params:", currentUser.searchingPreferences);
-  const commonUsers = usersData
-  .map((u) => ({
-    ...u,
-    industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
-    commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
-      Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
-    ).length : 0,
-    coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
-    skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills), // Add this line
-  }))
+const commonUsers = usersData
+.map((u) => ({
+  ...u,
+  industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
+  commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
+    Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
+  ).length : 0,
+  coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
+  skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills),
+  languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), // Add this line
+}))
   .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
   .sort((a, b) => {
     // Sort by common connections (descending)
@@ -105,14 +123,20 @@ const fetchSuggestedUsers = async (userId) => {
       }
     }
   
-    // Sort by common school and course title (as the second filter)
+    // Sort by common school and course title (as the third and fifth filter)
     const coursesMatchDiff = b.coursesMatchScore - a.coursesMatchScore;
     if (coursesMatchDiff !== 0) {
       return coursesMatchDiff;
     }
   
-    // Sort by common skills (as the third filter)
-    return b.skillsMatchScore - a.skillsMatchScore;
+    // Sort by common skills (as the fifth filter)
+    const skillsMatchDiff = b.skillsMatchScore - a.skillsMatchScore;
+    if (skillsMatchDiff !== 0) {
+      return skillsMatchDiff;
+    }
+
+     // Sort by common languages (as the sixth filter)
+     return b.languagesMatchScore - a.languagesMatchScore;
   });
 
   // You can adjust the limit to show more or fewer suggested users
