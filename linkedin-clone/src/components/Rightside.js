@@ -29,7 +29,7 @@ const Rightside = () => {
       const usersData = usersSnapshot.docs
         .map((doc) => ({ ...doc.data(), id: doc.id }))
         .filter((u) => u.id !== userId);
-      
+    
       const currentUserDoc = await getDoc(doc(db, 'Users', userId));
       const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
       console.log("Current user params:", currentUser.searchingPreferences);
@@ -48,17 +48,25 @@ const Rightside = () => {
           if (commonConnectionsDiff !== 0) {
             return commonConnectionsDiff;
           }
-
-
+    
+          // Sort by common industry (if both have 0 common connections)
+          if (currentUser.searchingPreferences && currentUser.searchingPreferences.industry) {
+            const currentUserIndustry = currentUser.searchingPreferences.industry;
+            const aMatch = a.industry === currentUserIndustry;
+            const bMatch = b.industry === currentUserIndustry;
+        
+            if (aMatch && !bMatch) {
+              return -1;
+            }
+            if (!aMatch && bMatch) {
+              return 1;
+            }
+          }
           return 0;
         });
-
+    
       // You can adjust the limit to show more or fewer suggested users
       setSuggestedUsers(commonUsers.slice(0, 11));
-//       console.log('Common users:');
-// commonUsers.forEach((user) => {
-//   console.log(user);
-// });
       setLoading(false);
     };
 
