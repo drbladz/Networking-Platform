@@ -94,6 +94,9 @@ const commonUsers = usersData
 .map((u) => ({
   ...u,
   industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
+  experienceLevelMatch: currentUser.searchingPreferences &&
+        u.searchingPreferences &&
+        currentUser.searchingPreferences.experienceLevel === u.searchingPreferences.experienceLevel ? 1 : 0,
   commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
     Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
   ).length : 0,
@@ -136,7 +139,13 @@ const commonUsers = usersData
     }
 
      // Sort by common languages (as the sixth filter)
-     return b.languagesMatchScore - a.languagesMatchScore;
+     const languagesMatchDiff = b.languagesMatchScore - a.languagesMatchScore;
+     if (languagesMatchDiff !== 0) {
+       return languagesMatchDiff;
+     }
+     
+      // Sort by experience level (as the seventh filter)
+      return b.experienceLevelMatch - a.experienceLevelMatch;
   });
 
   // You can adjust the limit to show more or fewer suggested users
