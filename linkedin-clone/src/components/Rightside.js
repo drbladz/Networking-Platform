@@ -43,6 +43,26 @@ const Rightside = () => {
       return score;
     };
 
+    const skillsMatchScore = (currentUserSkills, otherUserSkills) => {
+      let score = 0;
+      if (!Array.isArray(currentUserSkills) || !Array.isArray(otherUserSkills)) {
+        return score;
+      }
+    
+      currentUserSkills.forEach((currentUserSkill) => {
+        otherUserSkills.forEach((otherUserSkill) => {
+          if (currentUserSkill && otherUserSkill && currentUserSkill === otherUserSkill) {
+            console.log('currentUserSkill: ' + currentUserSkill)
+            console.log('OtherUserSkill: ' + otherUserSkill)
+            score += 1;
+          }
+        });
+      });
+    
+      return score;
+    };
+
+
 const fetchSuggestedUsers = async (userId) => {
   const usersRef = collection(db, 'Users');
   const usersSnapshot = await getDocs(usersRef);
@@ -54,39 +74,46 @@ const fetchSuggestedUsers = async (userId) => {
   const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
   console.log("Current user params:", currentUser.searchingPreferences);
   const commonUsers = usersData
-    .map((u) => ({
-      ...u,
-      industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
-      commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
-        Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
-      ).length : 0,
-      coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
-    }))
-    .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
-    .sort((a, b) => {
-      // Sort by common connections (descending)
-      const commonConnectionsDiff = b.commonConnections - a.commonConnections;
-      if (commonConnectionsDiff !== 0) {
-        return commonConnectionsDiff;
+  .map((u) => ({
+    ...u,
+    industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
+    commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
+      Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
+    ).length : 0,
+    coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
+    skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills), // Add this line
+  }))
+  .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
+  .sort((a, b) => {
+    // Sort by common connections (descending)
+    const commonConnectionsDiff = b.commonConnections - a.commonConnections;
+    if (commonConnectionsDiff !== 0) {
+      return commonConnectionsDiff;
+    }
+  
+    // Sort by common industry (if both have the same number of common connections)
+    if (currentUser.searchingPreferences && currentUser.searchingPreferences.industry) {
+      const currentUserIndustry = currentUser.searchingPreferences.industry;
+      const aMatch = a.industry === currentUserIndustry;
+      const bMatch = b.industry === currentUserIndustry;
+  
+      if (aMatch && !bMatch) {
+        return -1;
       }
-
-      // Sort by common industry (if both have the same number of common connections)
-      if (currentUser.searchingPreferences && currentUser.searchingPreferences.industry) {
-        const currentUserIndustry = currentUser.searchingPreferences.industry;
-        const aMatch = a.industry === currentUserIndustry;
-        const bMatch = b.industry === currentUserIndustry;
-
-        if (aMatch && !bMatch) {
-          return -1;
-        }
-        if (!aMatch && bMatch) {
-          return 1;
-        }
+      if (!aMatch && bMatch) {
+        return 1;
       }
-
-      // Sort by common school and course title (as the third filter)
-      return b.coursesMatchScore - a.coursesMatchScore;
-    });
+    }
+  
+    // Sort by common school and course title (as the second filter)
+    const coursesMatchDiff = b.coursesMatchScore - a.coursesMatchScore;
+    if (coursesMatchDiff !== 0) {
+      return coursesMatchDiff;
+    }
+  
+    // Sort by common skills (as the third filter)
+    return b.skillsMatchScore - a.skillsMatchScore;
+  });
 
   // You can adjust the limit to show more or fewer suggested users
   setSuggestedUsers(commonUsers.slice(0, 11));
