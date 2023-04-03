@@ -1,9 +1,78 @@
 import styled from "styled-components";
 import { connect } from "react-redux";
+import { db } from '../firebase';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { getAuth } from "firebase/auth";
 
 const Rightside = () => {
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const auth = getAuth();
+
+
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        const userId = user.uid;
+        
+        fetchSuggestedUsers(userId);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    const fetchSuggestedUsers = async (userId) => {
+      const usersRef = collection(db, 'Users');
+      const usersSnapshot = await getDocs(usersRef);
+      const usersData = usersSnapshot.docs
+        .map((doc) => ({ ...doc.data(), id: doc.id }))
+        .filter((u) => u.id !== userId);
+      
+      const currentUserDoc = await getDoc(doc(db, 'Users', userId));
+      const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
+      console.log("Current user params:", currentUser.searchingPreferences);
+      const commonUsers = usersData
+        .map((u) => ({
+          ...u,
+          industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
+          commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
+            Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
+          ).length : 0,
+        }))
+        .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
+        .sort((a, b) => {
+          // Sort by common connections (descending)
+          const commonConnectionsDiff = b.commonConnections - a.commonConnections;
+          if (commonConnectionsDiff !== 0) {
+            return commonConnectionsDiff;
+          }
+
+
+          return 0;
+        });
+
+      // You can adjust the limit to show more or fewer suggested users
+      setSuggestedUsers(commonUsers.slice(0, 11));
+//       console.log('Common users:');
+// commonUsers.forEach((user) => {
+//   console.log(user);
+// });
+      setLoading(false);
+    };
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+    
+  }
+  
   return (
-    <Container>
+    <div>
+          <Container>
       <FollowCard>
         <Title>
           <h2>Add to your feed</h2>
@@ -36,13 +105,25 @@ const Rightside = () => {
           <img src="/images/right-icon.svg" alt="" />
         </Recommendation>
       </FollowCard>
-      <BannerCard>
-        <img
-          src="https://www.blackenterprise.com/wp-content/blogs.dir/1/files/2022/01/iStock-1290639027-scaled.jpg"
-          alt=""
-        />
-      </BannerCard>
+
     </Container>
+    <div className="suggestedUsers">
+      <h1>Suggested Users</h1>
+      <ul>
+  {suggestedUsers.map((user) => (
+    <li key={user.id}>
+      <div>
+        <Avatar style={{ backgroundImage: `url(${user.photoURL || 'https://static-exp1.licdn.com/sc/h/1b4vl1r54ijmrmcyxzoidwmxs'})` }} />
+      </div>
+      <div>
+        <h3>{user.displayName}</h3>
+        <button>Connect</button>
+      </div>
+    </li>
+  ))}
+</ul>
+    </div>
+    </div>
   );
 };
 
