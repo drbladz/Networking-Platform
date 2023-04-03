@@ -14,7 +14,8 @@ import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { FaFlag } from 'react-icons/fa';
 import { TiWarning } from "react-icons/ti";
 import { GrAttachment } from 'react-icons/gr';
-import { BsSendFill } from 'react-icons/bs'
+import { BsSendFill, BsFillEmojiSmileFill } from 'react-icons/bs';
+import Picker from '@emoji-mart/react'
 import { v4 as uuidv4 } from "uuid";
 
 
@@ -22,6 +23,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
   
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
 
   const [messages, loading, error] = useCollectionData(
     query(collection(db, "Messages"), where('sender', 'in', [currentUserId, recipientId]),
@@ -127,7 +129,11 @@ const DmModal = ({ currentUserId, recipientId }) => {
             </div>
           ))}
       </DirectMessageChatWindow>
-
+      {showPicker &&
+        <div style={{overflowY: 'auto'}}>
+          <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} />
+        </div>
+      }
       <InputBox>
         <input
           type="text"
@@ -136,15 +142,18 @@ const DmModal = ({ currentUserId, recipientId }) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleEnter}
         />
-        <label htmlFor="attach">
-        <GrAttachment cursor="pointer" style={{margin: '0px 10px'}}></GrAttachment>
-        </label>
-        <input type="file" id="attach" onChange={handleFileChange} style={{display: 'none'}}/>
         {file && 
-        <div style={{marginRight: '10px'}}>
+        <div style={{border: '1px dashed', borderColor: '#007bff', borderRadius:'2px'}}>
           {file.name.length > 10 ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length-4)}` : file.name}
         </div>}
+        <div style={{marginLeft: 'auto'}}>
+        <label htmlFor="attach">
+        <GrAttachment cursor="pointer" style={{marginRight: '10px'}}></GrAttachment>
+        </label>
+        <input type="file" id="attach" onChange={handleFileChange} style={{display: 'none'}}/>
+        <BsFillEmojiSmileFill onClick={() => setShowPicker(!showPicker)} cursor="pointer" style={{marginRight: '10px'}}></BsFillEmojiSmileFill>
         <BsSendFill color="blue" cursor="pointer" onClick={sendMessage}><button type="submit">Send</button></BsSendFill>
+        </div>
       </InputBox>
     </DirectMessageContainer>
     </Container>
@@ -212,7 +221,6 @@ const DirectMessageChatWindow = styled.div`
 
   flex: 1;
   overflow-y: auto;
-  max-height: 400px;
   padding: 10px;
 `
 
@@ -221,6 +229,11 @@ const InputBox = styled.div`
   align-items: center;
   padding: 10px;
   background-color: white;
+
+  input[type="text"] {
+    border: none;
+    outline: none;
+  }
 `
 
 const Container = styled.div`

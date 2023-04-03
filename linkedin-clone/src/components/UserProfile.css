@@ -243,3 +243,17 @@
     color: white;
     transition-duration: 200ms;
 }
+
+.dm-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    height: 55%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+}

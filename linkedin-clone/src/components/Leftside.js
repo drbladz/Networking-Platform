@@ -284,7 +284,7 @@ const CustomModal3 = styled(Modal)`
   border-radius: 10px;
   padding: 20px;
   width: 400px;
-  height: 300px;
+  height: 55%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
 `;

@@ -44,7 +44,8 @@ const ConnectionsContainer = styled.div`
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 16px;
-  margin-top: 16px;
+  height: 100%;
+  border-radius: 10px;
 `;
 
 const ConnectionsHeader = styled.h3`
