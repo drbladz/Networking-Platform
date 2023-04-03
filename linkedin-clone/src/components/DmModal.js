@@ -9,15 +9,20 @@ import db, {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "../firebase";
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import { FaFlag } from 'react-icons/fa';
 import { TiWarning } from "react-icons/ti";
+import { GrAttachment } from 'react-icons/gr';
+import { BsSendFill } from 'react-icons/bs'
 import { v4 as uuidv4 } from "uuid";
 
 
 const DmModal = ({ currentUserId, recipientId }) => {
   
   const [message, setMessage] = useState('');
+  const [file, setFile] = useState(null);
+
   const [messages, loading, error] = useCollectionData(
     query(collection(db, "Messages"), where('sender', 'in', [currentUserId, recipientId]),
     where('recipient', 'in', [currentUserId, recipientId]),
@@ -39,6 +44,33 @@ const DmModal = ({ currentUserId, recipientId }) => {
         flagged: false
       })
       setMessage('');
+    }
+
+    else if (file) {
+      const storageRef = ref(storage, `messages/`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      await setDoc(doc(collection(db, "Messages"), id), {
+        id: id,
+        sender: currentUserId,
+        recipient: recipientId,
+        file: downloadURL,
+        fileName: file.name,
+        createdAt: new Date(),
+        flagged: false
+      })
+      setFile(null);
+    }
+  };
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleEnter = (e) => {
+    if (e.key === "Enter") {
+      sendMessage(e);
     }
   };
 
@@ -74,7 +106,14 @@ const DmModal = ({ currentUserId, recipientId }) => {
                 msg.sender === currentUserId ? 'sent' : 'received'
               }`}
             >
-              {msg.message}
+              {msg.file ? (
+                <a href={msg.file} target="_blank" rel="noreferrer">
+                  {msg.fileName}
+                </a>
+              ) : (
+                <div>{msg.message}</div>
+              )}
+              <div className="direct-message-date">{Date(msg.createdAt)}</div>
               {msg.sender === recipientId && !msg.flagged && (
                <div className="direct-message-flag">
                <FaFlag onClick={() => flagMessage(msg.id)} />
@@ -89,15 +128,24 @@ const DmModal = ({ currentUserId, recipientId }) => {
           ))}
       </DirectMessageChatWindow>
 
-      <form onSubmit={sendMessage}>
+      <InputBox>
         <input
           type="text"
           placeholder="Type your message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleEnter}
         />
-        <button type="submit">Send</button>
-      </form>
+        <label htmlFor="attach">
+        <GrAttachment cursor="pointer" style={{margin: '0px 10px'}}></GrAttachment>
+        </label>
+        <input type="file" id="attach" onChange={handleFileChange} style={{display: 'none'}}/>
+        {file && 
+        <div style={{marginRight: '10px'}}>
+          {file.name.length > 10 ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length-4)}` : file.name}
+        </div>}
+        <BsSendFill color="blue" cursor="pointer" onClick={sendMessage}><button type="submit">Send</button></BsSendFill>
+      </InputBox>
     </DirectMessageContainer>
     </Container>
   );
@@ -130,10 +178,15 @@ const DirectMessageChatWindow = styled.div`
   align-self: end;
   background-color: #007bff;
   color: #fff;
+  margin-left: auto;
 }
 
 .direct-message.received {
   align-self: start;
+}
+
+.direct-message-date {
+  display: none;
 }
 
 .direct-message-flag {
@@ -152,9 +205,22 @@ const DirectMessageChatWindow = styled.div`
   display: block;
 }
 
+.direct-message:hover .direct-message-date {
+  font-size: 8px;
+  display: block;
+}
+
   flex: 1;
   overflow-y: auto;
   max-height: 400px;
+  padding: 10px;
+`
+
+const InputBox = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: white;
 `
 
 const Container = styled.div`

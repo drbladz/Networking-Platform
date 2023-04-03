@@ -286,6 +286,7 @@ const CustomModal3 = styled(Modal)`
   width: 400px;
   height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
 `;
 
 const EditInfo = styled.div`
@@ -331,8 +332,8 @@ const CustomModal2 = styled(Modal)`
   background-color: white;
   border-radius: 10px;
   padding: 20px;
-  width: 800px;
-  height: 800px;
+  width: 50%;
+  height: 75%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
 `;
