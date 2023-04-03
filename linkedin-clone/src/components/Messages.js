@@ -72,12 +72,19 @@ const Messages = (props) => {
           {loading && <p>Loading...</p>}
         {error && <p>Error: {error.message}</p>}
         {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage)  => (
-            <div className="card" key={flaggedMessage.id}>
+            <div className="flag-card" key={flaggedMessage.id}>
             <div>
             </div>
             <h2>{flaggedMessage.sender}</h2>
             <br/>
+            {flaggedMessage.file ? 
+            <p>
+              <a href={flaggedMessage.file} target="_blank" rel="noreferrer">
+                  {flaggedMessage.fileName}
+                </a>
+            </p> :
             <p>"{flaggedMessage.message}"</p>
+            }
             <button className="buttonc" onClick={() => {
               }}>Ban</button>
             <button className="buttonc" onClick={() => {
