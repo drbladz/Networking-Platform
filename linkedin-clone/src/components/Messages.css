@@ -25,7 +25,7 @@
   justify-content: center;
 }
 
-.card{
+.flag-card{
   margin: 10px 20px;
   border: 1px solid grey;
   padding: 16px;
@@ -36,11 +36,11 @@
   overflow-wrap: break-word;
 }
 
-.card:hover{
+.flag-card:hover{
   box-shadow: 0 0 10px black;
 }
 
-.card img{
+.flag-card img{
   margin-bottom: 5px;
   border-radius: 50%;
 }
