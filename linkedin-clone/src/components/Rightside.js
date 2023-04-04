@@ -1,13 +1,15 @@
+
 import styled from "styled-components";
+import './rightside.css'
 import { connect } from "react-redux";
 import { db } from '../firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
 import {Link } from "react-router-dom";
-
+import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../actions";
 // Main RighSide component
-const Rightside = () => {
+const Rightside = (props) => {
 
   // Define state variables
   const [suggestedUsers, setSuggestedUsers] = useState([]);
@@ -77,7 +79,7 @@ const Rightside = () => {
 
 
   // Function to fetch suggested users
-  const fetchSuggestedUsers = async (userId, limit) => {
+  const fetchSuggestedUsers = async (userId) => {
     const usersRef = collection(db, 'Users');
     const usersSnapshot = await getDocs(usersRef);
     const usersData = usersSnapshot.docs
@@ -146,7 +148,7 @@ const Rightside = () => {
     });
   
     // Adjust the limit to show more or fewer suggested users
-    setSuggestedUsers(commonUsers.slice(0, limit));
+    setSuggestedUsers(commonUsers.slice(0, 15));
     setLoading(false);
   };
 
@@ -164,29 +166,17 @@ const Rightside = () => {
       }
     });
 
-    const handleResize = () => {
-      if (window.innerWidth < 1100 && window.innerWidth >= 900) {
-        setDisplayedUsers(20);
-      } else if(window.innerWidth < 900){
-        setDisplayedUsers(10);
-      }
-      else setDisplayedUsers(30);
-      if (auth.currentUser) {
-        fetchSuggestedUsers(auth.currentUser.uid, displayedUsers);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
+
 
     
 
-
+    console.log("HI I am here")
     return () => {
       unsubscribe();
-      window.removeEventListener('resize', handleResize);
+      
     }
-
-  }, [displayedUsers]);
+    
+  }, []);
 
   // Return statement to show loading indicator while data is being fetched
   if (loading) {
@@ -236,9 +226,9 @@ const Rightside = () => {
       </FollowCard>
 
     </Container>
-    <div className="suggestedUsers">
+    <div>
       <h1>Suggested Users</h1>
-      <SuggestedUsers>
+      <SuggestedUsers className="SuggestedUsers">
   {suggestedUsers.map((user) => (
     <li key={user.id}>
       <div>
@@ -247,7 +237,7 @@ const Rightside = () => {
             pathname: `/user/${user.userId}`,
             state: user
             }}  style={{ textDecoration: 'none', color: 'black' }}> 
-           <Avatar
+           <Avatar className="Avatar"
           style={{
             backgroundImage: `url(${
               user.photoURL
@@ -271,9 +261,10 @@ const Rightside = () => {
             </div>
       </Link>
       </div>
-      <button>
-        connect
-      </button>
+      {(props.user && props.user.pending && props.user.pending.includes(user.userId)) ? <button className="buttonp" disabled>Pending</button> : 
+            <button className="buttonc" onClick={() => {
+              props.addConnectionById(user.userId);
+              }}>Connect</button>}
     </li>
   ))}
 </SuggestedUsers>
@@ -366,55 +357,7 @@ const BannerCard = styled(FollowCard)`
 
 
 const SuggestedUsers = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-top: 24px;
-
-  li {
-    width: calc(60% - 16px);
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    max-width: 300px;
-    min-width: 0; 
-    flex-direction: column;
-
-    @media (min-width: 576px) { 
-      width: calc(40% - 12px);
-    }
-
-    @media (min-width: 1700px) { 
-      width: calc(36% - 16px);
-    }
-    @media (max-width: 1500px) {
-      width: calc(100% - 12px);
-    }
-
-    button {
-      margin: 1rem;
-      margin-top: 10px;
-      border: 2px solid rgb(79, 117, 220);
-      color: rgb(79, 117, 220);
-      padding: 0.6rem;
-      border-radius: 30px;
-      background-color: white;
-      cursor: pointer;
-      &:hover {
-        font-weight: bold;
-        background-color: rgb(207, 216, 239);
-        transform: scale(1.1);
-        transition-duration: 200ms;
-    }
-    div {
-      min-width: 0; 
-      margin: 3px auto;
-      h3 {
-        font-size: 1.2rem;
-        margin: 2px auto;
-      }
-    }
-  }
+  
 `;
 
 // mapStateToProps function to map user state to props
@@ -425,8 +368,13 @@ const mapStateToProps = (state) =>{
 }
 
 // mapDispatchToProps function to map dispatch to props
+
 const mapDispatchToProps = (dispatch) => ({
+  addConnectionById: (id) => dispatch(addConnectionById(id)),
+  acceptRequest: (id) => dispatch(acceptRequest(id)),
+  declineRequest: (id) => dispatch(declineRequest(id))
 })
+
 
 // Connect the component to the Redux store
 export default connect(mapStateToProps, mapDispatchToProps)(Rightside)
