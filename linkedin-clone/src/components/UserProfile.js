@@ -1,14 +1,20 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux';
 import { useLocation, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { addConnectionById, acceptRequest, declineRequest } from '../actions';
 import './UserProfile.css';
+import Modal from "react-modal";
+import DmModal from './DmModal';
 // Define a functional component called UserProfile
 const UserProfile = (props) => {
     // Get the user data from the location object provided by react-router-dom
   const location = useLocation();
   const user = location.state;
+
+  //Handle DM modal display if the user is a connection
+  const [showDm, setShowDm] = useState(false);
+
   return (
          // Render the user profile container
     <Container>
@@ -38,7 +44,7 @@ const UserProfile = (props) => {
 
               {props.user.connections &&
                 props.user.connections.some(c => c.id === user.userId) &&
-                <button className="message-btn">Message</button>
+                <button className="message-btn" onClick={() => setShowDm(true)}>Message</button>
               }
 
               {props.user.requests &&
@@ -182,6 +188,11 @@ const UserProfile = (props) => {
             </ul>
           </div>}
       </div>
+      {showDm &&
+      <Modal className="dm-modal" isOpen={showDm} onRequestClose={() => setShowDm(false)}>
+        <DmModal currentUserId={props.user.userId} recipientId={user.userId} />
+      </Modal> 
+      }
     </Container>
   )
 }

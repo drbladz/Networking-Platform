@@ -3,6 +3,7 @@ import { removeConnectionById } from "../actions";
 import { connect } from "react-redux";
 import { useState } from "react";
 import DmModal from "./DmModal";
+import { AiFillMessage } from "react-icons/ai";
 
 const UpdateConnections = (props) => {
   const [showDm, setShowDm] = useState(false);
@@ -32,7 +33,7 @@ const UpdateConnections = (props) => {
               )}
               <ConnectionName>{connection.name}</ConnectionName>
               <DmButton onClick={() => handleDmOpen(connection.id)}>
-                Message
+                <AiFillMessage />
               </DmButton>
               <DeleteButton
                 onClick={() => {
@@ -58,7 +59,8 @@ const ConnectionsContainer = styled.div`
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 16px;
-  margin-top: 16px;
+  height: 100%;
+  border-radius: 10px;
 `;
 
 const ConnectionsHeader = styled.h3`
@@ -77,6 +79,7 @@ const ConnectionItem = styled.li`
   justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
 
   &:last-of-type {
     border-bottom: none;
@@ -86,6 +89,7 @@ const ConnectionItem = styled.li`
 const ConnectionName = styled.p`
   margin: 0;
   font-size: 16px;
+  width: 40%;
 `;
 
 const ConnectionPhoto = styled.img`
@@ -113,7 +117,7 @@ const DeleteButton = styled.button`
 `;
 
 const DmButton = styled.button`
-  background-color: #f44336;
+  background-color: rgb(79, 117, 220);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -122,7 +126,7 @@ const DmButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #d32f2f;
+    background-color: blue;
   }
 
   &:active {
