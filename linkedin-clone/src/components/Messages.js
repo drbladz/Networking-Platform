@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../actions";
+import { getUsers, addConnectionById, banUser, warnUser } from "../actions";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
 import './Messages.css';
@@ -32,38 +32,24 @@ const Messages = (props) => {
     )
   );
 
+  const handleBanUser = async (banUserId, messageId) =>{
+    banUser(banUserId)
+    await updateDoc(doc(db, "Messages", messageId), {
+      reviewed: true
+    })
+  }
+
+  const handleWarnUser = async (warnUserId, messageId) =>{
+    warnUser(warnUserId)
+    await updateDoc(doc(db, "Messages", messageId), {
+      reviewed: true
+    })
+  }
+
   return (
     <Container>
       {!props.user && <Redirect to="/" />}
-      <table className="center">
-        <caption><b></b></caption>
-        {(props.user && props.user.requests && props.user.requests.length === 0) && <div>No requests</div>}
-        {props.user && props.user.requests ? props.user.requests.map((req, index) => (
-          <tr className="reqRow" key={req.id}>
-            <td>
-            {req.photoURL ?
-              <img src={req.photoURL} alt="" width={50} height={50} />
-              :<img src="/images/user.svg" alt="" height="50" width="50"/>
-            }
-            </td>
-            <td>
-            {req.name}
-            </td>
-            <td>
-            <button className="accept" onClick={() => {
-              props.acceptRequest(req.id);
-            }}>Accept</button>
-            </td>
-            <td>
-            <button className="decline" onClick={() => {
-              props.declineRequest(req.id);
-            }}>Decline</button>
-            </td>
-          </tr>   
-        )
-        ) : <div></div>}
-      </table>
-      <br/>
+        {(props.user && props.user.displayName == "admin" && (
       <div className="wrapper"> 
       <div className="container">
         <h1>Flagged Messages</h1>
@@ -71,7 +57,9 @@ const Messages = (props) => {
           <div className="column">
           {loading && <p>Loading...</p>}
         {error && <p>Error: {error.message}</p>}
-        {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage)  => (
+        {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage)  => {
+          if(!flaggedMessage.reviewed){
+            return(
             <div className="flag-card" key={flaggedMessage.id}>
             <div>
             </div>
@@ -83,18 +71,16 @@ const Messages = (props) => {
                   {flaggedMessage.fileName}
                 </a>
             </p> :
-            <p>"{flaggedMessage.message}"</p>
-            }
-            <button className="buttonc" onClick={() => {
-              }}>Ban</button>
-            <button className="buttonc" onClick={() => {
-              }}>Tolerate</button>
-          </div>
-      ))} 
+            <p>"{flaggedMessage.message}"</p>}
+            <button className="buttonc" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
+            <button className="buttonc" onClick={() => handleWarnUser(flaggedMessage.sender, flaggedMessage.id)
+              }>Tolerate</button>
+          </div>)}
+      })} 
       </div>
       </div>
       </div> 
-      </div>
+      </div>))}
       <br/>
       <div className="wrapper"> 
       <div className="container">
@@ -121,9 +107,8 @@ const mapStateToProps = (state) =>{
   }
   
   const mapDispatchToProps = (dispatch) => ({
-    addConnectionById: (id) => dispatch(addConnectionById(id)),
-    acceptRequest: (id) => dispatch(acceptRequest(id)),
-    declineRequest: (id) => dispatch(declineRequest(id))
+    banUser: (id)=> dispatch(banUser(id)),
+    warnUser: (id)=> dispatch(warnUser(id)),
   })
   
   export default connect(mapStateToProps, mapDispatchToProps)(Messages)

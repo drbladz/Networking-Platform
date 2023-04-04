@@ -43,7 +43,8 @@ const DmModal = ({ currentUserId, recipientId }) => {
         recipient: recipientId,
         message,
         createdAt: new Date(),
-        flagged: false
+        flagged: false,
+        reviewed: false
       })
       setMessage('');
     }
