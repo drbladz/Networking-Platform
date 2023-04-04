@@ -60,12 +60,18 @@ const Messages = (props) => {
         {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage)  => {
           if(!flaggedMessage.reviewed){
             return(
-            <div className="card" key={flaggedMessage.id}>
+            <div className="flag-card" key={flaggedMessage.id}>
             <div>
             </div>
             <h2>{flaggedMessage.sender}</h2>
             <br/>
-            <p>"{flaggedMessage.message}"</p>
+            {flaggedMessage.file ? 
+            <p>
+              <a href={flaggedMessage.file} target="_blank" rel="noreferrer">
+                  {flaggedMessage.fileName}
+                </a>
+            </p> :
+            <p>"{flaggedMessage.message}"</p>}
             <button className="buttonc" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
             <button className="buttonc" onClick={() => handleWarnUser(flaggedMessage.sender, flaggedMessage.id)
               }>Tolerate</button>
