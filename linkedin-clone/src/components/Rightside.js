@@ -1,12 +1,15 @@
 import styled from "styled-components";
 import { connect } from "react-redux";
 import { db } from '../firebase';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
 import {Link } from "react-router-dom";
 
+// Main RighSide component
 const Rightside = () => {
+
+  // Define state variables
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
@@ -14,7 +17,7 @@ const Rightside = () => {
 
 
 
-
+  // Function to calculate course match score
   const courseMatchScore = (currentUserCourses, otherUserCourses) => {
     let score = 0;
     if (!currentUserCourses || !otherUserCourses) {
@@ -35,6 +38,7 @@ const Rightside = () => {
     return score;
   };
 
+  // Function to calculate skills match score
   const skillsMatchScore = (currentUserSkills, otherUserSkills) => {
     let score = 0;
     if (!Array.isArray(currentUserSkills) || !Array.isArray(otherUserSkills)) {
@@ -53,7 +57,7 @@ const Rightside = () => {
     return score;
   };
 
-
+  // Function to calculate language match score
   const languagesMatchScore = (currentUserLanguages, otherUserLanguages) => {
     let score = 0;
     if (!Array.isArray(currentUserLanguages) || !Array.isArray(otherUserLanguages)) {
@@ -72,6 +76,7 @@ const Rightside = () => {
   };
 
 
+  // Function to fetch suggested users
   const fetchSuggestedUsers = async (userId, limit) => {
     const usersRef = collection(db, 'Users');
     const usersSnapshot = await getDocs(usersRef);
@@ -94,7 +99,7 @@ const Rightside = () => {
     ).length : 0,
     coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
     skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills),
-    languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), // Add this line
+    languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), 
   }))
     .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
     .sort((a, b) => {
@@ -147,7 +152,7 @@ const Rightside = () => {
 
 
 
-
+  // useEffect hook to fetch suggested users and handle window resize
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -183,6 +188,7 @@ const Rightside = () => {
 
   }, [displayedUsers]);
 
+  // Return statement to show loading indicator while data is being fetched
   if (loading) {
     return <div>Loading...</div>;
     
@@ -276,6 +282,8 @@ const Rightside = () => {
   );
 };
 
+
+//styling
 const Container = styled.div`
   grid-area: rightside;
 `;
@@ -369,14 +377,14 @@ const SuggestedUsers = styled.div`
     display: flex;
     align-items: center;
     max-width: 300px;
-    min-width: 0; // Add this line
+    min-width: 0; 
     flex-direction: column;
 
-    @media (min-width: 576px) { // Wrap elements when screen width is >= 576px
+    @media (min-width: 576px) { 
       width: calc(40% - 12px);
     }
 
-    @media (min-width: 1700px) { // Wrap elements when screen width is >= 768px
+    @media (min-width: 1700px) { 
       width: calc(36% - 16px);
     }
     @media (max-width: 1500px) {
@@ -384,25 +392,6 @@ const SuggestedUsers = styled.div`
     }
 
     button {
-      // background-color: transparent;
-      // color: rgba(0, 0, 0, 0.6);
-      // border: 1px solid #0a66c2; 
-      // padding: 0.6rem 1rem;
-      // border-radius: 25px;
-      // box-sizing: border-box;
-      // margin: 3px auto;
-      // display: inline-flex;
-      // justify-content: center;
-      // text-align: center;
-      // outline: none;
-      // cursor: pointer;
-      // font-size: 1rem; 
-      // width: auto; 
-      // height: auto; 
-      // cursor: pointer
-
-
-
       margin: 1rem;
       margin-top: 10px;
       border: 2px solid rgb(79, 117, 220);
@@ -417,16 +406,6 @@ const SuggestedUsers = styled.div`
         transform: scale(1.1);
         transition-duration: 200ms;
     }
-
-
-
-
-
-
-
-
-
-
     div {
       min-width: 0; 
       margin: 3px auto;
@@ -437,13 +416,17 @@ const SuggestedUsers = styled.div`
     }
   }
 `;
+
+// mapStateToProps function to map user state to props
 const mapStateToProps = (state) =>{
   return {
     user: state.userState.user
   }
 }
 
+// mapDispatchToProps function to map dispatch to props
 const mapDispatchToProps = (dispatch) => ({
 })
 
+// Connect the component to the Redux store
 export default connect(mapStateToProps, mapDispatchToProps)(Rightside)
