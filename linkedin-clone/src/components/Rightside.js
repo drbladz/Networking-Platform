@@ -4,11 +4,147 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
+import {Link } from "react-router-dom";
 
 const Rightside = () => {
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
+  const [displayedUsers, setDisplayedUsers] = useState(30);
+
+
+
+
+  const courseMatchScore = (currentUserCourses, otherUserCourses) => {
+    let score = 0;
+    if (!currentUserCourses || !otherUserCourses) {
+      return score;
+    }
+  
+    currentUserCourses.forEach((currentUserCourse) => {
+      otherUserCourses.forEach((otherUserCourse) => {
+        if (currentUserCourse.school === otherUserCourse.school) {
+          score += 1;
+          if (currentUserCourse.title === otherUserCourse.title) {
+            score += 1;
+          }
+        }
+      });
+    });
+  
+    return score;
+  };
+
+  const skillsMatchScore = (currentUserSkills, otherUserSkills) => {
+    let score = 0;
+    if (!Array.isArray(currentUserSkills) || !Array.isArray(otherUserSkills)) {
+      return score;
+    }
+  
+    currentUserSkills.forEach((currentUserSkill) => {
+      otherUserSkills.forEach((otherUserSkill) => {
+        if (currentUserSkill && otherUserSkill && currentUserSkill.toLowerCase() === otherUserSkill.toLowerCase()) {
+
+          score += 1;
+        }
+      });
+    });
+  
+    return score;
+  };
+
+
+  const languagesMatchScore = (currentUserLanguages, otherUserLanguages) => {
+    let score = 0;
+    if (!Array.isArray(currentUserLanguages) || !Array.isArray(otherUserLanguages)) {
+      return score;
+    }
+  
+    currentUserLanguages.forEach((currentUserLanguage) => {
+      otherUserLanguages.forEach((otherUserLanguage) => {
+        if (currentUserLanguage && otherUserLanguage && currentUserLanguage.toLowerCase() === otherUserLanguage.toLowerCase()) {
+          score += 1;
+        }
+      });
+    });
+  
+    return score;
+  };
+
+
+  const fetchSuggestedUsers = async (userId, limit) => {
+    const usersRef = collection(db, 'Users');
+    const usersSnapshot = await getDocs(usersRef);
+    const usersData = usersSnapshot.docs
+      .map((doc) => ({ ...doc.data(), id: doc.id }))
+      .filter((u) => u.id !== userId);
+  
+    const currentUserDoc = await getDoc(doc(db, 'Users', userId));
+    const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
+  
+  const commonUsers = usersData
+  .map((u) => ({
+    ...u,
+    industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
+    experienceLevelMatch: currentUser.searchingPreferences &&
+          u.searchingPreferences &&
+          currentUser.searchingPreferences.experienceLevel === u.searchingPreferences.experienceLevel ? 1 : 0,
+    commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
+      Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
+    ).length : 0,
+    coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
+    skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills),
+    languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), // Add this line
+  }))
+    .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
+    .sort((a, b) => {
+      // Sort by common connections (descending)
+      const commonConnectionsDiff = b.commonConnections - a.commonConnections;
+      if (commonConnectionsDiff !== 0) {
+        return commonConnectionsDiff;
+      }
+    
+      // Sort by common industry (if both have the same number of common connections)
+      if (currentUser.searchingPreferences && currentUser.searchingPreferences.industry) {
+        const currentUserIndustry = currentUser.searchingPreferences.industry;
+        const aMatch = a.industry === currentUserIndustry;
+        const bMatch = b.industry === currentUserIndustry;
+    
+        if (aMatch && !bMatch) {
+          return -1;
+        }
+        if (!aMatch && bMatch) {
+          return 1;
+        }
+      }
+    
+      // Sort by common school and course title (as the third and fifth filter)
+      const coursesMatchDiff = b.coursesMatchScore - a.coursesMatchScore;
+      if (coursesMatchDiff !== 0) {
+        return coursesMatchDiff;
+      }
+    
+      // Sort by common skills (as the fifth filter)
+      const skillsMatchDiff = b.skillsMatchScore - a.skillsMatchScore;
+      if (skillsMatchDiff !== 0) {
+        return skillsMatchDiff;
+      }
+  
+       // Sort by common languages (as the sixth filter)
+       const languagesMatchDiff = b.languagesMatchScore - a.languagesMatchScore;
+       if (languagesMatchDiff !== 0) {
+         return languagesMatchDiff;
+       }
+  
+        // Sort by experience level (as the seventh filter)
+        return b.experienceLevelMatch - a.experienceLevelMatch;
+    });
+  
+    // Adjust the limit to show more or fewer suggested users
+    setSuggestedUsers(commonUsers.slice(0, limit));
+    setLoading(false);
+  };
+
 
 
 
@@ -17,149 +153,45 @@ const Rightside = () => {
       if (user) {
         const userId = user.uid;
         
-        fetchSuggestedUsers(userId);
+        fetchSuggestedUsers(userId, displayedUsers);
       } else {
         setLoading(false);
       }
     });
-    
-    const courseMatchScore = (currentUserCourses, otherUserCourses) => {
-      let score = 0;
-      if (!currentUserCourses || !otherUserCourses) {
-        return score;
+
+    const handleResize = () => {
+      if (window.innerWidth < 1100 && window.innerWidth >= 900) {
+        setDisplayedUsers(20);
+      } else if(window.innerWidth < 900){
+        setDisplayedUsers(10);
       }
-    
-      currentUserCourses.forEach((currentUserCourse) => {
-        otherUserCourses.forEach((otherUserCourse) => {
-          if (currentUserCourse.school === otherUserCourse.school) {
-            score += 1;
-            if (currentUserCourse.title === otherUserCourse.title) {
-              score += 1;
-            }
-          }
-        });
-      });
-    
-      return score;
+      else setDisplayedUsers(30);
+      if (auth.currentUser) {
+        fetchSuggestedUsers(auth.currentUser.uid, displayedUsers);
+      }
     };
+    window.addEventListener('resize', handleResize);
+    handleResize();
 
-    const skillsMatchScore = (currentUserSkills, otherUserSkills) => {
-      let score = 0;
-      if (!Array.isArray(currentUserSkills) || !Array.isArray(otherUserSkills)) {
-        return score;
-      }
     
-      currentUserSkills.forEach((currentUserSkill) => {
-        otherUserSkills.forEach((otherUserSkill) => {
-          if (currentUserSkill && otherUserSkill && currentUserSkill.toLowerCase() === otherUserSkill.toLowerCase()) {
-            console.log('currentUserSkill: ' + currentUserSkill)
-            console.log('OtherUserSkill: ' + otherUserSkill)
-            score += 1;
-          }
-        });
-      });
-    
-      return score;
-    };
 
 
-    const languagesMatchScore = (currentUserLanguages, otherUserLanguages) => {
-      let score = 0;
-      if (!Array.isArray(currentUserLanguages) || !Array.isArray(otherUserLanguages)) {
-        return score;
-      }
-    
-      currentUserLanguages.forEach((currentUserLanguage) => {
-        otherUserLanguages.forEach((otherUserLanguage) => {
-          if (currentUserLanguage && otherUserLanguage && currentUserLanguage.toLowerCase() === otherUserLanguage.toLowerCase()) {
-            score += 1;
-          }
-        });
-      });
-    
-      return score;
-    };
-
-const fetchSuggestedUsers = async (userId) => {
-  const usersRef = collection(db, 'Users');
-  const usersSnapshot = await getDocs(usersRef);
-  const usersData = usersSnapshot.docs
-    .map((doc) => ({ ...doc.data(), id: doc.id }))
-    .filter((u) => u.id !== userId);
-
-  const currentUserDoc = await getDoc(doc(db, 'Users', userId));
-  const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
-  console.log("Current user params:", currentUser.searchingPreferences);
-const commonUsers = usersData
-.map((u) => ({
-  ...u,
-  industry: u.searchingPreferences ? u.searchingPreferences.industry : '',
-  experienceLevelMatch: currentUser.searchingPreferences &&
-        u.searchingPreferences &&
-        currentUser.searchingPreferences.experienceLevel === u.searchingPreferences.experienceLevel ? 1 : 0,
-  commonConnections: Array.isArray(u.connections) ? u.connections.filter((c) =>
-    Array.isArray(currentUser.connections) && currentUser.connections.some((uc) => uc.id === c.id)
-  ).length : 0,
-  coursesMatchScore: courseMatchScore(currentUser.courses, u.courses),
-  skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills),
-  languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), // Add this line
-}))
-  .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
-  .sort((a, b) => {
-    // Sort by common connections (descending)
-    const commonConnectionsDiff = b.commonConnections - a.commonConnections;
-    if (commonConnectionsDiff !== 0) {
-      return commonConnectionsDiff;
-    }
-  
-    // Sort by common industry (if both have the same number of common connections)
-    if (currentUser.searchingPreferences && currentUser.searchingPreferences.industry) {
-      const currentUserIndustry = currentUser.searchingPreferences.industry;
-      const aMatch = a.industry === currentUserIndustry;
-      const bMatch = b.industry === currentUserIndustry;
-  
-      if (aMatch && !bMatch) {
-        return -1;
-      }
-      if (!aMatch && bMatch) {
-        return 1;
-      }
-    }
-  
-    // Sort by common school and course title (as the third and fifth filter)
-    const coursesMatchDiff = b.coursesMatchScore - a.coursesMatchScore;
-    if (coursesMatchDiff !== 0) {
-      return coursesMatchDiff;
-    }
-  
-    // Sort by common skills (as the fifth filter)
-    const skillsMatchDiff = b.skillsMatchScore - a.skillsMatchScore;
-    if (skillsMatchDiff !== 0) {
-      return skillsMatchDiff;
+    return () => {
+      unsubscribe();
+      window.removeEventListener('resize', handleResize);
     }
 
-     // Sort by common languages (as the sixth filter)
-     const languagesMatchDiff = b.languagesMatchScore - a.languagesMatchScore;
-     if (languagesMatchDiff !== 0) {
-       return languagesMatchDiff;
-     }
-     
-      // Sort by experience level (as the seventh filter)
-      return b.experienceLevelMatch - a.experienceLevelMatch;
-  });
-
-  // You can adjust the limit to show more or fewer suggested users
-  setSuggestedUsers(commonUsers.slice(0, 11));
-  setLoading(false);
-};
-
-    return () => unsubscribe();
-  }, []);
+  }, [displayedUsers]);
 
   if (loading) {
     return <div>Loading...</div>;
     
   }
+  
+
+
+
+
   
   return (
     <div>
@@ -200,19 +232,45 @@ const commonUsers = usersData
     </Container>
     <div className="suggestedUsers">
       <h1>Suggested Users</h1>
-      <ul>
+      <SuggestedUsers>
   {suggestedUsers.map((user) => (
     <li key={user.id}>
       <div>
-        <Avatar style={{ backgroundImage: `url(${user.photoURL || 'https://static-exp1.licdn.com/sc/h/1b4vl1r54ijmrmcyxzoidwmxs'})` }} />
+        
+      <Link to={{
+            pathname: `/user/${user.userId}`,
+            state: user
+            }}  style={{ textDecoration: 'none', color: 'black' }}> 
+           <Avatar
+          style={{
+            backgroundImage: `url(${
+              user.photoURL
+                ? user.photoURL
+                : "images/495-4952535_create-digital-profile-icon-blue-user-profile-icon.png" 
+            })`,
+          }}
+        />
+      </Link>
+      
       </div>
       <div>
-        <h3>{user.displayName}</h3>
-        <button>Connect</button>
+      
+        
+        <Link to={{
+            pathname: `/user/${user.userId}`,
+            state: user
+            }}  style={{ textDecoration: 'none', color: 'black' }}> 
+            <div>
+            <h3>{user.displayName}</h3>
+            </div>
+      </Link>
       </div>
+      <button>
+        connect
+      </button>
     </li>
   ))}
-</ul>
+</SuggestedUsers>
     </div>
     </div>
   );
@@ -298,6 +356,87 @@ const BannerCard = styled(FollowCard)`
   }
 `;
 
+
+const SuggestedUsers = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 24px;
+
+  li {
+    width: calc(60% - 16px);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    max-width: 300px;
+    min-width: 0; // Add this line
+    flex-direction: column;
+
+    @media (min-width: 576px) { // Wrap elements when screen width is >= 576px
+      width: calc(40% - 12px);
+    }
+
+    @media (min-width: 1700px) { // Wrap elements when screen width is >= 768px
+      width: calc(36% - 16px);
+    }
+    @media (max-width: 1500px) {
+      width: calc(100% - 12px);
+    }
+
+    button {
+      // background-color: transparent;
+      // color: rgba(0, 0, 0, 0.6);
+      // border: 1px solid #0a66c2; 
+      // padding: 0.6rem 1rem;
+      // border-radius: 25px;
+      // box-sizing: border-box;
+      // margin: 3px auto;
+      // display: inline-flex;
+      // justify-content: center;
+      // text-align: center;
+      // outline: none;
+      // cursor: pointer;
+      // font-size: 1rem; 
+      // width: auto; 
+      // height: auto; 
+      // cursor: pointer
+
+
+
+      margin: 1rem;
+      margin-top: 10px;
+      border: 2px solid rgb(79, 117, 220);
+      color: rgb(79, 117, 220);
+      padding: 0.6rem;
+      border-radius: 30px;
+      background-color: white;
+      cursor: pointer;
+      &:hover {
+        font-weight: bold;
+        background-color: rgb(207, 216, 239);
+        transform: scale(1.1);
+        transition-duration: 200ms;
+    }
+
+
+
+
+
+
+
+
+
+
+    div {
+      min-width: 0; 
+      margin: 3px auto;
+      h3 {
+        font-size: 1.2rem;
+        margin: 2px auto;
+      }
+    }
+  }
+`;
 const mapStateToProps = (state) =>{
   return {
     user: state.userState.user
