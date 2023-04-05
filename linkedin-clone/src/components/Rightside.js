@@ -103,7 +103,11 @@ const Rightside = (props) => {
     skillsMatchScore: skillsMatchScore(currentUser.skills, u.skills),
     languagesMatchScore: languagesMatchScore(currentUser.languages, u.languages), 
   }))
-    .filter((u) => !Array.isArray(currentUser.connections) || !currentUser.connections.some((c) => c.id === u.id))
+    .filter((u) => {
+      const isConnected = Array.isArray(currentUser.connections) && currentUser.connections.some((c) => c.id === u.id);
+      const isPending = Array.isArray(currentUser.pending) && currentUser.pending.includes(u.id);
+      return !isConnected && !isPending;
+    })
     .sort((a, b) => {
       // Sort by common connections (descending)
       const commonConnectionsDiff = b.commonConnections - a.commonConnections;
@@ -170,7 +174,7 @@ const Rightside = (props) => {
 
     
 
-    console.log("HI I am here")
+    
     return () => {
       unsubscribe();
       
