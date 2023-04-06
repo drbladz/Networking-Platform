@@ -322,7 +322,7 @@ const Messages = (props) => {
                     </p> :
                     <p>"{flaggedMessage.message}"</p>
                   }
-                  <button className="buttonc" onClick={() => {
+                  <button className="buttonb" onClick={() => {
                   }}>Ban</button>
                   <button className="buttonc" onClick={() => {
                   }}>Tolerate</button>

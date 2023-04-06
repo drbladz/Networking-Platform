@@ -61,6 +61,24 @@
   transition-duration: 200ms;
 }
 
+.buttonb{
+  margin: 1rem;
+  margin-top: 10px;
+  border: 2px solid grey;
+  color: grey;
+  padding: 0.6rem;
+  border-radius: 30px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.buttonb:hover{
+  font-weight: bold;
+  background-color: #eee;
+  transform: scale(1.1);
+  transition-duration: 200ms;
+}
+
 .buttonp{
   margin: 1rem;
   margin-top: 10px;
