@@ -323,7 +323,7 @@ const Messages = (props) => {
       <br />
       <div className="wrapper">
         <div className="container">
-          <h1>Current Conversations</h1>
+          <h1>Conversations</h1>
           {msgLoading && <p>Loading...</p>}
           {msgError && <p>Error: {msgError.message}</p>}
           <Messenger />
