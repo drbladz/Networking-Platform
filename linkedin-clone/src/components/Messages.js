@@ -59,12 +59,23 @@ const Messages = (props) => {
     )
   );
 
-  // Custom comparison function to sort messages by date timestamp
+  // Helper comparison function to sort messages by date timestamp
   const compare = (a, b) => {
     if (a.createdAt < b.createdAt) {
       return -1;
     }
     if (a.createdAt > b.createdAt) {
+      return 1;
+    }
+    return 0;
+  };
+
+  // Helper comparison function to sort conversations by most recent
+  const compareConversations = (a, b) => {
+    if (a.messages && a.messages[a.messages.length-1].createdAt > b.messages[b.messages.length-1].createdAt){
+      return -1;
+    }
+    if (a.messages && a.messages[a.messages.length-1].createdAt < b.messages[b.messages.length-1].createdAt){
       return 1;
     }
     return 0;
@@ -84,6 +95,7 @@ const Messages = (props) => {
       }
     }   
   });
+  conversations?.sort(compareConversations);
   console.log(conversations);
 
   const ConversationList = ({ selectedConversationId, handleConversationClick }) => {
