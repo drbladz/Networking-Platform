@@ -131,6 +131,12 @@ const Conversation = ({ conversation }) => {
   const [file, setFile] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
 
+  useEffect(() => {
+    // Scroll to the bottom of the chat window on initial load and on new messages
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }, [messages]);
+
   const sendMessage = async (e) => {
     e.preventDefault();
     const id = uuidv4()
@@ -176,7 +182,7 @@ const Conversation = ({ conversation }) => {
   };
   return (
     <div className="conversation">
-      <ul className="conversation-messages">
+      <ul className="conversation-messages" id="chat-window">
         {conversation && conversation.messages && conversation.messages.map((msg) => (
           <li key={msg.id} className={`conversation-message ${msg.sender !== conversation.user.userId ? 'sent' : 'received'}`}>
             {/* {props.user && props.user.userId === msg.sender &&
@@ -346,10 +352,12 @@ const InputBox = styled.div`
   align-items: center;
   padding: 10px;
   background-color: white;
+  margin-top: auto;
 
   input[type="text"] {
     border: none;
     outline: none;
+    width: 75%;
   }
 `
 

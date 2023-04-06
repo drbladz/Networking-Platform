@@ -159,10 +159,9 @@
   }
   
   .conversation {
+  display: flex;
+  flex-direction: column;
   width: 75%;
-  padding: 20px;
-  overflow-y: auto;
-  margin-left: auto;
   }
   
   .conversation h2 {
@@ -172,7 +171,9 @@
   .conversation-messages {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 30px;
+  flex-grow: 1;
+  overflow-y: auto;
   }
   
   .conversation-message {
