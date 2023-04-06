@@ -4,7 +4,7 @@ import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../a
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
 import './Messages.css';
-import { collection, query, where, getDocs, orderBy, addDoc, updateDoc, doc, setDoc }from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, addDoc, updateDoc, doc, setDoc, or }from 'firebase/firestore';
 import db, {
   auth,
   provider,
@@ -13,14 +13,23 @@ import db, {
   createUserWithEmailAndPassword,
 } from "../firebase";
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { FaFlag } from 'react-icons/fa';
+import { TiWarning } from "react-icons/ti";
+import { GrAttachment } from 'react-icons/gr';
+import { BsSendFill, BsFillEmojiSmileFill } from 'react-icons/bs';
 
 const Messages = (props) => {
   const [users, setUsers] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  let conversations = [];
 
   useEffect(() => {
   getUsers().then(data => {
     setUsers(data);
   });
+  if(auth.currentUser){
+    setCurrentUserId(auth.currentUser.uid);
+  }
   return () => {
     setUsers([]);
   }
@@ -31,6 +40,141 @@ const Messages = (props) => {
     orderBy('createdAt')
     )
   );
+
+  const flagMessage = async (id) => {
+    await updateDoc(doc(db, "Messages", id), {
+      flagged: true
+    })
+  };
+
+  const unflagMessage = async (id) => {
+    await updateDoc(doc(db, "Messages", id), {
+      flagged: false
+    })
+  };
+
+  const [messages, msgLoading, msgError] = useCollectionData(
+    query(collection(db, "Messages"), or(where('sender', '==', currentUserId),
+    where('recipient', '==', currentUserId))
+    )
+  );
+
+  // Custom comparison function to sort messages by date timestamp
+  const compare = (a, b) => {
+    if (a.createdAt < b.createdAt) {
+      return -1;
+    }
+    if (a.createdAt > b.createdAt) {
+      return 1;
+    }
+    return 0;
+  };
+
+  // Sort the array by date timestamp
+  messages?.sort(compare);
+  console.log(messages);
+
+  //For each user, put all past messages as a conversation and store all conversations in an array 
+  users.forEach(user => {
+    if(user.userId !== currentUserId){
+      let filteredMessages = [];
+      filteredMessages = messages?.filter(msg => msg.sender === user.userId || msg.recipient === user.userId)
+      if(filteredMessages?.length !== 0){
+        conversations.push({user: user, messages: filteredMessages});
+      }
+    }   
+  });
+  console.log(conversations);
+
+  const ConversationList = ({ selectedConversationId, handleConversationClick }) => {
+  return (
+    <ul className="conversation-list">
+      {conversations.map((conversation) => (
+        <li
+          key={conversation.user.userId}
+          onClick={() => handleConversationClick(conversation.user.userId)}
+          className={`conversation-list-item ${conversation.user.userId === selectedConversationId ? 'selected' : ''}`}
+        >
+          {conversation.user.photoURL ?
+           <img src={conversation.user.photoURL} alt={conversation.user.displayName} /> :
+           <img src="/images/user.svg" alt={conversation.user.displayName} />
+          }
+          <div>
+            <h3>{conversation.user.displayName}</h3>
+            {conversation.messages && conversation.messages[conversation.messages.length-1].message ?
+             <p>{conversation.messages && conversation.messages[conversation.messages.length-1].message}</p> :
+             <p>{conversation.messages && conversation.messages[conversation.messages.length-1].fileName}</p> 
+            }
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const Conversation = ({ conversation }) => {
+  return (
+    <div className="conversation">
+      <ul className="conversation-messages">
+        {conversation && conversation.messages && conversation.messages.map((msg) => (
+          <li key={msg.id} className={`conversation-message ${msg.sender !== conversation.user.userId ? 'sent' : 'received'}`}>
+            {/* {props.user && props.user.userId === msg.sender &&
+            <img src={props.user.photoURL} alt={props.user.displayName} />
+            } */}
+            {conversation.user.photoURL && conversation.user.userId === msg.sender &&
+            <img src={conversation.user.photoURL} alt={conversation.user.displayName} />
+            }
+            {!conversation.user.photoURL && conversation.user.userId === msg.sender &&
+            <img src="/images/user.svg" alt={conversation.user.displayName} />
+            }
+            <div className="direct-message">
+              {msg.file ? (
+                <p>
+                  <a href={msg.file} target="_blank" rel="noreferrer">
+                  {msg.fileName}
+                  </a>
+                </p>
+              ) : (
+                <p>{msg.message}</p>
+              )}
+              <small className="direct-message-date">{Date(msg.createdAt)}</small>
+              {msg.sender === conversation.user.userId && !msg.flagged && (
+               <div className="direct-message-flag">
+               <FaFlag onClick={() => flagMessage(msg.id)} />
+             </div>
+              )}
+              {msg.sender === conversation.user.userId && msg.flagged && (
+               <div className="direct-message-offense">
+               <TiWarning onClick={() => unflagMessage(msg.id)} />
+             </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const Messenger = () => {
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
+  const selectedConversation = conversations.find((conversation) => conversation.user.userId === selectedConversationId);
+
+  const handleConversationClick = (id) => {
+    setSelectedConversationId(id);
+  };
+
+  return (
+    <div className="messenger">
+      <ConversationList selectedConversationId={selectedConversationId} handleConversationClick={handleConversationClick} />
+{selectedConversation ? (
+<Conversation conversation={selectedConversation} />
+) : (
+  <Conversation conversation={conversations[0]} />
+)}
+</div>
+);
+};
 
   return (
     <Container>
@@ -98,11 +242,12 @@ const Messages = (props) => {
       <br/>
       <div className="wrapper"> 
       <div className="container">
-        <h1>Current Conversations</h1>
-        <div className="row">
+        <h1>Conversations</h1>
+        {/* <div className="row">
           <div className="column">
       </div>
-      </div>
+      </div> */}
+      <Messenger />
       </div>  
       </div>
     </Container>
