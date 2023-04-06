@@ -130,7 +130,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
           ))}
       </DirectMessageChatWindow>
       {showPicker &&
-        <div style={{overflowY: 'auto'}}>
+        <div style={{marginLeft: 'auto'}}>
           <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} />
         </div>
       }

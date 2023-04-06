@@ -17,6 +17,7 @@ import { FaFlag } from 'react-icons/fa';
 import { TiWarning } from "react-icons/ti";
 import { GrAttachment } from 'react-icons/gr';
 import { BsSendFill, BsFillEmojiSmileFill } from 'react-icons/bs';
+import Picker from '@emoji-mart/react'
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from "uuid";
 
@@ -219,6 +220,11 @@ const Conversation = ({ conversation }) => {
           </li>
         ))}
       </ul>
+      {showPicker &&
+        <div style={{marginLeft: 'auto'}}>
+          <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} theme="light"/>
+        </div>
+      }
       <InputBox>
         <input
           type="text"
