@@ -38,6 +38,7 @@ const Messages = (props) => {
   }
   }, [])
 
+  // Get all flagged messages
   const [flaggedMessages, loading, error] = useCollectionData(
     query(collection(db, "Messages"), where('flagged', '==', true),
     orderBy('createdAt')
@@ -56,6 +57,7 @@ const Messages = (props) => {
     })
   };
 
+  // Get all messages related to the current user 
   const [messages, msgLoading, msgError] = useCollectionData(
     query(collection(db, "Messages"), or(where('sender', '==', currentUserId),
     where('recipient', '==', currentUserId))
@@ -84,9 +86,8 @@ const Messages = (props) => {
     return 0;
   };
 
-  // Sort the array by date timestamp
+  // Sort the messages array by date timestamp
   messages?.sort(compare);
-  console.log(messages);
 
   //For each user, put all past messages as a conversation and store all conversations in an array 
   users.forEach(user => {
@@ -98,9 +99,10 @@ const Messages = (props) => {
       }
     }   
   });
+  // Sort the conversations from most recent
   conversations?.sort(compareConversations);
-  console.log(conversations);
 
+  // Conversation list component on the left of the Messenger component where user selects the conversation
   const ConversationList = ({ selectedConversationId, handleConversationClick }) => {
   return (
     <ul className="conversation-list">
@@ -127,6 +129,7 @@ const Messages = (props) => {
   );
 };
 
+// Conversation component on the rightof the Messenger component which loads the selected conversation
 const Conversation = ({ conversation }) => {
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
@@ -138,6 +141,7 @@ const Conversation = ({ conversation }) => {
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }, [messages]);
 
+  // Send message and update db
   const sendMessage = async (e) => {
     e.preventDefault();
     const id = uuidv4()
@@ -176,6 +180,7 @@ const Conversation = ({ conversation }) => {
     setFile(event.target.files[0]);
   };
 
+  // User can press Enter on keyboard to send message
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       sendMessage(e);
@@ -186,9 +191,6 @@ const Conversation = ({ conversation }) => {
       <ul className="conversation-messages" id="chat-window">
         {conversation && conversation.messages && conversation.messages.map((msg) => (
           <li key={msg.id} className={`conversation-message ${msg.sender !== conversation.user.userId ? 'sent' : 'received'}`}>
-            {/* {props.user && props.user.userId === msg.sender &&
-            <img src={props.user.photoURL} alt={props.user.displayName} />
-            } */}
             {conversation.user.photoURL && conversation.user.userId === msg.sender &&
             <img src={conversation.user.photoURL} alt={conversation.user.displayName} />
             }
@@ -250,6 +252,7 @@ const Conversation = ({ conversation }) => {
   );
 };
 
+// Messenger component that uses ConversationList and Conversation components 
 const Messenger = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const selectedConversation = conversations.find((conversation) => conversation.user.userId === selectedConversationId);
@@ -275,7 +278,6 @@ const Messenger = () => {
       {!props.user && <Redirect to="/" />}
       <table className="center">
         <caption><b></b></caption>
-        {(props.user && props.user.requests && props.user.requests.length === 0) && <div>No requests</div>}
         {props.user && props.user.requests ? props.user.requests.map((req, index) => (
           <tr className="reqRow" key={req.id}>
             <td>
@@ -337,10 +339,8 @@ const Messenger = () => {
       <div className="wrapper"> 
       <div className="container">
         <h1>Conversations</h1>
-        {/* <div className="row">
-          <div className="column">
-      </div>
-      </div> */}
+        {msgLoading && <p>Loading...</p>}
+        {msgError && <p>Error: {msgError.message}</p>}
       <Messenger />
       </div>  
       </div>
