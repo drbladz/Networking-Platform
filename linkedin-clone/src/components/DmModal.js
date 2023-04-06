@@ -1,13 +1,8 @@
 import styled from "styled-components";
 import React, { useState, useEffect } from 'react';
-import firebase from 'firebase/app';
-import { collection, query, where, getDocs, orderBy, addDoc, updateDoc, doc, setDoc }from 'firebase/firestore';
+import { collection, query, where, orderBy, updateDoc, doc, setDoc } from 'firebase/firestore';
 import db, {
-  auth,
-  provider,
   storage,
-  signInWithPopup,
-  createUserWithEmailAndPassword,
 } from "../firebase";
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -20,7 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 
 
 const DmModal = ({ currentUserId, recipientId }) => {
-  
+
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -28,8 +23,8 @@ const DmModal = ({ currentUserId, recipientId }) => {
   // Get all messages
   const [messages, loading, error] = useCollectionData(
     query(collection(db, "Messages"), where('sender', 'in', [currentUserId, recipientId]),
-    where('recipient', 'in', [currentUserId, recipientId]),
-    orderBy('createdAt')
+      where('recipient', 'in', [currentUserId, recipientId]),
+      orderBy('createdAt')
     )
   );
 
@@ -99,66 +94,65 @@ const DmModal = ({ currentUserId, recipientId }) => {
 
   return (
     <Container>
-    <DirectMessageContainer className="direct-message-container">
-      <DirectMessageChatWindow id="chat-window" className="direct-message-chat-window">
-        {loading && <p>Loading...</p>}
-        {error && <p>Error: {error.message}</p>}
-        {messages &&
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`direct-message ${
-                msg.sender === currentUserId ? 'sent' : 'received'
-              }`}
-            >
-              {msg.file ? (
-                <a href={msg.file} target="_blank" rel="noreferrer">
-                  {msg.fileName}
-                </a>
-              ) : (
-                <div>{msg.message}</div>
-              )}
-              <div className="direct-message-date">{Date(msg.createdAt)}</div>
-              {msg.sender === recipientId && !msg.flagged && (
-               <div className="direct-message-flag">
-               <FaFlag onClick={() => flagMessage(msg.id)} />
-             </div>
-              )}
-              {msg.sender === recipientId && msg.flagged && (
-               <div className="direct-message-offense">
-               <TiWarning onClick={() => unflagMessage(msg.id)} />
-             </div>
-              )}
-            </div>
-          ))}
-      </DirectMessageChatWindow>
-      {showPicker &&
-        <div style={{marginLeft: 'auto'}}>
-          <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} />
-        </div>
-      }
-      <InputBox>
-        <input
-          type="text"
-          placeholder="Type your message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleEnter}
-        />
-        {file && 
-        <div style={{border: '1px dashed', borderColor: '#007bff', borderRadius:'2px'}}>
-          {file.name.length > 10 ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length-4)}` : file.name}
-        </div>}
-        <div style={{marginLeft: 'auto'}}>
-        <label htmlFor="attach">
-        <GrAttachment cursor="pointer" style={{marginRight: '10px'}}></GrAttachment>
-        </label>
-        <input type="file" id="attach" onChange={handleFileChange} style={{display: 'none'}}/>
-        <BsFillEmojiSmileFill onClick={() => setShowPicker(!showPicker)} cursor="pointer" style={{marginRight: '10px'}}></BsFillEmojiSmileFill>
-        <BsSendFill color="blue" cursor="pointer" onClick={sendMessage}><button type="submit">Send</button></BsSendFill>
-        </div>
-      </InputBox>
-    </DirectMessageContainer>
+      <DirectMessageContainer className="direct-message-container">
+        <DirectMessageChatWindow id="chat-window" className="direct-message-chat-window">
+          {loading && <p>Loading...</p>}
+          {error && <p>Error: {error.message}</p>}
+          {messages &&
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`direct-message ${msg.sender === currentUserId ? 'sent' : 'received'
+                  }`}
+              >
+                {msg.file ? (
+                  <a href={msg.file} target="_blank" rel="noreferrer">
+                    {msg.fileName}
+                  </a>
+                ) : (
+                  <div>{msg.message}</div>
+                )}
+                <div className="direct-message-date">{Date(msg.createdAt)}</div>
+                {msg.sender === recipientId && !msg.flagged && (
+                  <div className="direct-message-flag">
+                    <FaFlag onClick={() => flagMessage(msg.id)} />
+                  </div>
+                )}
+                {msg.sender === recipientId && msg.flagged && (
+                  <div className="direct-message-offense">
+                    <TiWarning onClick={() => unflagMessage(msg.id)} />
+                  </div>
+                )}
+              </div>
+            ))}
+        </DirectMessageChatWindow>
+        {showPicker &&
+          <div style={{ marginLeft: 'auto' }}>
+            <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} />
+          </div>
+        }
+        <InputBox>
+          <input
+            type="text"
+            placeholder="Type your message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleEnter}
+          />
+          {file &&
+            <div style={{ border: '1px dashed', borderColor: '#007bff', borderRadius: '2px' }}>
+              {file.name.length > 10 ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length - 4)}` : file.name}
+            </div>}
+          <div style={{ marginLeft: 'auto' }}>
+            <label htmlFor="attach">
+              <GrAttachment cursor="pointer" style={{ marginRight: '10px' }}></GrAttachment>
+            </label>
+            <input type="file" id="attach" onChange={handleFileChange} style={{ display: 'none' }} />
+            <BsFillEmojiSmileFill onClick={() => setShowPicker(!showPicker)} cursor="pointer" style={{ marginRight: '10px' }}></BsFillEmojiSmileFill>
+            <BsSendFill color="blue" cursor="pointer" onClick={sendMessage}><button type="submit">Send</button></BsSendFill>
+          </div>
+        </InputBox>
+      </DirectMessageContainer>
     </Container>
   );
 };
