@@ -49,7 +49,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
     }
 
     else if (file) {
-      const storageRef = ref(storage, `messages/`);
+      const storageRef = ref(storage, `messages/${file.name}`);
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
