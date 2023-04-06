@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getUsers, addConnectionById, acceptRequest, declineRequest } from "../actions";
+import { getUsers, addConnectionById, banUser, warnUser } from "../actions";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import './Messages.css';
@@ -41,6 +41,20 @@ const Messages = (props) => {
       orderBy('createdAt')
     )
   );
+
+  const handleBanUser = async (banUserId, messageId) =>{
+    banUser(banUserId)
+    await updateDoc(doc(db, "Messages", messageId), {
+      reviewed: true
+    })
+  }
+
+  const handleWarnUser = async (warnUserId, messageId) =>{
+    warnUser(warnUserId)
+    await updateDoc(doc(db, "Messages", messageId), {
+      reviewed: true
+    })
+  }
 
   const flagMessage = async (id) => {
     await updateDoc(doc(db, "Messages", id), {
@@ -273,73 +287,47 @@ const Messages = (props) => {
   return (
     <Container>
       {!props.user && <Redirect to="/" />}
-      <table className="center">
-        <caption><b></b></caption>
-        {props.user && props.user.requests ? props.user.requests.map((req, index) => (
-          <tr className="reqRow" key={req.id}>
-            <td>
-              {req.photoURL ?
-                <img src={req.photoURL} alt="" width={50} height={50} />
-                : <img src="/images/user.svg" alt="" height="50" width="50" />
-              }
-            </td>
-            <td>
-              {req.name}
-            </td>
-            <td>
-              <button className="accept" onClick={() => {
-                props.acceptRequest(req.id);
-              }}>Accept</button>
-            </td>
-            <td>
-              <button className="decline" onClick={() => {
-                props.declineRequest(req.id);
-              }}>Decline</button>
-            </td>
-          </tr>
-        )
-        ) : <div></div>}
-      </table>
-      <br />
-      <div className="wrapper">
-        <div className="container">
-          <h1>Flagged Messages</h1>
-          <div className="row">
-            <div className="column">
-              {loading && <p>Loading...</p>}
-              {error && <p>Error: {error.message}</p>}
-              {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage) => (
-                <div className="flag-card" key={flaggedMessage.id}>
-                  <div>
-                  </div>
-                  <h2>{flaggedMessage.sender}</h2>
-                  <br />
-                  {flaggedMessage.file ?
-                    <p>
-                      <a href={flaggedMessage.file} target="_blank" rel="noreferrer">
-                        {flaggedMessage.fileName}
-                      </a>
-                    </p> :
-                    <p>"{flaggedMessage.message}"</p>
-                  }
-                  <button className="buttonb" onClick={() => {
-                  }}>Ban</button>
-                  <button className="buttonc" onClick={() => {
-                  }}>Tolerate</button>
-                </div>
-              ))}
+        {(props.user && props.user.displayName == "admin" && (
+      <div className="wrapper"> 
+      <div className="container">
+        <h1>Flagged Messages</h1>
+        <div className="row">
+          <div className="column">
+          {loading && <p>Loading...</p>}
+        {error && <p>Error: {error.message}</p>}
+        {props.user && flaggedMessages && flaggedMessages.map((flaggedMessage)  => {
+          if(!flaggedMessage.reviewed){
+            return(
+            <div className="flag-card" key={flaggedMessage.id}>
+            <div>
             </div>
-          </div>
-        </div>
+            <h2>{flaggedMessage.sender}</h2>
+            <br/>
+            {flaggedMessage.file ? 
+            <p>
+              <a href={flaggedMessage.file} target="_blank" rel="noreferrer">
+                  {flaggedMessage.fileName}
+                </a>
+            </p> :
+            <p>"{flaggedMessage.message}"</p>}
+            <button className="buttonc" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
+            <button className="buttonc" onClick={() => handleWarnUser(flaggedMessage.sender, flaggedMessage.id)
+              }>Tolerate</button>
+          </div>)}
+      })} 
       </div>
-      <br />
-      <div className="wrapper">
-        <div className="container">
-          <h1>Conversations</h1>
-          {msgLoading && <p>Loading...</p>}
-          {msgError && <p>Error: {msgError.message}</p>}
-          <Messenger />
-        </div>
+      </div>
+      </div> 
+      </div>))}
+      <br/>
+      <div className="wrapper"> 
+      <div className="container">
+        <h1>Current Conversations</h1>
+        <div className="row">
+          <div className="column">
+      </div>
+      </div>
+      </div>  
       </div>
     </Container>
   );
@@ -364,16 +352,15 @@ const InputBox = styled.div`
   }
 `
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.userState.user
+const mapStateToProps = (state) =>{
+    return {
+      user: state.userState.user
+    }
   }
-}
-
-const mapDispatchToProps = (dispatch) => ({
-  addConnectionById: (id) => dispatch(addConnectionById(id)),
-  acceptRequest: (id) => dispatch(acceptRequest(id)),
-  declineRequest: (id) => dispatch(declineRequest(id))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Messages)
+  
+  const mapDispatchToProps = (dispatch) => ({
+    banUser: (id)=> dispatch(banUser(id)),
+    warnUser: (id)=> dispatch(warnUser(id)),
+  })
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(Messages)
