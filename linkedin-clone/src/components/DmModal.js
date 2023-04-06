@@ -25,6 +25,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
   const [file, setFile] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
 
+  // Get all messages
   const [messages, loading, error] = useCollectionData(
     query(collection(db, "Messages"), where('sender', 'in', [currentUserId, recipientId]),
     where('recipient', 'in', [currentUserId, recipientId]),
@@ -32,6 +33,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
     )
   );
 
+  // Send message and update db
   const sendMessage = async (e) => {
     e.preventDefault();
     const id = uuidv4()
@@ -70,6 +72,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
     setFile(event.target.files[0]);
   };
 
+  // User can press Enter on keyboard to send message
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       sendMessage(e);
