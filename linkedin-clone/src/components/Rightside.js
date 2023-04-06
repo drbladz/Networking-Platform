@@ -230,26 +230,23 @@ const Rightside = (props) => {
       </FollowCard>
 
     </Container>
-    <div>
+    <div style={{marginTop: '30px'}}>
       <h1>Suggested Users</h1>
       <SuggestedUsers className="SuggestedUsers">
   {suggestedUsers.map((user) => (
-    <li key={user.id}>
+    <li key={user.id} style={{textAlign: 'center'}}>
       <div>
         
       <Link to={{
             pathname: `/user/${user.userId}`,
             state: user
             }}  style={{ textDecoration: 'none', color: 'black' }}> 
-           <Avatar className="Avatar"
-          style={{
-            backgroundImage: `url(${
-              user.photoURL
-                ? user.photoURL
-                : "images/495-4952535_create-digital-profile-icon-blue-user-profile-icon.png" 
-            })`,
-          }}
-        />
+        <Avatar>
+          {user.photoURL ?
+          <img src={user.photoURL} style={{height: '48px', width: '48px', borderRadius: '50%'}} /> :
+          <img src="/images/user.svg" style={{height: '48px', width: '48px', borderRadius: '50%'}} />
+          }
+        </Avatar>
       </Link>
       
       </div>
@@ -336,10 +333,6 @@ const FeedList = styled.ul`
 `;
 
 const Avatar = styled.div`
-  background-image: url("https://static-exp1.licdn.com/sc/h/1b4vl1r54ijmrmcyxzoidwmxs");
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
   width: 48px;
   height: 48px;
   margin-right: 8px;
