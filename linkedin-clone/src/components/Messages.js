@@ -250,8 +250,8 @@ const Messages = (props) => {
             <div style={{ border: '1px dashed', borderColor: '#007bff', borderRadius: '2px' }}>
               {file.name.length > 10 ? `${file.name.substring(0, 10)}...${file.name.substring(file.name.length - 4)}` : file.name}
             </div>}
-          <div style={{ marginLeft: 'auto' }}>
-            <label htmlFor="attach">
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+            <label htmlFor="attach" style={{display: 'flex', alignItems: 'center'}}>
               <GrAttachment cursor="pointer" style={{ marginRight: '10px' }}></GrAttachment>
             </label>
             <input type="file" id="attach" onChange={handleFileChange} style={{ display: 'none' }} />
@@ -341,12 +341,16 @@ const Container = styled.div`
 const InputBox = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 0px 20px;
   background-color: white;
   margin-top: auto;
 
   input[type="text"] {
-    border: none;
+    border: 1px solid;
+    border-radius: 20px;
+    border-color: Gainsboro;
+    padding: 10px;
+    font-size: 16px;
     outline: none;
     width: 75%;
   }
