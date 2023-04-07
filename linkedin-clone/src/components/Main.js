@@ -34,16 +34,16 @@ const Main = (props) => {
     }
   };
 
-  const handleJobEditOpen = (job) =>{
-    setJobToEdit(job)
-    setShowEditPostModal(true)
-  }
+  const handleJobEditOpen = (job) => {
+    setJobToEdit(job);
+    setShowEditPostModal(true);
+  };
 
-  const handleJobEditClose = () =>{
-    console.log("close")
-    setJobToEdit({})
-    setShowEditPostModal(false)
-  }
+  const handleJobEditClose = () => {
+    console.log("close");
+    setJobToEdit({});
+    setShowEditPostModal(false);
+  };
   console.log(props.userJobPostings);
 
   const history = useHistory();
@@ -102,8 +102,8 @@ const Main = (props) => {
                       <a>44 Applicants</a>
               </button> 
                   </SocialCounts> */}
-                  <SocialActions>
-                    {/* <button onClick={() => handleApply(job.id)}>
+                      <SocialActions>
+                        {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
                   { job.isExternal ?
@@ -158,8 +158,8 @@ const Main = (props) => {
                       <a>44 Applicants</a>
               </button> 
                   </SocialCounts> */}
-                  <SocialActions>
-                    {/* <button onClick={() => handleApply(job.id)}>
+                      <SocialActions>
+                        {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
           {!job.isExternal && (
@@ -249,7 +249,11 @@ const Main = (props) => {
         }
       
       <PostModal showModal={showModal} handleClick={handleClick} />
-      <EditPostModal job={jobToEdit} showEditPostModal={showEditPostModal} handleClick={handleJobEditClose}></EditPostModal>
+      <EditPostModal
+        job={jobToEdit}
+        showEditPostModal={showEditPostModal}
+        handleClick={handleJobEditClose}
+      ></EditPostModal>
     </Container>
   );
 };
@@ -410,11 +414,11 @@ const SocialActions = styled.div`
 `;
 
 const mapStateToProps = (state) => {
-  console.log(state)
+  console.log(state);
   return {
     user: state.userState.user,
     jobPostings: state.jobPostingsState.jobPostings,
-    userJobPostings: state.jobPostingsState.userJobPostings
+    userJobPostings: state.jobPostingsState.userJobPostings,
   };
 };
 

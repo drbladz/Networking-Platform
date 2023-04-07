@@ -1,0 +1,70 @@
+.buttonp{
+    margin: 1rem;
+    margin-top: 10px;
+    border: 2px solid grey;
+    padding: 0.6rem;
+    border-radius: 30px;
+}
+
+.SuggestedUsers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.SuggestedUsers li {
+    width: calc(60% - 16px);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    max-width: 300px;
+    min-width: 0; 
+    flex-direction: column;
+}
+
+
+.SuggestedUsers li div {
+    min-width: 0; 
+    margin: 3px auto;
+}
+
+.SuggestedUsers li div h3 {
+    font-size: 1.2rem;
+    margin: 2px auto;
+}
+
+.buttonc {
+    margin: 1rem;
+      margin-top: 10px;
+      border: 2px solid rgb(79, 117, 220);
+      color: rgb(79, 117, 220);
+      padding: 0.6rem;
+      border-radius: 30px;
+      background-color: white;
+      cursor: pointer;
+
+}
+
+.buttonc:hover {
+    font-weight: bold;
+    background-color: rgb(207, 216, 239);
+    transform: scale(1.1);
+    transition-duration: 200ms;
+}
+
+@media (min-width: 576px) { 
+    .SuggestedUsers li {
+  width: calc(40% - 12px);
+}
+}
+@media (min-width: 1700px) { 
+    .SuggestedUsers li {
+  width: calc(36% - 16px);
+}
+}
+@media (max-width: 1500px) {
+    .SuggestedUsers li {
+  width: calc(100% - 12px);
+}
+}
