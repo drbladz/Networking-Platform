@@ -323,6 +323,24 @@ export function signInAPI() {
           (job) => job.userId == userData.userId
         );
         dispatch(setUserJobPostings(userJobPostings));
+        if (userData.ban) {
+          alert("You have broken our policy and been banned");
+          auth.signOut().then(() => {
+            dispatch(setUser(null));
+            dispatch(setJobPostings(null));
+          });
+        } else {
+          if (userData.warn) {
+            alert("You have an offense and been warned");
+          }
+          dispatch(setUser(userData));
+          const jobPostings = await getAllJobPostings();
+          dispatch(setJobPostings(jobPostings));
+          const userJobPostings = jobPostings.filter(
+            (job) => job.userId == userData.userId
+          );
+          dispatch(setUserJobPostings(userJobPostings));
+        }
       })
       .catch((error) => alert(error.message));
   };
@@ -330,8 +348,8 @@ export function signInAPI() {
 
 export function createUserByEmail(email, password, fullName) {
   return (dispatch) => {
-    createUserWithEmailAndPassword(auth, email, password).then(
-      async (payload) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (payload) => {
         console.log(payload);
         const InitialDataToStore = {
           userId: payload.user.uid,
@@ -363,8 +381,10 @@ export function createUserByEmail(email, password, fullName) {
           (job) => job.userId == userData.userId
         );
         dispatch(setUserJobPostings(userJobPostings));
-      }
-    );
+      })
+      .catch((e) => {
+        alert(e);
+      });
   };
 }
 
@@ -564,15 +584,26 @@ export function loginWithEmail(email, password) {
         // Signed in
         const user = userCredential.user;
         const userData = await getUserDataById(user.uid);
-        dispatch(setUser(userData));
-        const jobPostings = await getAllJobPostings();
-        console.log("wowowo");
-        dispatch(setJobPostings(jobPostings));
-        const userJobPostings = jobPostings.filter(
-          (job) => job.userId == userData.userId
-        );
-        dispatch(setUserJobPostings(userJobPostings));
-        // ...
+        if (userData.ban) {
+          alert("You have broken our policy and been banned");
+          auth.signOut().then(() => {
+            dispatch(setUser(null));
+            dispatch(setJobPostings(null));
+          });
+        } else {
+          if (userData.warn) {
+            alert("You have an offense and been warned");
+          }
+          dispatch(setUser(userData));
+          const jobPostings = await getAllJobPostings();
+          console.log("wowowo");
+          dispatch(setJobPostings(jobPostings));
+          const userJobPostings = jobPostings.filter(
+            (job) => job.userId == userData.userId
+          );
+          dispatch(setUserJobPostings(userJobPostings));
+          // ...
+        }
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -696,6 +727,30 @@ export const getUserSearchingPreferences = async () => {
     }
   } catch (error) {
     console.error("Error fetching user preferences:", error);
+    return null;
+  }
+};
+
+export const banUser = async (banUserId) => {
+  try {
+    const banUserDocRef = doc(db, "Users", banUserId);
+    await updateDoc(banUserDocRef, {
+      ban: true,
+    });
+  } catch (error) {
+    console.error("Error banning the user", error);
+    return null;
+  }
+};
+
+export const warnUser = async (warnUserId) => {
+  try {
+    const warnUserDocRef = doc(db, "Users", warnUserId);
+    await updateDoc(warnUserDocRef, {
+      warn: true,
+    });
+  } catch (error) {
+    console.error("Error warning the user", error);
     return null;
   }
 };
