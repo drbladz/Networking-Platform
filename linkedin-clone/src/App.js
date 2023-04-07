@@ -6,19 +6,19 @@ import Login from "./components/Login.js";
 import { useEffect } from "react";
 import { getUserAuth } from "./actions";
 import { connect } from "react-redux";
-import JobPostingPage from './components/JobPostingPage';
+import JobPostingPage from "./components/JobPostingPage";
 import Network from "./components/Network";
 import JobApplications from "./components/JobApplications";
 import UserProfile from "./components/UserProfile";
 import SearchingPreferences from "./components/SearchingPreferences";
+import GroupPage from "./components/GroupPage";
 import Messages from "./components/Messages";
 
 function App(props) {
-
   useEffect(() => {
     props.getUserAuth();
-  }, [])
-  
+  }, []);
+
   return (
     <div className="App">
       <Router>
@@ -38,23 +38,27 @@ function App(props) {
           </Route>
           <Route path="/user/:id" component={UserProfile} />
           <Route path="/job-posting/:id" component={JobPostingPage} />
-          <Route path="/job-applications/job/:jobId" component={JobApplications} />
+          <Route
+            path="/job-applications/job/:jobId"
+            component={JobApplications}
+          />
           <Route path="/job-preferences" component={SearchingPreferences} />
+          <Route path="/groups/:groupId" component={GroupPage} />
         </Switch>
       </Router>
     </div>
   );
 }
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
-    jobPostings: state.jobPostingsState.jobPostings
-  }
-}
+    jobPostings: state.jobPostingsState.jobPostings,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
-  getUserAuth: () => dispatch(getUserAuth())
-})
+  getUserAuth: () => dispatch(getUserAuth()),
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(App);
