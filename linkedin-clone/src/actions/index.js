@@ -349,7 +349,7 @@ export function deleteJobPosting(
     console.log(updatedUserData)
     const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
     updateDoc(userDocumentRef, updatedUserData)
-    .then((result) =>{
+    .then((result) => {
       console.log(result)
       dispatch(setUser(updatedUserData))
     })
