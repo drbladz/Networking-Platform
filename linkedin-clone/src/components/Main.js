@@ -72,6 +72,7 @@ const Main = (props) => {
         <Articles>
           {props.jobPostings ? (
             props.jobPostings.map((job) => {
+              const saved = props.user.savedJobs.find((savedJob) => savedJob==job.id) 
               return (
                 <div key={job.id}>
                   <SharedActor>
@@ -83,7 +84,9 @@ const Main = (props) => {
                         <span>{Date(job.timeStamp)}</span>
                       </div>
                     </a>
-                    {props.user.savedJobs.find((savedJob) => savedJob==job.id) ?
+                    {
+                    saved
+                    ?
                       <BsBookmarkFill onClick={()=>{props.handleUnsavePost(job.id, props.user)}} />
                       : 
                       <BsBookmark onClick={()=>{props.handleSavePost(job.id, props.user)}} />
@@ -177,19 +180,19 @@ const Main = (props) => {
         <div>
         <Articles>
           {props.user.savedJobs ? (
-            props.user.savedJobs.map((job) => {
+            props.user.savedJobs.map((savedJob) => {
               const post = props.jobPostings.find((postEle) => {
-                if(postEle.id == job){
+                if(postEle.id == savedJob){
                   console.log(postEle)
                 }
-                return postEle.id == job
+                return postEle.id == savedJob
               })
-              console.log(job)
+              console.log(savedJob)
               if(typeof post == "undefined"){
                 return
               }
               return (
-                <div key={post}>
+                <div key={savedJob.id}>
                   <SharedActor>
                     <a>
                       <img src={post.photoURL} />
