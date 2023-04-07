@@ -310,7 +310,7 @@ const Messages = (props) => {
                             </a>
                           </p> :
                           <p>"{flaggedMessage.message}"</p>}
-                        <button className="buttonc" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
+                        <button className="buttonb" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
                         <button className="buttonc" onClick={() => handleWarnUser(flaggedMessage.sender, flaggedMessage.id)
                         }>Tolerate</button>
                       </div>)

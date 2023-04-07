@@ -2,6 +2,8 @@ import styled from "styled-components";
 import { useState } from "react";
 import { createJobPosting } from "../actions"; 
 import { connect } from "react-redux";
+import db from "../firebase";
+import { updateDoc, doc, arrayUnion } from "firebase/firestore";
 
 const PostModal = (props) =>{
   console.log(props.jobPostings)
@@ -179,6 +181,16 @@ const PostModal = (props) =>{
                 industry,
                 experienceLevel,
                 remoteWorkOption,
+              })
+              // Create notification for the all connections
+              props.user.connections.forEach(connection => {
+                updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
+                  notification: `${props.user.displayName} added a post`,
+                  photoURL: props.user.photoURL,
+                  date: new Date(),
+                  viewed: false
+                  })
+                });
               })
             reset(e)
             }}>

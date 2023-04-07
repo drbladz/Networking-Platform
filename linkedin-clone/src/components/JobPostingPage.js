@@ -1,6 +1,6 @@
 // Import necessary libraries and components
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import React, { useState, useEffect } from 'react';
 import '../JobPostingPageStyles.css';
@@ -142,6 +142,18 @@ const JobPostingPage = () => {
     // Set the application status to "already applied" and display a success message
     setAlreadyApplied(true);
     alert('Application submitted successfully!');
+
+    // Create notification for recruiter
+    const currentUserDocumentRef = doc(db, `Users/${userId}`);
+    const currentUserDocument = await getDoc(currentUserDocumentRef);
+
+    updateDoc(doc(db,"Users",jobPosting.userId), {notifications: arrayUnion({
+      notification: `${currentUserDocument.data().displayName} applied to your job: ${jobPosting.postTitle}`,
+      photoURL: currentUserDocument.data().photoURL,
+      date: new Date(),
+      viewed: false
+      })
+    });
   };
 
   // This function handles the selection of a resume file by the user.
