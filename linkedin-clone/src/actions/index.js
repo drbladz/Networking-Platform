@@ -233,6 +233,7 @@ export function signInAPI() {
             skills: [],
             awards: [],
             bio: "",
+            savedJobs: [],
             connections: [],
             requests: [],
             pending: [],
@@ -272,6 +273,7 @@ export function createUserByEmail(email, password, fullName) {
           skills: [],
           awards: [],
           bio: "",
+          savedJobs: [],
           connections: [],
           requests: [],
           pending: [],
@@ -336,6 +338,46 @@ export function deleteJobPosting(
        .catch((error) => alert(error.message));
    };
  }
+
+ export function savePost(jobId, userData){
+  return  (dispatch) =>{
+    userData.savedJobs.push(jobId)
+  let updatedUserData = {}
+  for (let property in userData) {
+      updatedUserData[property] = userData[property];
+    }
+    console.log(updatedUserData)
+    const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
+    updateDoc(userDocumentRef, updatedUserData)
+    .then((result) =>{
+      console.log(result)
+      dispatch(setUser(updatedUserData))
+    })
+    .catch(e => {
+      alert(e)
+    })
+  }
+}
+
+export function unsavePost(jobId, userData){
+  return  (dispatch) =>{
+    userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+  let updatedUserData = {}
+  for (let property in userData) {
+      updatedUserData[property] = userData[property];
+    }
+    console.log(updatedUserData)
+    const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
+    updateDoc(userDocumentRef, updatedUserData)
+    .then((result) =>{
+      dispatch(setUser(updatedUserData))
+    })
+    .catch(e => {
+      alert(e)
+    })
+  }
+}
+
 
 export function createJobPosting(
   userId,
