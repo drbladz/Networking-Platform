@@ -12,6 +12,7 @@ import JobApplications from "./components/JobApplications";
 import UserProfile from "./components/UserProfile";
 import SearchingPreferences from "./components/SearchingPreferences";
 import Messages from "./components/Messages";
+import Notifications from "./components/Notifications";
 
 function App(props) {
 
@@ -35,6 +36,9 @@ function App(props) {
           </Route>
           <Route path="/messages">
             <Messages />
+          </Route>
+          <Route path="/notifications">
+            <Notifications />
           </Route>
           <Route path="/user/:id" component={UserProfile} />
           <Route path="/job-posting/:id" component={JobPostingPage} />

@@ -6,6 +6,10 @@ import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog} from '@fortawesome/free-solid-svg-icons';
 import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
+import { db, auth } from "../firebase";
+import { collection, doc, query, where, updateDoc } from 'firebase/firestore';
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { MdNotificationsActive } from 'react-icons/md';
 
 const Header = (props) => {
   // useState hook to manage the search input value
@@ -14,6 +18,7 @@ const Header = (props) => {
   const [users, setUsers] = useState([]);
   const [searchPreferences, setSearchPreferences] = useState(null);
   const [usePreferences, setUsePreferences] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   // useEffect hook to call the getUsers function from the actions file on component mount
   useEffect(() => {
         // getUsers returns a promise that resolves to an array of user objects
@@ -29,6 +34,9 @@ const Header = (props) => {
         // console.log statement to show when the component is mounted
 
     console.log("get users and search preferences");
+    if (auth.currentUser) {
+      setCurrentUserId(auth.currentUser.uid);
+    } 
     // return statement to clean up the users state on component unmount
     return () => {
       setUsers([]);
@@ -38,6 +46,14 @@ const Header = (props) => {
   const onChange = (event) => {
     setValue(event.target.value);
   };
+  const [user, userLoading, userError] = useCollectionData(
+    query(collection(db, "Users"), where('userId', '==', currentUserId)
+    )
+  );
+  let notifications = []
+  if (user && user[0].notifications){
+    notifications = user[0].notifications;
+  }
   // component JSX for the Header
   return (
     <Container>
@@ -177,10 +193,16 @@ const Header = (props) => {
             </NavList>
 
             <NavList>
+              <NavLink to="/notifications">
               <a>
-                <img src="/images/nav-notifications.svg" alt="" />
+                {notifications && notifications[notifications.length-1] &&
+                 notifications[notifications.length-1].viewed === false ?
+                  <MdNotificationsActive color="orange" size={24}/> :
+                  <img src="/images/nav-notifications.svg" alt="" />
+                }
                 <span>Notifications</span>
               </a>
+              </NavLink>
             </NavList>
 
             <User>
