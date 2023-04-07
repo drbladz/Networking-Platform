@@ -13,8 +13,8 @@ import { storage, db, auth } from "../firebase";
 const EditGroupForm = () => {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
-  const [groupLocation, setGroupLocation] = useState("");
-  const [groupRules, setGroupRules] = useState("");
+  /* const [groupLocation, setGroupLocation] = useState("");
+  const [groupRules, setGroupRules] = useState(""); */
 
   const { groupId } = useParams();
 
@@ -46,9 +46,9 @@ const EditGroupForm = () => {
         groupDescription !== ""
           ? groupDescription
           : existingGroupData.groupDescription,
-      groupLocation:
+      /* groupLocation:
         groupLocation !== "" ? groupLocation : existingGroupData.groupLocation,
-      groupRules: groupRules !== "" ? groupRules : existingGroupData.groupRules,
+      groupRules: groupRules !== "" ? groupRules : existingGroupData.groupRules, */
     };
 
     await updateDoc(groupRef, updatedGroupData, { merge: true });
@@ -73,7 +73,7 @@ const EditGroupForm = () => {
           onChange={(e) => setGroupDescription(e.target.value)}
         />
       </label>
-      <label>
+      {/* <label>
         Group Location:
         <textarea
           value={groupLocation}
@@ -89,7 +89,7 @@ const EditGroupForm = () => {
           placeholder={"Set the tone and expectations of your group"}
           onChange={(e) => setGroupRules(e.target.value)}
         />
-      </label>
+      </label> */}
       <button onClick={updateGroup}>Update Group</button>
     </form>
   );

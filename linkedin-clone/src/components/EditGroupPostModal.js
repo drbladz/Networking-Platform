@@ -1,9 +1,14 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { createJobPosting, deleteJobPosting, editJobPosting } from "../actions";
+import {
+  createGroupJobPosting,
+  deleteGroupJobPosting,
+  editGroupJobPosting,
+} from "../actions";
 import { connect } from "react-redux";
+import { useParams } from "react-router-dom";
 
-const EditPostModal = (props) => {
+const EditGroupPostModal = (props) => {
   // logging props object to console
   console.log(props);
   console.log(props.job);
@@ -37,6 +42,8 @@ const EditPostModal = (props) => {
     initialRemoteWorkOption
   );
 
+  const groupId = useParams();
+
   // useEffect hook to update state variables when props change
   useEffect(() => {
     setPostTitle(props.job.postTitle);
@@ -67,7 +74,7 @@ const EditPostModal = (props) => {
   return (
     <>
       {console.log(postTitle)}
-      {props.showEditPostModal && (
+      {props.showEditGroupPostModal && (
         <Container>
           <Content>
             <Header>
@@ -245,7 +252,7 @@ const EditPostModal = (props) => {
             <SharedCreation>
               <EditButton
                 onClick={() => {
-                  props.editJobPosting(
+                  props.editGroupJobPosting(
                     {
                       displayName: props.job.displayName,
                       id: props.job.id,
@@ -263,6 +270,7 @@ const EditPostModal = (props) => {
                         experienceLevel: experienceLevel,
                         remoteWorkOption: remoteWorkOption,
                       },
+                      groupId: groupId,
                     },
                     props.jobPostings
                   );
@@ -273,9 +281,10 @@ const EditPostModal = (props) => {
               </EditButton>
               <DeleteButton
                 onClick={() => {
-                  props.deleteJobPosting(
+                  props.deleteGroupJobPosting(
                     props.job.id,
                     props.job.userId,
+                    groupId,
                     props.jobPostings
                   );
                   reset();
@@ -297,12 +306,12 @@ const mapStateToProps = (state) => {
     jobPostings: state.jobPostingsState.jobPostings,
   };
 };
+
 // Maps dispatch to props
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (
+  createGroupJobPosting: (
     userId,
     postTitle,
-
     postDescription,
     currentPostingsList,
     userPhotoURL,
@@ -312,10 +321,9 @@ const mapDispatchToProps = (dispatch) => ({
     jobParameters
   ) =>
     dispatch(
-      createJobPosting(
+      createGroupJobPosting(
         userId,
         postTitle,
-
         postDescription,
         currentPostingsList,
         userPhotoURL,
@@ -325,14 +333,15 @@ const mapDispatchToProps = (dispatch) => ({
         jobParameters
       )
     ),
-  editJobPosting: (editedJobData, currentPostingsList) =>
-    dispatch(editJobPosting(editedJobData, currentPostingsList)),
-  deleteJobPosting: (jobPostingId, userId, currentPostingsList) =>
-    dispatch(deleteJobPosting(jobPostingId, userId, currentPostingsList)),
+  editGroupJobPosting: (editedJobData, currentPostingsList) =>
+    dispatch(editGroupJobPosting(editedJobData, currentPostingsList)),
+  deleteGroupJobPosting: (jobPostingId, userId, groupId, currentPostingsList) =>
+    dispatch(
+      deleteGroupJobPosting(jobPostingId, userId, groupId, currentPostingsList)
+    ),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditPostModal);
-
+export default connect(mapStateToProps, mapDispatchToProps)(EditGroupPostModal);
 const Container = styled.div`
   position: fixed;
   top: 0;

@@ -360,7 +360,7 @@ const CustomModal5 = styled(Modal)`
   border-radius: 10px;
   padding: 20px;
   width: 800px;
-  height: 800px;
+  height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
 `;

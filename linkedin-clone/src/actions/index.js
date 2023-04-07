@@ -28,6 +28,7 @@ import {
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
+import { useParams } from "react-router-dom";
 // Define an action creator to set the current user in the store.
 export const setUser = (payload) => ({
   type: SET_USER,
@@ -390,6 +391,61 @@ export function editJobPosting(editedJobPosting, currentPostingsList) {
   };
 }
 
+export function editGroupJobPosting(
+  editedJobPosting,
+  currentPostingsList,
+  groupId
+) {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, `JobPostings/${editedJobPosting.id}`);
+    const jobDocument = await getDoc(jobDocumentRef);
+    const currentGroupId = jobDocument.data().groupId;
+    editedJobPosting.groupId = currentGroupId; // add the current groupId to the editedJobPosting object
+    await setDoc(jobDocumentRef, editedJobPosting)
+      .then(() => {
+        const newPostingsList = currentPostingsList.map((job) =>
+          job.id === editedJobPosting.id ? editedJobPosting : job
+        );
+        const newUserPostingsList = newPostingsList.filter(
+          (job) => job.userId === editedJobPosting.userId
+        );
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      })
+      .catch((error) => alert(error.message));
+  };
+}
+
+export function deleteGroupJobPosting(
+  jobPostingId,
+  userId,
+  groupId,
+  currentPostingsList
+) {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
+    const jobDocumentSnapshot = await getDoc(jobDocumentRef);
+    if (jobDocumentSnapshot.exists()) {
+      const jobPosting = jobDocumentSnapshot.data();
+      if (jobPosting.groupId === groupId) {
+        await deleteDoc(jobDocumentRef);
+        const newPostingsList = currentPostingsList.filter(
+          (job) => job.id !== jobPostingId
+        );
+        const newUserPostingsList = newPostingsList.filter(
+          (job) => job.userId === userId
+        );
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      } else {
+        alert("This job posting does not belong to the current group.");
+      }
+    } else {
+      alert("This job posting does not exist.");
+    }
+  };
+}
+
 export function deleteJobPosting(jobPostingId, userId, currentPostingsList) {
   return async (dispatch) => {
     const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
@@ -399,6 +455,51 @@ export function deleteJobPosting(jobPostingId, userId, currentPostingsList) {
           (job) => job.id != jobPostingId
         );
         const newPostingsList = currentPostingsList.map((job) => job);
+        const newUserPostingsList = [];
+        for (let i in newPostingsList) {
+          if (newPostingsList[i].userId == userId) {
+            newUserPostingsList.push(newPostingsList[i]);
+          }
+        }
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      })
+      .catch((error) => alert(error.message));
+  };
+}
+
+export function createGroupJobPosting(
+  userId,
+  postTitle,
+  postDescription,
+  currentPostingsList,
+  userPhotoURL,
+  displayName,
+  mandatoryResume,
+  mandatoryCoverLetter,
+  isExternal,
+  jobParameters,
+  groupId = null
+) {
+  return (dispatch) => {
+    const newJobPostingData = {
+      id: uuidv4(),
+      userId: userId,
+      groupId: groupId,
+      postTitle: postTitle,
+      postDescription: postDescription,
+      timeStamp: Date.now(),
+      photoURL: userPhotoURL,
+      displayName: displayName,
+      mandatoryResume: mandatoryResume,
+      mandatoryCoverLetter: mandatoryCoverLetter,
+      isExternal: isExternal,
+      jobParameters: jobParameters,
+    };
+    createJobPostingInDB(newJobPostingData)
+      .then(() => {
+        currentPostingsList.push(newJobPostingData);
+        const newPostingsList = currentPostingsList.map((ele) => ele);
         const newUserPostingsList = [];
         for (let i in newPostingsList) {
           if (newPostingsList[i].userId == userId) {

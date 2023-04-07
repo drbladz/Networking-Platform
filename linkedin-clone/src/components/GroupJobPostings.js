@@ -1,16 +1,19 @@
+import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { getAllJobPostings } from "../actions";
-import { connect } from "react-redux";
-import PostModal from "./PostModal";
-import EditPostModal from "./EditPostModal";
-import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import GroupPostModal from "./GroupPostModal";
+import EditGroupPostModal from "./EditGroupPostModal";
+import { connect } from "react-redux";
+import { useParams } from "react-router-dom";
 
-const Main = (props) => {
+const GroupJobPostings = (props) => {
   const [showModal, setShowModal] = useState("close");
-  const [showEditPostModal, setShowEditPostModal] = useState(false);
+  const [showEditGroupPostModal, setShowEditGroupPostModal] = useState(false);
   const [showMyJobs, setShowMyJobs] = useState(false);
   const [jobToEdit, setJobToEdit] = useState({});
+
+  const { groupId } = useParams();
+
   const handleClick = (e) => {
     console.log("herrr");
     e.preventDefault();
@@ -32,13 +35,13 @@ const Main = (props) => {
 
   const handleJobEditOpen = (job) => {
     setJobToEdit(job);
-    setShowEditPostModal(true);
+    setShowEditGroupPostModal(true);
   };
 
   const handleJobEditClose = () => {
     console.log("close");
     setJobToEdit({});
-    setShowEditPostModal(false);
+    setShowEditGroupPostModal(false);
   };
   console.log(props.userJobPostings);
 
@@ -68,7 +71,7 @@ const Main = (props) => {
           <Articles>
             {props.jobPostings ? (
               props.jobPostings
-                .filter((job) => !job.groupId) // filter out job postings that have a 'groupId' field
+                .filter((job) => job.groupId === groupId)
                 .map((job) => {
                   return (
                     <div key={job.id}>
@@ -88,15 +91,15 @@ const Main = (props) => {
                           : job.postDescription}
                       </Description>
                       {/*
-                  <SocialCounts>
-                    <button>
-                      <a>44 Applicants</a>
-              </button> 
-                  </SocialCounts> */}
+                    <SocialCounts>
+                      <button>
+                        <a>44 Applicants</a>
+                </button> 
+                    </SocialCounts> */}
                       <SocialActions>
                         {/* <button onClick={() => handleApply(job.id)}>
-
-          </button> */}
+  
+            </button> */}
                         {job.isExternal ? (
                           <a href={`${job.postDescription}`} target="_blank">
                             <button>
@@ -126,7 +129,7 @@ const Main = (props) => {
           <Articles>
             {props.jobPostings ? (
               props.userJobPostings
-                .filter((job) => !job.groupId) // filter out job postings that have a 'groupId' field
+                .filter((job) => job.groupId === groupId)
                 .map((job) => {
                   return (
                     <div key={job.id}>
@@ -154,15 +157,15 @@ const Main = (props) => {
                         )}
                       </Description>
                       {/*
-                  <SocialCounts>
-                    <button>
-                      <a>44 Applicants</a>
-              </button> 
-                  </SocialCounts> */}
+                    <SocialCounts>
+                      <button>
+                        <a>44 Applicants</a>
+                </button> 
+                    </SocialCounts> */}
                       <SocialActions>
                         {/* <button onClick={() => handleApply(job.id)}>
-
-          </button> */}
+  
+            </button> */}
                         {!job.isExternal && (
                           <a
                             href={`/job-applications/job/${job.id}`}
@@ -184,12 +187,12 @@ const Main = (props) => {
         </div>
       )}
 
-      <PostModal showModal={showModal} handleClick={handleClick} />
-      <EditPostModal
+      <GroupPostModal showModal={showModal} handleClick={handleClick} />
+      <EditGroupPostModal
         job={jobToEdit}
-        showEditPostModal={showEditPostModal}
+        showEditGroupPostModal={showEditGroupPostModal}
         handleClick={handleJobEditClose}
-      ></EditPostModal>
+      ></EditGroupPostModal>
     </Container>
   );
 };
@@ -362,4 +365,4 @@ const mapDispatchToProps = (dispatch) => ({
   // getAllJobPostings: () => dispatch(getAllJobPostings())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
+export default connect(mapStateToProps, mapDispatchToProps)(GroupJobPostings);

@@ -1,11 +1,12 @@
 import styled from "styled-components";
 import Header from "./Header";
-import Main from "./Main";
+//import Main from "./Main";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { storage, db, auth } from "../firebase";
 import EditGroupForm from "./EditGroupForm";
 import Modal from "react-modal";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   doc,
   updateDoc,
@@ -13,13 +14,17 @@ import {
   collection,
   addDoc,
   getDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import InviteToGroup from "./InviteToGroup";
+
+import GroupJobPostings from "./GroupJobPostings";
 
 const GroupPage = (props) => {
   const { groupId } = useParams();
 
-  const [error, setError] = useState(null);
+  const [error1, setError1] = useState(null);
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
   const [adminName, setAdminName] = useState("");
@@ -29,6 +34,10 @@ const GroupPage = (props) => {
 
   const [showEditForm, setShowEditForm] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
+
+  /* const [jobPostings, loading, error] = useCollectionData(
+    query(collection(db, "JobPostings"), where("groupId", "==", groupId))
+  ); */
 
   const handleEditClick = () => {
     setShowEditForm(true);
@@ -49,7 +58,7 @@ const GroupPage = (props) => {
         // Set the job title state variable to the title of the job posting
         setGroupName(groupDoc.data().groupName);
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getGroupName();
@@ -65,7 +74,7 @@ const GroupPage = (props) => {
         // Set the job title state variable to the title of the job posting
         setGroupDescription(groupDoc.data().groupDescription);
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getGroupDescription();
@@ -81,7 +90,7 @@ const GroupPage = (props) => {
         // Set the job title state variable to the title of the job posting
         setAdminName(groupDoc.data().adminName);
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getAdminName();
@@ -95,7 +104,7 @@ const GroupPage = (props) => {
         const membersArray = groupDoc.data().groupMembers;
         setGroupMembers(membersArray);
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getGroupMembers();
@@ -115,7 +124,7 @@ const GroupPage = (props) => {
           setIsAdmin(false);
         }
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getAdminName();
@@ -131,7 +140,7 @@ const GroupPage = (props) => {
         setAdminId(groupDoc.data().createdBy);
         setGroupMembers(groupDoc.data().groupMembers);
       } catch (error) {
-        setError(error);
+        setError1(error);
       }
     };
     getGroupData();
@@ -146,7 +155,7 @@ const GroupPage = (props) => {
         <BannerTitle>{groupName}</BannerTitle>
         <BannerAdmin>
           <h3>Admin Name: {adminName}</h3>
-          <h4>Admin Id: {adminId}</h4>
+          {/* <h4>Admin Id: {adminId}</h4> */}
         </BannerAdmin>
         {currentUser && adminId === currentUser.uid && (
           <>
@@ -187,7 +196,7 @@ const GroupPage = (props) => {
           </Card>
         </Leftside>
         <GroupFeed>
-          <Main />
+          <GroupJobPostings />
         </GroupFeed>
 
         <Rightside>
@@ -213,7 +222,7 @@ const CustomModal5 = styled(Modal)`
   border-radius: 10px;
   padding: 20px;
   width: 800px;
-  height: 800px;
+  height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
 `;
