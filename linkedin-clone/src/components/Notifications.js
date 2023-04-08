@@ -16,16 +16,18 @@ const Notifications = (props) => {
     }
   }, []);
 
-
+  // Get realtime current user data
   const [user, userLoading, userError] = useCollectionData(
     query(collection(db, "Users"), where('userId', '==', currentUserId)
     )
   );
-  let notifications = []
+  let notifications = [];
+  // Sort notifications by latest
   if (user && user[0].notifications) {
     notifications = user[0].notifications.reverse();
   }
 
+  // Update db and mark notification as viewed
   const markAsViewed = async (notification) => {
     const notifIndex = notifications.findIndex(notif => notif.date === notification.date);
     notifications[notifIndex].viewed = true;
@@ -34,6 +36,7 @@ const Notifications = (props) => {
     })
   };
 
+  // Set notification as viewed and redirect to network page
   const viewRequest = async (notification) => {
     const notifIndex = notifications.findIndex(notif => notif.date === notification.date);
     notifications[notifIndex].viewed = true;
@@ -43,6 +46,7 @@ const Notifications = (props) => {
     window.location.assign("/network");
   };
 
+  // Set notification as viewed and redirect to the post
   const viewPost = async (notification) => {
     const notifIndex = notifications.findIndex(notif => notif.date === notification.date);
     notifications[notifIndex].viewed = true;
@@ -52,12 +56,12 @@ const Notifications = (props) => {
     window.location.assign(notification.postURL);
   };
 
+  // Clear previous notifications
   const handleClear = async () => {
     const clearedNotifs = notifications.filter(notif => notif.viewed === false)
     await updateDoc(doc(db, "Users", currentUserId), {
       notifications: clearedNotifs
     })
-    console.log("cleared");
   };
   
   return (

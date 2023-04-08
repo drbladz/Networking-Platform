@@ -46,14 +46,18 @@ const Header = (props) => {
   const onChange = (event) => {
     setValue(event.target.value);
   };
+
+  // Get realtime current user data
   const [user, userLoading, userError] = useCollectionData(
     query(collection(db, "Users"), where('userId', '==', currentUserId)
     )
   );
-  let notifications = []
+  let notifications = [];
+  // Get notifications
   if (user && user[0].notifications){
     notifications = user[0].notifications;
   }
+  
   // component JSX for the Header
   return (
     <Container>
