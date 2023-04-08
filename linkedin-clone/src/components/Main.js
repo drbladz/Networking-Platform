@@ -72,7 +72,10 @@ const Main = (props) => {
                 <div key={job.id}>
                   <SharedActor>
                     <a>
-                      <img src={job.photoURL} />
+                      {job.photoURL ?
+                      <img src={job.photoURL} /> :
+                      <img src="/images/user.svg" />
+                      }
                       <div>
                         <span>{job.postTitle}</span>
                         <span>{job.displayName}</span>
@@ -248,6 +251,7 @@ const SharedActor = styled.div`
     img {
       width: 48px;
       height: 48px;
+      border-radius: 50%;
     }
     & > div {
       display: flex;

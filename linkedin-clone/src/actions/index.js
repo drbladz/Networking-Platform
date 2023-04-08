@@ -383,7 +383,7 @@ export function createJobPosting(
   isExternal,
   jobParameters
 ) {
-  return (dispatch) => {
+  return async (dispatch) => {
     const newJobPostingData = {
       id: uuidv4(),
       userId: userId,
@@ -411,6 +411,21 @@ export function createJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList))
       })
       .catch((error) => alert(error.message));
+
+      const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+      const currentUserDocument = await getDoc(currentUserRef);
+
+      // Create notification for the all connections
+      currentUserDocument.data().connections.forEach(connection => {
+        updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
+          notification: `${currentUserDocument.data().displayName} added a post`,
+          postURL: `/job-posting/${newJobPostingData.id}`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false
+          })
+        });
+      })
   };
 }
 
