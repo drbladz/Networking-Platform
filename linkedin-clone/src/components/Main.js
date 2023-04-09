@@ -1,15 +1,17 @@
 import styled from "styled-components";
-import { getAllJobPostings } from "../actions";
+import { getAllJobPostings, savePost, unsavePost } from "../actions";
 import { connect } from "react-redux";
 import PostModal from "./PostModal";
 import EditPostModal from "./EditPostModal";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 
 const Main = (props) => {
   const [showModal, setShowModal] = useState("close");
   const [showEditPostModal, setShowEditPostModal] = useState(false)
   const [showMyJobs, setShowMyJobs] = useState(false)
+  const [view, setView] = useState("feedJobs")
   const [jobToEdit, setJobToEdit] = useState({
 
   })
@@ -32,16 +34,16 @@ const Main = (props) => {
     }
   };
 
-  const handleJobEditOpen = (job) =>{
-    setJobToEdit(job)
-    setShowEditPostModal(true)
-  }
+  const handleJobEditOpen = (job) => {
+    setJobToEdit(job);
+    setShowEditPostModal(true);
+  };
 
-  const handleJobEditClose = () =>{
-    console.log("close")
-    setJobToEdit({})
-    setShowEditPostModal(false)
-  }
+  const handleJobEditClose = () => {
+    console.log("close");
+    setJobToEdit({});
+    setShowEditPostModal(false);
+  };
   console.log(props.userJobPostings);
 
   const history = useHistory();
@@ -52,7 +54,9 @@ const Main = (props) => {
 
   return (
     <Container>
-      <button onClick={()=>setShowMyJobs(!showMyJobs)}>My Job Postings</button>
+      <button onClick={()=>setView("feedJobs")}>Feed</button>
+      <button onClick={()=>setView("userJobs")}>My Job Postings</button>
+      <button onClick={()=>setView("savedJobs")}>Saved Jobs</button>
       <Sharebox>
         <div>
           {props.user && props.user.photoURL ? (
@@ -63,11 +67,12 @@ const Main = (props) => {
           <button onClick={handleClick}>Post Job</button>
         </div>
       </Sharebox>
-      {!showMyJobs ?
+      {view == "feedJobs"  ?
        <div>
         <Articles>
           {props.jobPostings ? (
             props.jobPostings.map((job) => {
+              const saved = props.user.savedJobs.find((savedJob) => savedJob==job.id) 
               return (
                 <div key={job.id}>
                   <SharedActor>
@@ -82,6 +87,14 @@ const Main = (props) => {
                         <span>{Date(job.timeStamp)}</span>
                       </div>
                     </a>
+                    {
+                    saved
+                    ?
+                      <BsBookmarkFill onClick={()=>{props.handleUnsavePost(job.id, props.user)}} />
+                      : 
+                      <BsBookmark onClick={()=>{props.handleSavePost(job.id, props.user)}} />
+                    }
+                      
                   </SharedActor>
                   <Description>
                   {job.isExternal ? "Be redirected with the Apply button !" : job.postDescription }
@@ -92,8 +105,8 @@ const Main = (props) => {
                       <a>44 Applicants</a>
               </button> 
                   </SocialCounts> */}
-                  <SocialActions>
-                    {/* <button onClick={() => handleApply(job.id)}>
+                      <SocialActions>
+                        {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
                   { job.isExternal ?
@@ -121,6 +134,7 @@ const Main = (props) => {
         </Articles>
       </div>
       :
+      view == "userJobs" ?
       <div>
         <Articles>
           {props.jobPostings ? (
@@ -147,8 +161,8 @@ const Main = (props) => {
                       <a>44 Applicants</a>
               </button> 
                   </SocialCounts> */}
-                  <SocialActions>
-                    {/* <button onClick={() => handleApply(job.id)}>
+                      <SocialActions>
+                        {/* <button onClick={() => handleApply(job.id)}>
 
           </button> */}
           {!job.isExternal && (
@@ -165,10 +179,84 @@ const Main = (props) => {
             <>None</>
           )}
         </Articles>
-      </div>  }
+      </div> :
+        <div>
+        <Articles>
+          {props.user.savedJobs ? (
+            props.user.savedJobs.map((savedJob) => {
+              const post = props.jobPostings.find((postEle) => {
+                if(postEle.id == savedJob){
+                  console.log(postEle)
+                }
+                return postEle.id == savedJob
+              })
+              console.log(savedJob)
+              if(typeof post == "undefined"){
+                return
+              }
+              return (
+                <div key={savedJob.id}>
+                  <SharedActor>
+                    <a>
+                      <img src={post.photoURL} />
+                      <div>
+                        <span>{post.postTitle}</span>
+                        <span>{post.displayName}</span>
+                        <span>{Date(post.timeStamp)}</span>
+                      </div>
+                    </a>
+                    { 
+                      <BsBookmarkFill onClick={()=>{props.handleUnsavePost(post.id, props.user)}} />
+                      
+        
+                    }
+                      
+                  </SharedActor>
+                  <Description>
+                  {post.isExternal ? "Be redirected with the Apply button !" : post.postDescription }
+                    </Description>
+                  {/*
+                  <SocialCounts>
+                    <button>
+                      <a>44 Applicants</a>
+              </button> 
+                  </SocialCounts> */}
+                  <SocialActions>
+                    {/* <button onClick={() => handleApply(job.id)}>
+
+          </button> */}
+                  { post.isExternal ?
+                    (<a href={`${post.postDescription}`} target="_blank">
+                      <button>
+                        <img src="/images/apply.svg" />
+                        <span>Apply!</span>
+                      </button>
+                    </a>)
+                    :
+                    <a href={`/job-posting/${post.id}`} target="_blank">
+                      <button>
+                        <img src="/images/apply.svg" />
+                        <span>Apply!</span>
+                      </button>
+                    </a>
+            }
+                  </SocialActions>
+                </div>
+              );
+            })
+          ) : (
+            <>None</>
+          )}
+        </Articles>
+      </div>
+        }
       
       <PostModal showModal={showModal} handleClick={handleClick} />
-      <EditPostModal job={jobToEdit} showEditPostModal={showEditPostModal} handleClick={handleJobEditClose}></EditPostModal>
+      <EditPostModal
+        job={jobToEdit}
+        showEditPostModal={showEditPostModal}
+        handleClick={handleJobEditClose}
+      ></EditPostModal>
     </Container>
   );
 };
@@ -330,16 +418,18 @@ const SocialActions = styled.div`
 `;
 
 const mapStateToProps = (state) => {
-  console.log(state)
+  console.log(state);
   return {
     user: state.userState.user,
     jobPostings: state.jobPostingsState.jobPostings,
-    userJobPostings: state.jobPostingsState.userJobPostings
+    userJobPostings: state.jobPostingsState.userJobPostings,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
   // getAllJobPostings: () => dispatch(getAllJobPostings())
+  handleSavePost: (postId, userData)=>dispatch(savePost(postId, userData)),
+  handleUnsavePost: (postId, userData)=>dispatch(unsavePost(postId, userData)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Main);

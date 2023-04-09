@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { useSelector } from "react-redux";
 import UpdatePhoto from "./UpdatePhoto";
@@ -7,7 +7,9 @@ import UploadDocuments from "./UploadDocuments";
 import EditForm from "./EditForm";
 import Modal from "react-modal";
 import UpdateConnections from "./UpdateConnections";
-import { Link } from 'react-router-dom';
+import GroupCreationForm from "./GroupCreationForm";
+import { Link } from "react-router-dom";
+import { db } from "../firebase";
 
 Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -22,6 +24,11 @@ const Leftside = (props) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+
+  const handleGroupClick = () => {
+    setShowGroupModal(true);
+  };
 
   const handleDocumentClick = () => {
     setShowDocumentsModal(true);
@@ -44,6 +51,7 @@ const Leftside = (props) => {
     setShowEditModal(false);
     setShowConnectionModal(false);
     setShowDocumentsModal(false);
+    setShowGroupModal(false);
   };
 
   console.log(props.user);
@@ -54,7 +62,11 @@ const Leftside = (props) => {
           <CardBackground />
           <a>
             {props.user && props.user.photoURL ? (
-              <img src={props.user.photoURL} referrerPolicy="no-referrer" style={{ width: "120px", height: "110px", objectFit: "cover"  }} />
+              <img
+                src={props.user.photoURL}
+                referrerPolicy="no-referrer"
+                style={{ width: "120px", height: "110px", objectFit: "cover" }}
+              />
             ) : (
               <Photo />
             )}
@@ -90,14 +102,65 @@ const Leftside = (props) => {
               )}
             </CustomModal4>
           </a>
-          <a href="/job-preferences" target="_blank" style={{ textDecoration: 'none' }}>
+          <a
+            href="/job-preferences"
+            target="_blank"
+            style={{ textDecoration: "none" }}
+          >
             <SetPreferencesText>
               Set Job Searching Preferences
             </SetPreferencesText>
           </a>
-          {/*
-           */}
+          <a>
+            <CreateGroup onClick={handleGroupClick}>
+              Create a new group
+            </CreateGroup>
+            <CustomModal5 isOpen={showGroupModal} onRequestClose={handleClose}>
+              {showGroupModal && <GroupCreationForm />}
+            </CustomModal5>
+          </a>
 
+          <GroupList>
+            <a>
+              <div>
+                <span>My groups:</span>
+                {props.user &&
+                  props.user.groupOwned &&
+                  Object.keys(props.user.groupOwned).map((groupId) => (
+                    <a
+                      href={`/groups/${groupId}`}
+                      target="_blank"
+                      key={groupId}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <MyGroup>
+                        <span>{props.user.groupOwned[groupId]}</span>
+                      </MyGroup>
+                    </a>
+                  ))}
+              </div>
+            </a>
+          </GroupList>
+          <GroupList2>
+            <a>
+              <div>
+                <span>My Connections' groups:</span>
+                {props.user &&
+                  props.user.groupMemberOf &&
+                  props.user.groupMemberOf.map((group) => (
+                    <div key={group.groupId}>
+                      <a
+                        href={`/groups/${group.groupId}`}
+                        target="_blank"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <span>{group.group}</span>
+                      </a>
+                    </div>
+                  ))}
+              </div>
+            </a>
+          </GroupList2>
           <EditInfo>
             <img
               onClick={handleEditClick}
@@ -144,9 +207,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Educations</span>
-              {props.user && props.user.educations && props.user.educations.map(e => (
-                <span key={e.program}>{e.school}</span>
-              ))}
+              {props.user &&
+                props.user.educations &&
+                props.user.educations.map((e) => (
+                  <span key={e.program}>{e.school}</span>
+                ))}
             </div>
           </a>
         </Education>
@@ -155,9 +220,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Work</span>
-              {props.user && props.user.works && props.user.works.map(work => (
-                <span key={work.company}>{work.title}</span>
-              ))}
+              {props.user &&
+                props.user.works &&
+                props.user.works.map((work) => (
+                  <span key={work.company}>{work.title}</span>
+                ))}
             </div>
           </a>
         </Work>
@@ -166,9 +233,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Skills</span>
-              {props.user && props.user.skills && props.user.skills.map(skill => (
-                <span key={skill}>{skill}</span>
-              ))}
+              {props.user &&
+                props.user.skills &&
+                props.user.skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
             </div>
           </a>
         </Skills>
@@ -177,9 +246,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Languages</span>
-              {props.user && props.user.languages && props.user.languages.map(lang => (
-                <span key={lang}>{lang}</span>
-              ))}
+              {props.user &&
+                props.user.languages &&
+                props.user.languages.map((lang) => (
+                  <span key={lang}>{lang}</span>
+                ))}
             </div>
           </a>
         </Languages>
@@ -188,9 +259,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Courses</span>
-              {props.user && props.user.courses && props.user.courses.map(course => (
-                <span key={course.school}>{course.title}</span>
-              ))}
+              {props.user &&
+                props.user.courses &&
+                props.user.courses.map((course) => (
+                  <span key={course.school}>{course.title}</span>
+                ))}
             </div>
           </a>
         </Courses>
@@ -199,9 +272,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Projects</span>
-              {props.user && props.user.projects && props.user.projects.map(project => (
-                <span key={project.title}>{project.title}</span>
-              ))}
+              {props.user &&
+                props.user.projects &&
+                props.user.projects.map((project) => (
+                  <span key={project.title}>{project.title}</span>
+                ))}
             </div>
           </a>
         </Projects>
@@ -210,9 +285,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Volunteerings</span>
-              {props.user && props.user.volunteerings && props.user.volunteerings.map(v => (
-                <span key={v.company}>{v.title}</span>
-              ))}
+              {props.user &&
+                props.user.volunteerings &&
+                props.user.volunteerings.map((v) => (
+                  <span key={v.company}>{v.title}</span>
+                ))}
             </div>
           </a>
         </Volunteerings>
@@ -220,9 +297,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Awards</span>
-              {props.user && props.user.awards && props.user.awards.map(award => (
-                <span key={award.issuer}>{award.title}</span>
-              ))}
+              {props.user &&
+                props.user.awards &&
+                props.user.awards.map((award) => (
+                  <span key={award.issuer}>{award.title}</span>
+                ))}
             </div>
           </a>
         </Awards>
@@ -231,9 +310,11 @@ const Leftside = (props) => {
           <a>
             <div>
               <span>Recommendations</span>
-              {props.user && props.user.recommendations && props.user.recommendations.map(rec => (
-                <span key={rec}>{rec}</span>
-              ))}
+              {props.user &&
+                props.user.recommendations &&
+                props.user.recommendations.map((rec) => (
+                  <span key={rec}>{rec}</span>
+                ))}
             </div>
           </a>
         </Recommandations>
@@ -266,6 +347,39 @@ const Leftside = (props) => {
     </Container>
   );
 };
+
+const CustomModal5 = styled(Modal)`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 800px;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+`;
+
+const MyGroup = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
+
+const CreateGroup = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
 
 const ReviewConnections = styled.div`
   color: #0a66c2;
@@ -462,6 +576,73 @@ const Skills = styled.div`
         line-height: 1.333;
         &:first-child {
           color: rgba(0, 0, 0, 0.6);
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+
+const GroupList = styled.div`
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          text align: center
+          color: black;
+        }
+        &:nth-child(2) {
+          color: rgba(0, 0, 0, 1);
+        }
+      }
+    }
+  }
+  svg {
+    color: rgba(0, 0, 0, 1);
+  }
+`;
+const GroupList2 = styled.div`
+  padding-top: 12px;
+  padding-bottom: 12px;
+  & > a {
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 12px;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    div {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      span {
+        font-size: 12px;
+        line-height: 1.333;
+        &:first-child {
+          text align: center
+          color: black;
         }
         &:nth-child(2) {
           color: rgba(0, 0, 0, 1);
@@ -836,13 +1017,12 @@ const CommunityCard = styled(ArtCard)`
   }
 `;
 const SetPreferencesText = styled.span`
-
-color: #0a66c2;
-margin-top: 4px;
-font-size: 12px;
-line-height: 1.33;
-font-weight: 400;
-cursor: pointer;
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+  cursor: pointer;
 `;
 
 const mapStateToProps = (state) => {
