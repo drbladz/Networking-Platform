@@ -72,7 +72,10 @@ const Main = (props) => {
         <Articles>
           {props.jobPostings ? (
             props.jobPostings.map((job) => {
-              const saved = props.user.savedJobs.find((savedJob) => savedJob==job.id) 
+              let saved = [];
+              if (props.user && props.user.savedJobs){
+                saved = props.user.savedJobs.find((savedJob) => savedJob==job.id)
+              }
               return (
                 <div key={job.id}>
                   <SharedActor>

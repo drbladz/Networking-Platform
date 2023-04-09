@@ -573,7 +573,12 @@ export function createGroupJobPosting(
 
 export function unsavePost(jobId, userData){
   return  (dispatch) =>{
-    userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+    if (userData.savedJobs) {
+      userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+    }
+    else{
+      userData.savedJobs = []
+    } 
   let updatedUserData = {}
   for (let property in userData) {
       updatedUserData[property] = userData[property];
