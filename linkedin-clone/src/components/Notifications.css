@@ -1,0 +1,19 @@
+.notification {
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  
+  .notification h3 {
+    margin-top: 0;
+  }
+  
+  .notification p {
+    margin-bottom: 8px;
+  }
+  
+  .notification.viewed {
+    background-color: #f7f7f7;
+  }
+  

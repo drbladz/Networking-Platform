@@ -146,13 +146,21 @@ export function addConnectionById(id) {
 
     //current user is pending and other user gets a request
     // Add pending and request for the current user and other user, respectively.
-    updateDoc(currentUserRef, { pending: arrayUnion(id) });
-    updateDoc(otherUserRef, {
-      requests: arrayUnion({
-        id: auth.currentUser.uid,
-        name: currentUserDocument.data().displayName,
-        photoURL: currentUserDocument.data().photoURL,
-      }),
+    updateDoc(currentUserRef, {pending: arrayUnion(id)});
+    updateDoc(otherUserRef, {requests: arrayUnion({
+      id: auth.currentUser.uid, 
+      name: currentUserDocument.data().displayName, 
+      photoURL: currentUserDocument.data().photoURL
+    })
+  });
+
+    // Create notification for the other user
+    updateDoc(otherUserRef, {notifications: arrayUnion({
+      notification: `${currentUserDocument.data().displayName} wants to connect.`,
+      photoURL: currentUserDocument.data().photoURL,
+      date: new Date(),
+      viewed: false
+      })
     });
     console.log("Request has been sent!");
 
@@ -187,14 +195,22 @@ export function acceptRequest(id) {
       }),
     });
     //Clear their pending and request
-    updateDoc(currentUserRef, {
-      requests: arrayRemove({
-        id: id,
-        name: otherUserDocument.data().displayName,
-        photoURL: otherUserDocument.data().photoURL,
-      }),
+    updateDoc(currentUserRef, {requests: arrayRemove({
+      id: id, 
+      name: otherUserDocument.data().displayName, 
+      photoURL: otherUserDocument.data().photoURL
+    })
+  });
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+
+    // Create notification for the other user
+    updateDoc(otherUserRef, {notifications: arrayUnion({
+      notification: `${currentUserDocument.data().displayName} accepted you request.`,
+      photoURL: currentUserDocument.data().photoURL,
+      date: new Date(),
+      viewed: false
+      })
     });
-    updateDoc(otherUserRef, { pending: arrayRemove(auth.currentUser.uid) });
     console.log("accepted");
 
     const userData = await getUserDataById(auth.currentUser.uid);
@@ -557,7 +573,12 @@ export function createGroupJobPosting(
 
 export function unsavePost(jobId, userData){
   return  (dispatch) =>{
-    userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+    if (userData.savedJobs) {
+      userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+    }
+    else{
+      userData.savedJobs = []
+    } 
   let updatedUserData = {}
   for (let property in userData) {
       updatedUserData[property] = userData[property];
@@ -587,7 +608,7 @@ export function createJobPosting(
   isExternal,
   jobParameters
 ) {
-  return (dispatch) => {
+  return async (dispatch) => {
     const newJobPostingData = {
       id: uuidv4(),
       userId: userId,
@@ -615,6 +636,21 @@ export function createJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList));
       })
       .catch((error) => alert(error.message));
+
+      const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+      const currentUserDocument = await getDoc(currentUserRef);
+
+      // Create notification for the all connections
+      currentUserDocument.data().connections.forEach(connection => {
+        updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
+          notification: `${currentUserDocument.data().displayName} added a post`,
+          postURL: `/job-posting/${newJobPostingData.id}`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false
+          })
+        });
+      })
   };
 }
 

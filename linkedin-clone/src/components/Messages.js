@@ -238,6 +238,7 @@ const Messages = (props) => {
             <Picker onEmojiSelect={(emoji) => setMessage(message + emoji.native)} theme="light" />
           </div>
         }
+        {conversation &&
         <InputBox>
           <input
             type="text"
@@ -259,6 +260,7 @@ const Messages = (props) => {
             <BsSendFill color="blue" cursor="pointer" onClick={sendMessage}><button type="submit">Send</button></BsSendFill>
           </div>
         </InputBox>
+        }
       </div>
     );
   };
@@ -310,7 +312,7 @@ const Messages = (props) => {
                             </a>
                           </p> :
                           <p>"{flaggedMessage.message}"</p>}
-                        <button className="buttonc" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
+                        <button className="buttonb" onClick={() => handleBanUser(flaggedMessage.sender, flaggedMessage.id)}>Ban</button>
                         <button className="buttonc" onClick={() => handleWarnUser(flaggedMessage.sender, flaggedMessage.id)
                         }>Tolerate</button>
                       </div>)
