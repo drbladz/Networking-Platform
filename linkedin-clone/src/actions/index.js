@@ -28,6 +28,7 @@ import {
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
+import { useParams } from "react-router-dom";
 // Define an action creator to set the current user in the store.
 export const setUser = (payload) => ({
   type: SET_USER,
@@ -44,7 +45,7 @@ export const setUserJobPostings = (payload) => ({
   userJobPostings: payload,
 });
 
-export function updateGroup(userId, updatedGroupData, currentGroupData) {
+/* export function updateGroup(userId, updatedGroupData, currentGroupData) {
   for (let property in currentGroupData) {
     if (
       updatedGroupData[property] == "" ||
@@ -72,7 +73,8 @@ export function updateGroup(userId, updatedGroupData, currentGroupData) {
 
     dispatch(setUser(updatedGroupData));
   };
-}
+} */
+
 // Define a function to handle form submission and update user document
 export function updateUserProfile(userId, updatedUserData, currentUserData) {
   // Update the user document in the "Users" collection
@@ -144,13 +146,21 @@ export function addConnectionById(id) {
 
     //current user is pending and other user gets a request
     // Add pending and request for the current user and other user, respectively.
-    updateDoc(currentUserRef, { pending: arrayUnion(id) });
-    updateDoc(otherUserRef, {
-      requests: arrayUnion({
-        id: auth.currentUser.uid,
-        name: currentUserDocument.data().displayName,
-        photoURL: currentUserDocument.data().photoURL,
-      }),
+    updateDoc(currentUserRef, {pending: arrayUnion(id)});
+    updateDoc(otherUserRef, {requests: arrayUnion({
+      id: auth.currentUser.uid, 
+      name: currentUserDocument.data().displayName, 
+      photoURL: currentUserDocument.data().photoURL
+    })
+  });
+
+    // Create notification for the other user
+    updateDoc(otherUserRef, {notifications: arrayUnion({
+      notification: `${currentUserDocument.data().displayName} wants to connect.`,
+      photoURL: currentUserDocument.data().photoURL,
+      date: new Date(),
+      viewed: false
+      })
     });
     console.log("Request has been sent!");
 
@@ -185,14 +195,22 @@ export function acceptRequest(id) {
       }),
     });
     //Clear their pending and request
-    updateDoc(currentUserRef, {
-      requests: arrayRemove({
-        id: id,
-        name: otherUserDocument.data().displayName,
-        photoURL: otherUserDocument.data().photoURL,
-      }),
+    updateDoc(currentUserRef, {requests: arrayRemove({
+      id: id, 
+      name: otherUserDocument.data().displayName, 
+      photoURL: otherUserDocument.data().photoURL
+    })
+  });
+    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+
+    // Create notification for the other user
+    updateDoc(otherUserRef, {notifications: arrayUnion({
+      notification: `${currentUserDocument.data().displayName} accepted you request.`,
+      photoURL: currentUserDocument.data().photoURL,
+      date: new Date(),
+      viewed: false
+      })
     });
-    updateDoc(otherUserRef, { pending: arrayRemove(auth.currentUser.uid) });
     console.log("accepted");
 
     const userData = await getUserDataById(auth.currentUser.uid);
@@ -306,6 +324,7 @@ export function signInAPI() {
             skills: [],
             awards: [],
             bio: "",
+            savedJobs: [],
             connections: [],
             requests: [],
             pending: [],
@@ -321,6 +340,24 @@ export function signInAPI() {
           (job) => job.userId == userData.userId
         );
         dispatch(setUserJobPostings(userJobPostings));
+        if (userData.ban) {
+          alert("You have broken our policy and been banned");
+          auth.signOut().then(() => {
+            dispatch(setUser(null));
+            dispatch(setJobPostings(null));
+          });
+        } else {
+          if (userData.warn) {
+            alert("You have an offense and been warned");
+          }
+          dispatch(setUser(userData));
+          const jobPostings = await getAllJobPostings();
+          dispatch(setJobPostings(jobPostings));
+          const userJobPostings = jobPostings.filter(
+            (job) => job.userId == userData.userId
+          );
+          dispatch(setUserJobPostings(userJobPostings));
+        }
       })
       .catch((error) => alert(error.message));
   };
@@ -328,8 +365,8 @@ export function signInAPI() {
 
 export function createUserByEmail(email, password, fullName) {
   return (dispatch) => {
-    createUserWithEmailAndPassword(auth, email, password).then(
-      async (payload) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (payload) => {
         console.log(payload);
         const InitialDataToStore = {
           userId: payload.user.uid,
@@ -347,6 +384,7 @@ export function createUserByEmail(email, password, fullName) {
           skills: [],
           awards: [],
           bio: "",
+          savedJobs: [],
           connections: [],
           requests: [],
           pending: [],
@@ -361,8 +399,10 @@ export function createUserByEmail(email, password, fullName) {
           (job) => job.userId == userData.userId
         );
         dispatch(setUserJobPostings(userJobPostings));
-      }
-    );
+      })
+      .catch((e) => {
+        alert(e);
+      });
   };
 }
 
@@ -389,6 +429,61 @@ export function editJobPosting(editedJobPosting, currentPostingsList) {
   };
 }
 
+export function editGroupJobPosting(
+  editedJobPosting,
+  currentPostingsList,
+  groupId
+) {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, `JobPostings/${editedJobPosting.id}`);
+    const jobDocument = await getDoc(jobDocumentRef);
+    const currentGroupId = jobDocument.data().groupId;
+    editedJobPosting.groupId = currentGroupId; // add the current groupId to the editedJobPosting object
+    await setDoc(jobDocumentRef, editedJobPosting)
+      .then(() => {
+        const newPostingsList = currentPostingsList.map((job) =>
+          job.id === editedJobPosting.id ? editedJobPosting : job
+        );
+        const newUserPostingsList = newPostingsList.filter(
+          (job) => job.userId === editedJobPosting.userId
+        );
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      })
+      .catch((error) => alert(error.message));
+  };
+}
+
+export function deleteGroupJobPosting(
+  jobPostingId,
+  userId,
+  groupId,
+  currentPostingsList
+) {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
+    const jobDocumentSnapshot = await getDoc(jobDocumentRef);
+    if (jobDocumentSnapshot.exists()) {
+      const jobPosting = jobDocumentSnapshot.data();
+      if (jobPosting.groupId === groupId) {
+        await deleteDoc(jobDocumentRef);
+        const newPostingsList = currentPostingsList.filter(
+          (job) => job.id !== jobPostingId
+        );
+        const newUserPostingsList = newPostingsList.filter(
+          (job) => job.userId === userId
+        );
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      } else {
+        alert("This job posting does not belong to the current group.");
+      }
+    } else {
+      alert("This job posting does not exist.");
+    }
+  };
+}
+
 export function deleteJobPosting(jobPostingId, userId, currentPostingsList) {
   return async (dispatch) => {
     const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
@@ -411,7 +506,7 @@ export function deleteJobPosting(jobPostingId, userId, currentPostingsList) {
   };
 }
 
-export function createJobPosting(
+export function createGroupJobPosting(
   userId,
   postTitle,
   postDescription,
@@ -421,12 +516,14 @@ export function createJobPosting(
   mandatoryResume,
   mandatoryCoverLetter,
   isExternal,
-  jobParameters
+  jobParameters,
+  groupId = null
 ) {
   return (dispatch) => {
     const newJobPostingData = {
       id: uuidv4(),
       userId: userId,
+      groupId: groupId,
       postTitle: postTitle,
       postDescription: postDescription,
       timeStamp: Date.now(),
@@ -454,6 +551,109 @@ export function createJobPosting(
   };
 }
 
+ export function savePost(jobId, userData){
+  return  (dispatch) =>{
+    userData.savedJobs.push(jobId)
+  let updatedUserData = {}
+  for (let property in userData) {
+      updatedUserData[property] = userData[property];
+    }
+    console.log(updatedUserData)
+    const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
+    updateDoc(userDocumentRef, updatedUserData)
+    .then((result) => {
+      console.log(result)
+      dispatch(setUser(updatedUserData))
+    })
+    .catch(e => {
+      alert(e)
+    })
+  }
+}
+
+export function unsavePost(jobId, userData){
+  return  (dispatch) =>{
+    if (userData.savedJobs) {
+      userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+    }
+    else{
+      userData.savedJobs = []
+    } 
+  let updatedUserData = {}
+  for (let property in userData) {
+      updatedUserData[property] = userData[property];
+    }
+    console.log(updatedUserData)
+    const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
+    updateDoc(userDocumentRef, updatedUserData)
+    .then((result) =>{
+      dispatch(setUser(updatedUserData))
+    })
+    .catch(e => {
+      alert(e)
+    })
+  }
+}
+
+
+export function createJobPosting(
+  userId,
+  postTitle,
+  postDescription,
+  currentPostingsList,
+  userPhotoURL,
+  displayName,
+  mandatoryResume,
+  mandatoryCoverLetter,
+  isExternal,
+  jobParameters
+) {
+  return async (dispatch) => {
+    const newJobPostingData = {
+      id: uuidv4(),
+      userId: userId,
+      postTitle: postTitle,
+      postDescription: postDescription,
+      timeStamp: Date.now(),
+      photoURL: userPhotoURL,
+      displayName: displayName,
+      mandatoryResume: mandatoryResume,
+      mandatoryCoverLetter: mandatoryCoverLetter,
+      isExternal: isExternal,
+      jobParameters: jobParameters,
+    };
+    createJobPostingInDB(newJobPostingData)
+      .then(() => {
+        currentPostingsList.push(newJobPostingData);
+        const newPostingsList = currentPostingsList.map((ele) => ele);
+        const newUserPostingsList = [];
+        for (let i in newPostingsList) {
+          if (newPostingsList[i].userId == userId) {
+            newUserPostingsList.push(newPostingsList[i]);
+          }
+        }
+        dispatch(setJobPostings(newPostingsList));
+        dispatch(setUserJobPostings(newUserPostingsList));
+      })
+      .catch((error) => alert(error.message));
+
+      const currentUserRef = doc(db,"Users",auth.currentUser.uid);
+      const currentUserDocument = await getDoc(currentUserRef);
+
+      // Create notification for the all connections
+      currentUserDocument.data().connections.forEach(connection => {
+        updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
+          notification: `${currentUserDocument.data().displayName} added a post`,
+          postURL: `/job-posting/${newJobPostingData.id}`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false
+          })
+        });
+      })
+  };
+}
+
 export function loginWithEmail(email, password) {
   console.log("here");
   return (dispatch) => {
@@ -462,15 +662,26 @@ export function loginWithEmail(email, password) {
         // Signed in
         const user = userCredential.user;
         const userData = await getUserDataById(user.uid);
-        dispatch(setUser(userData));
-        const jobPostings = await getAllJobPostings();
-        console.log("wowowo");
-        dispatch(setJobPostings(jobPostings));
-        const userJobPostings = jobPostings.filter(
-          (job) => job.userId == userData.userId
-        );
-        dispatch(setUserJobPostings(userJobPostings));
-        // ...
+        if (userData.ban) {
+          alert("You have broken our policy and been banned");
+          auth.signOut().then(() => {
+            dispatch(setUser(null));
+            dispatch(setJobPostings(null));
+          });
+        } else {
+          if (userData.warn) {
+            alert("You have an offense and been warned");
+          }
+          dispatch(setUser(userData));
+          const jobPostings = await getAllJobPostings();
+          console.log("wowowo");
+          dispatch(setJobPostings(jobPostings));
+          const userJobPostings = jobPostings.filter(
+            (job) => job.userId == userData.userId
+          );
+          dispatch(setUserJobPostings(userJobPostings));
+          // ...
+        }
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -594,6 +805,30 @@ export const getUserSearchingPreferences = async () => {
     }
   } catch (error) {
     console.error("Error fetching user preferences:", error);
+    return null;
+  }
+};
+
+export const banUser = async (banUserId) => {
+  try {
+    const banUserDocRef = doc(db, "Users", banUserId);
+    await updateDoc(banUserDocRef, {
+      ban: true,
+    });
+  } catch (error) {
+    console.error("Error banning the user", error);
+    return null;
+  }
+};
+
+export const warnUser = async (warnUserId) => {
+  try {
+    const warnUserDocRef = doc(db, "Users", warnUserId);
+    await updateDoc(warnUserDocRef, {
+      warn: true,
+    });
+  } catch (error) {
+    console.error("Error warning the user", error);
     return null;
   }
 };

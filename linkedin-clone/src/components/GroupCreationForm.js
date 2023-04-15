@@ -14,22 +14,27 @@ import { updateGroup } from "../actions";
 function GroupCreationForm(props) {
   const [groupName, setGroupName] = useState("");
   const [groupDescription, setGroupDescription] = useState("");
-  const [groupLocation, setGroupLocation] = useState("");
-  const [groupRules, setGroupRules] = useState("");
+  /* const [groupLocation, setGroupLocation] = useState("");
+  const [groupRules, setGroupRules] = useState(""); */
+  const [groupMembers, setGroupMembers] = useState([]);
 
   const createGroup = async (e) => {
     e.preventDefault();
     const userId = auth.currentUser.uid;
+    const adminName = auth.currentUser.displayName;
     const updateGroupData = {
       groupName: groupName,
       groupDescription: groupDescription,
-      groupLocation: groupLocation,
-      groupRules: groupRules,
+      /*  groupLocation: groupLocation,
+      groupRules: groupRules, */
       createdBy: userId,
+      adminName: adminName,
+      groupMembers: groupMembers,
     };
 
     const groupsRef = collection(db, "Groups");
 
+    console.log(adminName);
     // Get the new group's ID
     const newGroupRef = await addDoc(groupsRef, updateGroupData);
     const newGroupId = newGroupRef.id;
@@ -64,7 +69,7 @@ function GroupCreationForm(props) {
           onChange={(e) => setGroupDescription(e.target.value)}
         />
       </label>
-      <label>
+      {/*  <label>
         Group Location:
         <textarea
           value={groupLocation}
@@ -80,7 +85,7 @@ function GroupCreationForm(props) {
           placeholder={"Set the tone and expectations of your group"}
           onChange={(e) => setGroupRules(e.target.value)}
         />
-      </label>
+      </label> */}
       <button onClick={createGroup}>Create Group</button>
     </form>
   );

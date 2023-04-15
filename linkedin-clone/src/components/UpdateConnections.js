@@ -3,38 +3,54 @@ import { removeConnectionById } from "../actions";
 import { connect } from "react-redux";
 import { useState } from "react";
 import DmModal from "./DmModal";
+import { AiFillMessage } from "react-icons/ai";
 
 const UpdateConnections = (props) => {
-  const [showDm, setShowDm] = useState(false)
-  const [recipientId, setRecipientId] = useState("")
+  const [showDm, setShowDm] = useState(false);
+  const [recipientId, setRecipientId] = useState("");
 
-  const handleDmOpen = (recipientId)=>{
-    setRecipientId(recipientId)
-    setShowDm(true)
-  }
+  const handleDmOpen = (recipientId) => {
+    setRecipientId(recipientId);
+    setShowDm(true);
+  };
 
-  const handleDmClose = ()=>{
-    setRecipientId("")
-    setShowDm(false)
-  }
+  const handleDmClose = () => {
+    setRecipientId("");
+    setShowDm(false);
+  };
+
   return (
     <ConnectionsContainer>
       <ConnectionsHeader>Connections</ConnectionsHeader>
       <ConnectionsList>
-        {props.user && props.user.connections.map((connection) => (
-          <ConnectionItem key={connection.id}>
-            {connection.photoURL ? <ConnectionPhoto src={connection.photoURL} alt=""/> : <ConnectionPhoto src="/images/user.svg" alt=""/>}
-            <ConnectionName>{connection.name}</ConnectionName>
-            <DmButton onClick={()=> handleDmOpen(connection.id)}>Message</DmButton>
-            <DeleteButton onClick={() => {
-              props.removeConnectionById(connection.id);
-            }}>
-              Delete
-            </DeleteButton>
-          </ConnectionItem>
-        ))}
+        {props.user &&
+          props.user.connections.map((connection) => (
+            <ConnectionItem key={connection.id}>
+              {connection.photoURL ? (
+                <ConnectionPhoto src={connection.photoURL} alt="" />
+              ) : (
+                <ConnectionPhoto src="/images/user.svg" alt="" />
+              )}
+              <ConnectionName>{connection.name}</ConnectionName>
+              <DmButton onClick={() => handleDmOpen(connection.id)}>
+                <AiFillMessage />
+              </DmButton>
+              <DeleteButton
+                onClick={() => {
+                  props.removeConnectionById(connection.id);
+                }}
+              >
+                Delete
+              </DeleteButton>
+            </ConnectionItem>
+          ))}
       </ConnectionsList>
-      {showDm && <DmModal currentUserId={props.user.userId} recipientId={recipientId}></DmModal> }
+      {showDm && (
+        <DmModal
+          currentUserId={props.user.userId}
+          recipientId={recipientId}
+        ></DmModal>
+      )}
     </ConnectionsContainer>
   );
 };
@@ -43,7 +59,8 @@ const ConnectionsContainer = styled.div`
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 16px;
-  margin-top: 16px;
+  height: 100%;
+  border-radius: 10px;
 `;
 
 const ConnectionsHeader = styled.h3`
@@ -62,6 +79,7 @@ const ConnectionItem = styled.li`
   justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
 
   &:last-of-type {
     border-bottom: none;
@@ -71,6 +89,7 @@ const ConnectionItem = styled.li`
 const ConnectionName = styled.p`
   margin: 0;
   font-size: 16px;
+  width: 40%;
 `;
 
 const ConnectionPhoto = styled.img`
@@ -98,7 +117,7 @@ const DeleteButton = styled.button`
 `;
 
 const DmButton = styled.button`
-  background-color: #f44336;
+  background-color: rgb(79, 117, 220);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -107,7 +126,7 @@ const DmButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #d32f2f;
+    background-color: blue;
   }
 
   &:active {
@@ -115,14 +134,14 @@ const DmButton = styled.button`
   }
 `;
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
-    user: state.userState.user
-  }
-}
+    user: state.userState.user,
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
   removeConnectionById: (id) => dispatch(removeConnectionById(id)),
-})
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(UpdateConnections)
+export default connect(mapStateToProps, mapDispatchToProps)(UpdateConnections);

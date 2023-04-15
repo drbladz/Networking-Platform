@@ -1,11 +1,10 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { createJobPosting } from "../actions";
+import { createGroupJobPosting } from "../actions";
 import { connect } from "react-redux";
-import db from "../firebase";
-import { updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { useParams } from "react-router-dom";
 
-const PostModal = (props) => {
+const GroupPostModal = (props) => {
   console.log(props.jobPostings);
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
@@ -16,6 +15,8 @@ const PostModal = (props) => {
   const [industry, setIndustry] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("");
   const [remoteWorkOption, setRemoteWorkOption] = useState("");
+
+  const { groupId } = useParams();
 
   const reset = (e) => {
     setPostDescription("");
@@ -28,6 +29,8 @@ const PostModal = (props) => {
     setExperienceLevel("");
     setRemoteWorkOption("");
     props.handleClick(e);
+
+    console.log(groupId);
   };
 
   return (
@@ -207,7 +210,7 @@ const PostModal = (props) => {
             <SharedCreation>
               <PostButton
                 onClick={(e) => {
-                  props.createJobPosting(
+                  props.createGroupJobPosting(
                     props.user.userId,
                     postTitle,
                     postDescription,
@@ -222,7 +225,8 @@ const PostModal = (props) => {
                       industry,
                       experienceLevel,
                       remoteWorkOption,
-                    }
+                    },
+                    groupId
                   );
                   reset(e);
                 }}
@@ -245,9 +249,10 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  createJobPosting: (
+  createGroupJobPosting: (
     userId,
     postTitle,
+    groupId,
     postDescription,
     currentPostingsList,
     userPhotoURL,
@@ -258,9 +263,10 @@ const mapDispatchToProps = (dispatch) => ({
     jobParameters
   ) =>
     dispatch(
-      createJobPosting(
+      createGroupJobPosting(
         userId,
         postTitle,
+        groupId,
         postDescription,
         currentPostingsList,
         userPhotoURL,
@@ -273,7 +279,7 @@ const mapDispatchToProps = (dispatch) => ({
     ),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(PostModal);
+export default connect(mapStateToProps, mapDispatchToProps)(GroupPostModal);
 
 const Container = styled.div`
   position: fixed;
