@@ -1,4 +1,4 @@
-/*import React from "react";
+import React from "react";
 import { shallow } from "enzyme";
 import { Network } from "../components/Network";
 
@@ -102,4 +102,3 @@ describe("Network component", () => {
     expect(props.declineRequest).toHaveBeenCalledWith(request.id);
   });
 });
-*/
