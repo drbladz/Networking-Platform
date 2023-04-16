@@ -77,7 +77,17 @@ const GroupNetwork = (props) => {
   }
 
   async function declineGroupJoinRequest(request) {
-    // Add your logic to decline the group join request
+    const groupCreatorRef = doc(db, "Users", props.user.userId);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Update the groupJoinRequests state variable
+    setGroupJoinRequests((prevRequests) =>
+      prevRequests.filter(
+        (r) => r.userId !== request.userId || r.groupId !== request.groupId
+      )
+    );
   }
 
   useEffect(() => {
