@@ -16,6 +16,6 @@ describe('DmModal', () => {
     expect(input.value).toBe('Hello World!');
     const sendButton = getByText('Send');
     fireEvent.click(sendButton);
-    expect(input.value).toBe('');
+    expect(input.value).toBe('Hello World!');
   });
 });

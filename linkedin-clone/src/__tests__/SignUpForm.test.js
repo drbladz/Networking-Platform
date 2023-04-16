@@ -46,7 +46,7 @@ describe('SignUpForm', () => {
     expect(passwordInput.value).toBe("password123");
   });
 
-  it("submits form on button click", () => {
+  /*it("submits form on button click", () => {
     const mockSignUp = jest.fn();
     const { getByPlaceholderText, getByText } = render(
       <Provider store={store}>
@@ -68,7 +68,7 @@ describe('SignUpForm', () => {
     );
   });
 
-  /*it('dispatches sign up action on form submission', () => {
+  it('dispatches sign up action on form submission', () => {
     const signUpMock = jest.fn();
     const email = 'test@example.com';
     const password = 'password123';

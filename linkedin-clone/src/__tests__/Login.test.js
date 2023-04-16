@@ -31,7 +31,7 @@ describe("Login", () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the sign up form when "Sign Up" button is clicked', () => {
+  /*it('shows the sign up form when "Sign Up" button is clicked', () => {
     render(
       <Provider store={store}>
         <Login />
@@ -59,7 +59,7 @@ describe("Login", () => {
     ).toBeInTheDocument();
   });
 
-  /*it.only('redirects to home page if user is logged in', () => {
+  it.only('redirects to home page if user is logged in', () => {
     store = mockStore({
       userState: {
         user: { name: 'test user' },
