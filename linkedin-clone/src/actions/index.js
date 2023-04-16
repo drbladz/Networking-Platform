@@ -149,6 +149,30 @@ export async function getGroups() {
   });
   return groups;
 }
+
+export const sendJoinGroupRequest = async (groupId, userId) => {
+  const currentUserRef = doc(db, "Users", userId);
+  const currentUserDocument = await getDoc(currentUserRef);
+  const groupRef = doc(db, "Groups", groupId);
+  const groupDocument = await getDoc(groupRef);
+  const groupCreatorId = groupDocument.data().createdBy;
+  const groupCreatorRef = doc(db, "Users", groupCreatorId);
+
+  // Add pending group for the current user
+  await updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
+
+  // Add join request for the group creator
+  await updateDoc(groupCreatorRef, {
+    groupJoinRequests: arrayUnion({
+      groupId: groupId,
+      groupName: groupDocument.data().groupName,
+      userId: userId,
+      userName: currentUserDocument.data().displayName,
+      userPhotoURL: currentUserDocument.data().photoURL,
+    }),
+  });
+};
+
 // Async function to add a connection by id.
 export function addConnectionById(id) {
   return async (dispatch) => {

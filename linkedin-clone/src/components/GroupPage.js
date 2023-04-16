@@ -186,8 +186,8 @@ const GroupPage = (props) => {
             <h4>Group Members</h4>
             {groupMembers.length > 0 ? (
               <ul>
-                {groupMembers.map((member) => (
-                  <li key={member}>{member}</li>
+                {groupMembers.map((member, index) => (
+                  <li key={index}>{member.userName}</li>
                 ))}
               </ul>
             ) : (

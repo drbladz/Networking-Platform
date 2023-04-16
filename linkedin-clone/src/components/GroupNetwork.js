@@ -2,16 +2,83 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   getGroups,
-  addConnectionById,
-  acceptRequest,
+  sendJoinGroupRequest,
+  groupJoinRequest,
   declineRequest,
 } from "../actions";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { db } from "../firebase";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
 import "./GroupNetwork.css";
 
 const GroupNetwork = (props) => {
   const [groups, setGroups] = useState([]);
+  const [groupJoinRequests, setGroupJoinRequests] = useState([]);
+
+  async function fetchGroupJoinRequests(userId) {
+    const userRef = doc(db, "Users", userId);
+    const userDoc = await getDoc(userRef);
+    const requests = userDoc.data().groupJoinRequests || [];
+    setGroupJoinRequests(requests);
+  }
+
+  useEffect(() => {
+    getGroups().then((data) => {
+      setGroups(data);
+      console.log(groups);
+    });
+    if (props.user) {
+      fetchGroupJoinRequests(props.user.userId);
+    }
+    return () => {
+      setGroups([]);
+    };
+  }, [props.user]);
+
+  async function acceptGroupJoinRequest(request) {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", request.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userName: request.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: request.groupName,
+        groupId: request.groupId,
+      }),
+    });
+
+    // Remove the join request from the group creator's groupJoinRequests field
+    const groupCreatorRef = doc(db, "Users", props.user.userId);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Update the groupJoinRequests state variable
+    setGroupJoinRequests((prevRequests) =>
+      prevRequests.filter(
+        (r) => r.userId !== request.userId || r.groupId !== request.groupId
+      )
+    );
+  }
+
+  async function declineGroupJoinRequest(request) {
+    // Add your logic to decline the group join request
+  }
 
   useEffect(() => {
     getGroups().then((data) => {
@@ -25,50 +92,24 @@ const GroupNetwork = (props) => {
   return (
     <Container>
       {!props.user && <Redirect to="/" />}
-      {/* <table className="center">
-      <caption>
-        <b>Requests</b>
-      </caption>
-      {props.user &&
-        props.user.requests &&
-        props.user.requests.length === 0 && <div>No requests</div>}
-      {props.user && props.user.requests ? (
-        props.user.requests.map((req, index) => (
-          <tr className="reqRow" key={req.id}>
-            <td>
-              {req.photoURL ? (
-                <img src={req.photoURL} alt="" width={50} height={50} />
-              ) : (
-                <img src="/images/user.svg" alt="" height="50" width="50" />
-              )}
-            </td>
-            <td>{req.name}</td>
-            <td>
-              <button
-                className="accept"
-                onClick={() => {
-                  props.acceptRequest(req.id);
-                }}
-              >
+      {groupJoinRequests.length > 0 && (
+        <div>
+          <h3>Group Join Requests:</h3>
+          {groupJoinRequests.map((request, index) => (
+            <div key={index}>
+              <span>
+                {request.userName} wants to join {request.groupName}
+              </span>
+              <button onClick={() => acceptGroupJoinRequest(request)}>
                 Accept
               </button>
-            </td>
-            <td>
-              <button
-                className="decline"
-                onClick={() => {
-                  props.declineRequest(req.id);
-                }}
-              >
+              <button onClick={() => declineGroupJoinRequest(request)}>
                 Decline
               </button>
-            </td>
-          </tr>
-        ))
-      ) : (
-        <div></div>
+            </div>
+          ))}
+        </div>
       )}
-    </table> */}
       <br />
       <div className="wrapper">
         <div className="container">
@@ -102,8 +143,11 @@ const GroupNetwork = (props) => {
                       ) : (
                         <button
                           className="buttonc"
-                          onClick={() => {
-                            // Add logic to join the group
+                          onClick={async () => {
+                            await sendJoinGroupRequest(
+                              group.groupId,
+                              props.user.userId
+                            );
                           }}
                         >
                           Join
