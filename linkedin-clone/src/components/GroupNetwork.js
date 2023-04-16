@@ -23,22 +23,78 @@ import "./GroupNetwork.css";
 const GroupNetwork = (props) => {
   const [groups, setGroups] = useState([]);
   const [groupJoinRequests, setGroupJoinRequests] = useState([]);
+  const [pendingGroups, setPendingGroups] = useState([]);
 
-  async function fetchGroupJoinRequests(userId) {
-    const userRef = doc(db, "Users", userId);
-    const userDoc = await getDoc(userRef);
-    const requests = userDoc.data().groupJoinRequests || [];
-    setGroupJoinRequests(requests);
+  const [groupInvites, setGroupInvites] = useState([]);
+
+  async function acceptGroupInvite(invite) {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", invite.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userId: invite.userId,
+        userName: invite.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: invite.groupName,
+        groupId: invite.groupId,
+      }),
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update the groupInvites state variable
+    setGroupInvites((prevInvites) =>
+      prevInvites.filter(
+        (i) => i.userId !== invite.userId || i.groupId !== invite.groupId
+      )
+    );
   }
 
+  async function declineGroupInvite(invite) {
+    // Remove the invite from the user's groupInvites field
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update the groupInvites state variable
+    setGroupInvites((prevInvites) =>
+      prevInvites.filter(
+        (i) => i.userId !== invite.userId || i.groupId !== invite.groupId
+      )
+    );
+  }
   useEffect(() => {
     getGroups().then((data) => {
       setGroups(data);
-      console.log(groups);
     });
-    if (props.user) {
-      fetchGroupJoinRequests(props.user.userId);
-    }
+
+    const fetchPendingGroupsAndJoinRequests = async () => {
+      if (props.user) {
+        const userRef = doc(db, "Users", props.user.userId);
+        const userDoc = await getDoc(userRef);
+
+        // Fetch group join requests
+        const requests = userDoc.data().groupJoinRequests || [];
+        setGroupJoinRequests(requests);
+
+        // Fetch pending groups
+        const pending = userDoc.data().pendingGroups || [];
+        setPendingGroups(pending);
+
+        // Fetch group invites
+        const invites = userDoc.data().groupInvites || [];
+        setGroupInvites(invites);
+      }
+    };
+
+    fetchPendingGroupsAndJoinRequests();
+
     return () => {
       setGroups([]);
     };
@@ -90,36 +146,58 @@ const GroupNetwork = (props) => {
     );
   }
 
-  useEffect(() => {
-    getGroups().then((data) => {
-      setGroups(data);
-    });
-    return () => {
-      setGroups([]);
-    };
-  }, []);
-
   return (
     <Container>
       {!props.user && <Redirect to="/" />}
-      {groupJoinRequests.length > 0 && (
-        <div>
-          <h3>Group Join Requests:</h3>
-          {groupJoinRequests.map((request, index) => (
-            <div key={index}>
-              <span>
-                {request.userName} wants to join {request.groupName}
-              </span>
-              <button onClick={() => acceptGroupJoinRequest(request)}>
-                Accept
-              </button>
-              <button onClick={() => declineGroupJoinRequest(request)}>
+      <table className="center">
+        <caption>
+          <b>Group Invitations</b>
+        </caption>
+        {groupInvites.length === 0 && <p>No Invites</p>}
+        {groupInvites.map((invite, index) => (
+          <tr key={index}>
+            <td>{invite.inviterName}</td>
+            <td>has invited you to join {invite.groupName}</td>
+            <td>
+              <button onClick={() => acceptGroupInvite(invite)}>Accept</button>
+            </td>
+            <td>
+              <button onClick={() => declineGroupInvite(invite)}>
                 Decline
               </button>
-            </div>
-          ))}
-        </div>
-      )}
+            </td>
+          </tr>
+        ))}
+      </table>
+
+      <table className="center">
+        <caption>
+          <b>Group Join Requests</b>
+        </caption>
+        {groupJoinRequests.length === 0 && <p>No Requests</p>}
+        {groupJoinRequests.map((request, index) => (
+          <tr key={index}>
+            <td>{request.userName}</td>
+            <td>wants to join {request.groupName}</td>
+            <td>
+              <button
+                className="accept"
+                onClick={() => acceptGroupJoinRequest(request)}
+              >
+                Accept
+              </button>
+            </td>
+            <td>
+              <button
+                className="decline"
+                onClick={() => declineGroupJoinRequest(request)}
+              >
+                Decline
+              </button>
+            </td>
+          </tr>
+        ))}
+      </table>
       <br />
       <div className="wrapper">
         <div className="container">
@@ -147,8 +225,12 @@ const GroupNetwork = (props) => {
                       Object.values(props.user.groupMemberOf).some(
                         (g) => g.groupId === group.groupId
                       ) ? (
-                        <button className="buttonc" disabled>
+                        <button className="buttonp" disabled>
                           Joined
+                        </button>
+                      ) : pendingGroups.includes(group.groupId) ? (
+                        <button className="buttonp" disabled>
+                          Pending
                         </button>
                       ) : (
                         <button
@@ -158,6 +240,7 @@ const GroupNetwork = (props) => {
                               group.groupId,
                               props.user.userId
                             );
+                            setPendingGroups([...pendingGroups, group.groupId]);
                           }}
                         >
                           Join

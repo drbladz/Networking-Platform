@@ -10,6 +10,7 @@ import {
   collection,
   addDoc,
   getDoc,
+  arrayUnion,
 } from "firebase/firestore";
 
 const InviteToGroup = (props) => {
@@ -29,7 +30,7 @@ const InviteToGroup = (props) => {
       const groupName = groupDoc.data().groupName;
 
       // Check if the connection is already a member
-      if (currentMembers.includes(connectionId)) {
+      if (currentMembers.some((member) => member.userId === connectionId)) {
         alert("This connection is already a member of the group!");
         return;
       }
@@ -41,32 +42,27 @@ const InviteToGroup = (props) => {
         .connections.find((conn) => conn.id === connectionId);
       const connectionName = connection.name;
 
-      // Add the connection name to the group members array
-      const newMembers = [...currentMembers, connectionName];
+      // Create a new invite object
+      const invite = {
+        groupId: groupId,
+        groupName: groupName,
+        userId: connectionId,
+        userName: connectionName,
+        inviterId: userId,
+        inviterName: currentUserDoc.data().displayName,
+        inviterPhotoURL: currentUserDoc.data().photoURL,
+      };
 
-      // Update the group document with the new members
-      await updateDoc(groupRef, { groupMembers: newMembers });
+      // Update the invited user's document with the new groupInvites field
+      await updateDoc(doc(db, "Users", connectionId), {
+        groupInvites: arrayUnion(invite),
+      });
 
       // Display success message
       setSuccess(`${connectionName} has been invited to the group!`);
 
-      // Fetch the existing groupMemberOf field of the invited user
-      const invitedUserDoc = await getDoc(doc(db, "Users", connectionId));
-      const currentGroups = invitedUserDoc.data().groupMemberOf || [];
-
-      // Add the group name to the invited user's groupMemberOf array
-      const newGroups = [
-        ...currentGroups,
-        { group: groupName, groupId: groupRef.id },
-      ];
-
-      // Update the invited user's document with the new groupMemberOf field
-      await updateDoc(doc(db, "Users", connectionId), {
-        groupMemberOf: newGroups,
-      });
-
       // Close the modal
-      /*  handleClose(); */
+      /* handleClose(); */
     } catch (error) {
       console.error("Error inviting connection to group: ", error);
       setError("Error inviting connection to group");
