@@ -137,6 +137,18 @@ export async function getUsers() {
   });
   return users;
 }
+
+// Async function to get all the groups from the database.
+export async function getGroups() {
+  const collectionRef = collection(db, "Groups");
+  const collectionSnap = await getDocs(collectionRef);
+  console.log(collectionSnap);
+  let groups = [];
+  collectionSnap.forEach((doc) => {
+    groups.push({ ...doc.data(), groupId: doc.id });
+  });
+  return groups;
+}
 // Async function to add a connection by id.
 export function addConnectionById(id) {
   return async (dispatch) => {
@@ -146,21 +158,25 @@ export function addConnectionById(id) {
 
     //current user is pending and other user gets a request
     // Add pending and request for the current user and other user, respectively.
-    updateDoc(currentUserRef, {pending: arrayUnion(id)});
-    updateDoc(otherUserRef, {requests: arrayUnion({
-      id: auth.currentUser.uid, 
-      name: currentUserDocument.data().displayName, 
-      photoURL: currentUserDocument.data().photoURL
-    })
-  });
+    updateDoc(currentUserRef, { pending: arrayUnion(id) });
+    updateDoc(otherUserRef, {
+      requests: arrayUnion({
+        id: auth.currentUser.uid,
+        name: currentUserDocument.data().displayName,
+        photoURL: currentUserDocument.data().photoURL,
+      }),
+    });
 
     // Create notification for the other user
-    updateDoc(otherUserRef, {notifications: arrayUnion({
-      notification: `${currentUserDocument.data().displayName} wants to connect.`,
-      photoURL: currentUserDocument.data().photoURL,
-      date: new Date(),
-      viewed: false
-      })
+    updateDoc(otherUserRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } wants to connect.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
     });
     console.log("Request has been sent!");
 
@@ -195,21 +211,25 @@ export function acceptRequest(id) {
       }),
     });
     //Clear their pending and request
-    updateDoc(currentUserRef, {requests: arrayRemove({
-      id: id, 
-      name: otherUserDocument.data().displayName, 
-      photoURL: otherUserDocument.data().photoURL
-    })
-  });
-    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    updateDoc(currentUserRef, {
+      requests: arrayRemove({
+        id: id,
+        name: otherUserDocument.data().displayName,
+        photoURL: otherUserDocument.data().photoURL,
+      }),
+    });
+    updateDoc(otherUserRef, { pending: arrayRemove(auth.currentUser.uid) });
 
     // Create notification for the other user
-    updateDoc(otherUserRef, {notifications: arrayUnion({
-      notification: `${currentUserDocument.data().displayName} accepted you request.`,
-      photoURL: currentUserDocument.data().photoURL,
-      date: new Date(),
-      viewed: false
-      })
+    updateDoc(otherUserRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } accepted you request.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
     });
     console.log("accepted");
 
@@ -551,50 +571,50 @@ export function createGroupJobPosting(
   };
 }
 
- export function savePost(jobId, userData){
-  return  (dispatch) =>{
-    userData.savedJobs.push(jobId)
-  let updatedUserData = {}
-  for (let property in userData) {
+export function savePost(jobId, userData) {
+  return (dispatch) => {
+    userData.savedJobs.push(jobId);
+    let updatedUserData = {};
+    for (let property in userData) {
       updatedUserData[property] = userData[property];
     }
-    console.log(updatedUserData)
+    console.log(updatedUserData);
     const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
     updateDoc(userDocumentRef, updatedUserData)
-    .then((result) => {
-      console.log(result)
-      dispatch(setUser(updatedUserData))
-    })
-    .catch(e => {
-      alert(e)
-    })
-  }
+      .then((result) => {
+        console.log(result);
+        dispatch(setUser(updatedUserData));
+      })
+      .catch((e) => {
+        alert(e);
+      });
+  };
 }
 
-export function unsavePost(jobId, userData){
-  return  (dispatch) =>{
+export function unsavePost(jobId, userData) {
+  return (dispatch) => {
     if (userData.savedJobs) {
-      userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+      userData.savedJobs = userData.savedJobs.filter(
+        (savedJob) => savedJob !== jobId
+      );
+    } else {
+      userData.savedJobs = [];
     }
-    else{
-      userData.savedJobs = []
-    } 
-  let updatedUserData = {}
-  for (let property in userData) {
+    let updatedUserData = {};
+    for (let property in userData) {
       updatedUserData[property] = userData[property];
     }
-    console.log(updatedUserData)
+    console.log(updatedUserData);
     const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
     updateDoc(userDocumentRef, updatedUserData)
-    .then((result) =>{
-      dispatch(setUser(updatedUserData))
-    })
-    .catch(e => {
-      alert(e)
-    })
-  }
+      .then((result) => {
+        dispatch(setUser(updatedUserData));
+      })
+      .catch((e) => {
+        alert(e);
+      });
+  };
 }
-
 
 export function createJobPosting(
   userId,
@@ -637,20 +657,23 @@ export function createJobPosting(
       })
       .catch((error) => alert(error.message));
 
-      const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-      const currentUserDocument = await getDoc(currentUserRef);
+    const currentUserRef = doc(db, "Users", auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
 
-      // Create notification for the all connections
-      currentUserDocument.data().connections.forEach(connection => {
-        updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
-          notification: `${currentUserDocument.data().displayName} added a post`,
+    // Create notification for the all connections
+    currentUserDocument.data().connections.forEach((connection) => {
+      updateDoc(doc(db, "Users", connection.id), {
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDocument.data().displayName
+          } added a post`,
           postURL: `/job-posting/${newJobPostingData.id}`,
           photoURL: currentUserDocument.data().photoURL,
           date: new Date(),
-          viewed: false
-          })
-        });
-      })
+          viewed: false,
+        }),
+      });
+    });
   };
 }
 

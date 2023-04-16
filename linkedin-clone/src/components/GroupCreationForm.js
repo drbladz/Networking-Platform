@@ -39,6 +39,9 @@ function GroupCreationForm(props) {
     const newGroupRef = await addDoc(groupsRef, updateGroupData);
     const newGroupId = newGroupRef.id;
 
+    // Add the groupId field to the group document
+    await updateDoc(newGroupRef, { groupId: newGroupId });
+
     // Update the user's groupOwned field
     const userRef = doc(db, "Users", userId);
     const userDoc = await getDoc(userRef);

@@ -8,6 +8,7 @@ import { getUserAuth } from "./actions";
 import { connect } from "react-redux";
 import JobPostingPage from "./components/JobPostingPage";
 import Network from "./components/Network";
+import GroupNetwork from "./components/GroupNetwork";
 import JobApplications from "./components/JobApplications";
 import UserProfile from "./components/UserProfile";
 import SearchingPreferences from "./components/SearchingPreferences";
@@ -33,6 +34,9 @@ function App(props) {
           </Route>
           <Route path="/network">
             <Network />
+          </Route>
+          <Route path="/groupNetwork">
+            <GroupNetwork />
           </Route>
           <Route path="/messages">
             <Messages />
