@@ -24,6 +24,7 @@ const GroupNetwork = (props) => {
   const [groups, setGroups] = useState([]);
   const [groupJoinRequests, setGroupJoinRequests] = useState([]);
   const [pendingGroups, setPendingGroups] = useState([]);
+  const [pendingJoinRequests, setPendingJoinRequests] = useState([]);
 
   const [groupInvites, setGroupInvites] = useState([]);
 
@@ -90,6 +91,10 @@ const GroupNetwork = (props) => {
         // Fetch group invites
         const invites = userDoc.data().groupInvites || [];
         setGroupInvites(invites);
+
+        // Fetch pending join requests
+        const pendingJoinRequests = userDoc.data().pendingJoinRequests || [];
+        setPendingJoinRequests(pendingJoinRequests);
       }
     };
 
@@ -130,12 +135,23 @@ const GroupNetwork = (props) => {
         (r) => r.userId !== request.userId || r.groupId !== request.groupId
       )
     );
+    // Remove the groupId from the user's pendingJoinRequests field in Firebase
+
+    await updateDoc(userRef, {
+      pendingJoinRequests: arrayRemove(request.groupId),
+    });
   }
 
   async function declineGroupJoinRequest(request) {
     const groupCreatorRef = doc(db, "Users", props.user.userId);
     updateDoc(groupCreatorRef, {
       groupJoinRequests: arrayRemove(request),
+    });
+
+    // Remove the groupId from the pendingGroups field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    await updateDoc(userRef, {
+      pendingGroups: arrayRemove(request.groupId),
     });
 
     // Update the groupJoinRequests state variable
@@ -240,7 +256,6 @@ const GroupNetwork = (props) => {
                               group.groupId,
                               props.user.userId
                             );
-                            setPendingGroups([...pendingGroups, group.groupId]);
                           }}
                         >
                           Join

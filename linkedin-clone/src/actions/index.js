@@ -25,6 +25,8 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
+  query,
+  where,
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
@@ -170,6 +172,12 @@ export const sendJoinGroupRequest = async (groupId, userId) => {
       userName: currentUserDocument.data().displayName,
       userPhotoURL: currentUserDocument.data().photoURL,
     }),
+  });
+
+  // Add the groupId to the user's pendingJoinRequests field in Firebase
+  const userRef = doc(db, "Users", userId);
+  await updateDoc(userRef, {
+    pendingJoinRequests: arrayUnion(groupId),
   });
 };
 
@@ -473,6 +481,28 @@ export function editJobPosting(editedJobPosting, currentPostingsList) {
   };
 }
 
+export const deleteGroupJobPosting = (
+  jobPostingId,
+  userId,
+  groupId,
+  currentPostingsList
+) => {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, "JobPostings", jobPostingId);
+    await deleteDoc(jobDocumentRef);
+
+    const newPostingsList = currentPostingsList.filter(
+      (job) => job.id !== jobPostingId
+    );
+    const newUserPostingsList = newPostingsList.filter(
+      (job) => job.userId === userId
+    );
+
+    dispatch(setJobPostings(newPostingsList));
+    dispatch(setUserJobPostings(newUserPostingsList));
+  };
+};
+
 export function editGroupJobPosting(
   editedJobPosting,
   currentPostingsList,
@@ -495,36 +525,6 @@ export function editGroupJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList));
       })
       .catch((error) => alert(error.message));
-  };
-}
-
-export function deleteGroupJobPosting(
-  jobPostingId,
-  userId,
-  groupId,
-  currentPostingsList
-) {
-  return async (dispatch) => {
-    const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
-    const jobDocumentSnapshot = await getDoc(jobDocumentRef);
-    if (jobDocumentSnapshot.exists()) {
-      const jobPosting = jobDocumentSnapshot.data();
-      if (jobPosting.groupId === groupId) {
-        await deleteDoc(jobDocumentRef);
-        const newPostingsList = currentPostingsList.filter(
-          (job) => job.id !== jobPostingId
-        );
-        const newUserPostingsList = newPostingsList.filter(
-          (job) => job.userId === userId
-        );
-        dispatch(setJobPostings(newPostingsList));
-        dispatch(setUserJobPostings(newUserPostingsList));
-      } else {
-        alert("This job posting does not belong to the current group.");
-      }
-    } else {
-      alert("This job posting does not exist.");
-    }
   };
 }
 
