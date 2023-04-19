@@ -51,6 +51,8 @@ function GroupCreationForm(props) {
       [newGroupId]: groupName,
     };
     await updateDoc(userRef, { groupOwned: updatedGroupOwned });
+
+    console.log(updatedGroupOwned);
   };
 
   return (

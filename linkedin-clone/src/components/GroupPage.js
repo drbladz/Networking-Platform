@@ -252,13 +252,13 @@ const GroupPage = (props) => {
         <BannerTitle>{groupName}</BannerTitle>
         <BannerAdmin>
           <h3>Admin Name: {adminName}</h3>
-          <QuitButton>
-            <button
-              onClick={() => currentUser && quitGroup(groupId, currentUser.uid)}
-            >
-              Quit Group
-            </button>
-          </QuitButton>
+          {currentUser && adminId !== currentUser.uid && (
+            <QuitButton>
+              <button onClick={() => quitGroup(groupId, currentUser.uid)}>
+                Quit Group
+              </button>
+            </QuitButton>
+          )}
           {/* <h4>Admin Id: {adminId}</h4> */}
         </BannerAdmin>
         {currentUser && adminId === currentUser.uid && (
