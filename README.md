@@ -18,9 +18,9 @@ A social networking application built for professionals to connect, communicate,
 
 ## Installation
 
-Clone the repository: `git clone https://github.com/your-username/linkedin-like-app.git`  
-Change directory to the project folder: `cd linkedin-clone`  
-Install the required dependencies: `npm install`  
+Clone the repository: `git clone https://github.com/your-username/linkedin-like-app.git` <br>  
+Change directory to the project folder: `cd linkedin-clone` <br>   
+Install the required dependencies: `npm install`  <br> 
 
 ## Usage
 Start the development server: `npm start`
