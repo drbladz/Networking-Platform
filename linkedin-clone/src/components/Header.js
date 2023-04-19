@@ -4,7 +4,7 @@ import { signOutAPI, getUsers } from "../actions";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faFileAlt } from "@fortawesome/free-solid-svg-icons";
 import {
   filterJobsByPreferences,
   getUserSearchingPreferences,
@@ -214,6 +214,15 @@ const Header = (props) => {
             </NavList>
 
             <NavList>
+            <NavLink to="/pages">
+              <a>
+                <FontAwesomeIcon icon={faFileAlt} />
+                <span>Pages</span>
+              </a>
+            </NavLink>
+          </NavList>
+
+            <NavList>
               <NavLink to="/messages">
                 <a>
                   <img src="/images/nav-messaging.svg" alt="" />
@@ -255,7 +264,7 @@ const Header = (props) => {
               </SignOut>
             </User>
 
-            <Work>
+            {/* <Work>
               <a>
                 <img src="/images/nav-work.svg" alt="" />
                 <span>
@@ -263,7 +272,7 @@ const Header = (props) => {
                   <img src="/images/down-icon.svg" alt="" />
                 </span>
               </a>
-            </Work>
+            </Work> */}
           </NavListWrap>
         </Nav>
       </Content>

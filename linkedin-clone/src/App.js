@@ -15,6 +15,9 @@ import SearchingPreferences from "./components/SearchingPreferences";
 import GroupPage from "./components/GroupPage";
 import Messages from "./components/Messages";
 import Notifications from "./components/Notifications";
+import CreatePageForm from "./components/CreatePageForm";
+import Pages from "./components/Pages";
+
 
 function App(props) {
   useEffect(() => {
@@ -52,6 +55,8 @@ function App(props) {
           />
           <Route path="/job-preferences" component={SearchingPreferences} />
           <Route path="/groups/:groupId" component={GroupPage} />
+          <Route path="/create-page" component={CreatePageForm} />
+          <Route path="/pages" component={Pages} />
         </Switch>
       </Router>
     </div>
