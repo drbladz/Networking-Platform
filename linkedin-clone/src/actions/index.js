@@ -25,6 +25,8 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
+  query,
+  where,
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
@@ -137,6 +139,48 @@ export async function getUsers() {
   });
   return users;
 }
+
+// Async function to get all the groups from the database.
+export async function getGroups() {
+  const collectionRef = collection(db, "Groups");
+  const collectionSnap = await getDocs(collectionRef);
+  console.log(collectionSnap);
+  let groups = [];
+  collectionSnap.forEach((doc) => {
+    groups.push({ ...doc.data(), groupId: doc.id });
+  });
+  return groups;
+}
+
+export const sendJoinGroupRequest = async (groupId, userId) => {
+  const currentUserRef = doc(db, "Users", userId);
+  const currentUserDocument = await getDoc(currentUserRef);
+  const groupRef = doc(db, "Groups", groupId);
+  const groupDocument = await getDoc(groupRef);
+  const groupCreatorId = groupDocument.data().createdBy;
+  const groupCreatorRef = doc(db, "Users", groupCreatorId);
+
+  // Add pending group for the current user
+  await updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
+
+  // Add join request for the group creator
+  await updateDoc(groupCreatorRef, {
+    groupJoinRequests: arrayUnion({
+      groupId: groupId,
+      groupName: groupDocument.data().groupName,
+      userId: userId,
+      userName: currentUserDocument.data().displayName,
+      userPhotoURL: currentUserDocument.data().photoURL,
+    }),
+  });
+
+  // Add the groupId to the user's pendingJoinRequests field in Firebase
+  const userRef = doc(db, "Users", userId);
+  await updateDoc(userRef, {
+    pendingJoinRequests: arrayUnion(groupId),
+  });
+};
+
 // Async function to add a connection by id.
 export function addConnectionById(id) {
   return async (dispatch) => {
@@ -146,21 +190,25 @@ export function addConnectionById(id) {
 
     //current user is pending and other user gets a request
     // Add pending and request for the current user and other user, respectively.
-    updateDoc(currentUserRef, {pending: arrayUnion(id)});
-    updateDoc(otherUserRef, {requests: arrayUnion({
-      id: auth.currentUser.uid, 
-      name: currentUserDocument.data().displayName, 
-      photoURL: currentUserDocument.data().photoURL
-    })
-  });
+    updateDoc(currentUserRef, { pending: arrayUnion(id) });
+    updateDoc(otherUserRef, {
+      requests: arrayUnion({
+        id: auth.currentUser.uid,
+        name: currentUserDocument.data().displayName,
+        photoURL: currentUserDocument.data().photoURL,
+      }),
+    });
 
     // Create notification for the other user
-    updateDoc(otherUserRef, {notifications: arrayUnion({
-      notification: `${currentUserDocument.data().displayName} wants to connect.`,
-      photoURL: currentUserDocument.data().photoURL,
-      date: new Date(),
-      viewed: false
-      })
+    updateDoc(otherUserRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } wants to connect.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
     });
     console.log("Request has been sent!");
 
@@ -195,21 +243,25 @@ export function acceptRequest(id) {
       }),
     });
     //Clear their pending and request
-    updateDoc(currentUserRef, {requests: arrayRemove({
-      id: id, 
-      name: otherUserDocument.data().displayName, 
-      photoURL: otherUserDocument.data().photoURL
-    })
-  });
-    updateDoc(otherUserRef, {pending: arrayRemove(auth.currentUser.uid)});
+    updateDoc(currentUserRef, {
+      requests: arrayRemove({
+        id: id,
+        name: otherUserDocument.data().displayName,
+        photoURL: otherUserDocument.data().photoURL,
+      }),
+    });
+    updateDoc(otherUserRef, { pending: arrayRemove(auth.currentUser.uid) });
 
     // Create notification for the other user
-    updateDoc(otherUserRef, {notifications: arrayUnion({
-      notification: `${currentUserDocument.data().displayName} accepted you request.`,
-      photoURL: currentUserDocument.data().photoURL,
-      date: new Date(),
-      viewed: false
-      })
+    updateDoc(otherUserRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } accepted you request.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
     });
     console.log("accepted");
 
@@ -429,6 +481,28 @@ export function editJobPosting(editedJobPosting, currentPostingsList) {
   };
 }
 
+export const deleteGroupJobPosting = (
+  jobPostingId,
+  userId,
+  groupId,
+  currentPostingsList
+) => {
+  return async (dispatch) => {
+    const jobDocumentRef = doc(db, "JobPostings", jobPostingId);
+    await deleteDoc(jobDocumentRef);
+
+    const newPostingsList = currentPostingsList.filter(
+      (job) => job.id !== jobPostingId
+    );
+    const newUserPostingsList = newPostingsList.filter(
+      (job) => job.userId === userId
+    );
+
+    dispatch(setJobPostings(newPostingsList));
+    dispatch(setUserJobPostings(newUserPostingsList));
+  };
+};
+
 export function editGroupJobPosting(
   editedJobPosting,
   currentPostingsList,
@@ -451,36 +525,6 @@ export function editGroupJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList));
       })
       .catch((error) => alert(error.message));
-  };
-}
-
-export function deleteGroupJobPosting(
-  jobPostingId,
-  userId,
-  groupId,
-  currentPostingsList
-) {
-  return async (dispatch) => {
-    const jobDocumentRef = doc(db, `JobPostings/${jobPostingId}`);
-    const jobDocumentSnapshot = await getDoc(jobDocumentRef);
-    if (jobDocumentSnapshot.exists()) {
-      const jobPosting = jobDocumentSnapshot.data();
-      if (jobPosting.groupId === groupId) {
-        await deleteDoc(jobDocumentRef);
-        const newPostingsList = currentPostingsList.filter(
-          (job) => job.id !== jobPostingId
-        );
-        const newUserPostingsList = newPostingsList.filter(
-          (job) => job.userId === userId
-        );
-        dispatch(setJobPostings(newPostingsList));
-        dispatch(setUserJobPostings(newUserPostingsList));
-      } else {
-        alert("This job posting does not belong to the current group.");
-      }
-    } else {
-      alert("This job posting does not exist.");
-    }
   };
 }
 
@@ -551,50 +595,50 @@ export function createGroupJobPosting(
   };
 }
 
- export function savePost(jobId, userData){
-  return  (dispatch) =>{
-    userData.savedJobs.push(jobId)
-  let updatedUserData = {}
-  for (let property in userData) {
+export function savePost(jobId, userData) {
+  return (dispatch) => {
+    userData.savedJobs.push(jobId);
+    let updatedUserData = {};
+    for (let property in userData) {
       updatedUserData[property] = userData[property];
     }
-    console.log(updatedUserData)
+    console.log(updatedUserData);
     const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
     updateDoc(userDocumentRef, updatedUserData)
-    .then((result) => {
-      console.log(result)
-      dispatch(setUser(updatedUserData))
-    })
-    .catch(e => {
-      alert(e)
-    })
-  }
+      .then((result) => {
+        console.log(result);
+        dispatch(setUser(updatedUserData));
+      })
+      .catch((e) => {
+        alert(e);
+      });
+  };
 }
 
-export function unsavePost(jobId, userData){
-  return  (dispatch) =>{
+export function unsavePost(jobId, userData) {
+  return (dispatch) => {
     if (userData.savedJobs) {
-      userData.savedJobs = userData.savedJobs.filter(savedJob => savedJob !== jobId)
+      userData.savedJobs = userData.savedJobs.filter(
+        (savedJob) => savedJob !== jobId
+      );
+    } else {
+      userData.savedJobs = [];
     }
-    else{
-      userData.savedJobs = []
-    } 
-  let updatedUserData = {}
-  for (let property in userData) {
+    let updatedUserData = {};
+    for (let property in userData) {
       updatedUserData[property] = userData[property];
     }
-    console.log(updatedUserData)
+    console.log(updatedUserData);
     const userDocumentRef = doc(db, `Users/${updatedUserData.userId}`);
     updateDoc(userDocumentRef, updatedUserData)
-    .then((result) =>{
-      dispatch(setUser(updatedUserData))
-    })
-    .catch(e => {
-      alert(e)
-    })
-  }
+      .then((result) => {
+        dispatch(setUser(updatedUserData));
+      })
+      .catch((e) => {
+        alert(e);
+      });
+  };
 }
-
 
 export function createJobPosting(
   userId,
@@ -637,20 +681,23 @@ export function createJobPosting(
       })
       .catch((error) => alert(error.message));
 
-      const currentUserRef = doc(db,"Users",auth.currentUser.uid);
-      const currentUserDocument = await getDoc(currentUserRef);
+    const currentUserRef = doc(db, "Users", auth.currentUser.uid);
+    const currentUserDocument = await getDoc(currentUserRef);
 
-      // Create notification for the all connections
-      currentUserDocument.data().connections.forEach(connection => {
-        updateDoc(doc(db,"Users",connection.id), {notifications: arrayUnion({
-          notification: `${currentUserDocument.data().displayName} added a post`,
+    // Create notification for the all connections
+    currentUserDocument.data().connections.forEach((connection) => {
+      updateDoc(doc(db, "Users", connection.id), {
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDocument.data().displayName
+          } added a post`,
           postURL: `/job-posting/${newJobPostingData.id}`,
           photoURL: currentUserDocument.data().photoURL,
           date: new Date(),
-          viewed: false
-          })
-        });
-      })
+          viewed: false,
+        }),
+      });
+    });
   };
 }
 

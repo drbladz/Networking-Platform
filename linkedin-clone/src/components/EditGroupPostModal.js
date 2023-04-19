@@ -2,9 +2,25 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import {
   createGroupJobPosting,
-  deleteGroupJobPosting,
   editGroupJobPosting,
+  deleteGroupJobPosting,
+  setJobPostings,
+  setUserJobPostings,
 } from "../actions";
+import {
+  collection,
+  getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  arrayUnion,
+  arrayRemove,
+  query,
+  where,
+  doc,
+} from "firebase/firestore";
+import db from "../firebase";
 import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 
@@ -43,6 +59,21 @@ const EditGroupPostModal = (props) => {
   );
 
   const groupId = useParams();
+
+  const handleDelete = async () => {
+    try {
+      await props.deleteGroupJobPosting(
+        props.job.id,
+        props.job.userId,
+        groupId,
+        props.jobPostings
+      );
+      reset();
+    } catch (error) {
+      console.error("Error deleting job posting:", error);
+      alert("There was an error deleting the job posting. Please try again.");
+    }
+  };
 
   // useEffect hook to update state variables when props change
   useEffect(() => {
@@ -252,6 +283,7 @@ const EditGroupPostModal = (props) => {
             <SharedCreation>
               <EditButton
                 onClick={() => {
+                  console.log(groupId);
                   props.editGroupJobPosting(
                     {
                       displayName: props.job.displayName,
@@ -279,19 +311,7 @@ const EditGroupPostModal = (props) => {
               >
                 Apply Change
               </EditButton>
-              <DeleteButton
-                onClick={() => {
-                  props.deleteGroupJobPosting(
-                    props.job.id,
-                    props.job.userId,
-                    groupId,
-                    props.jobPostings
-                  );
-                  reset();
-                }}
-              >
-                Delete Post
-              </DeleteButton>
+              <DeleteButton onClick={handleDelete}>Delete Post</DeleteButton>
             </SharedCreation>
           </Content>
         </Container>
@@ -336,9 +356,18 @@ const mapDispatchToProps = (dispatch) => ({
   editGroupJobPosting: (editedJobData, currentPostingsList) =>
     dispatch(editGroupJobPosting(editedJobData, currentPostingsList)),
   deleteGroupJobPosting: (jobPostingId, userId, groupId, currentPostingsList) =>
-    dispatch(
-      deleteGroupJobPosting(jobPostingId, userId, groupId, currentPostingsList)
-    ),
+    new Promise((resolve, reject) => {
+      dispatch(
+        deleteGroupJobPosting(
+          jobPostingId,
+          userId,
+          groupId,
+          currentPostingsList
+        )
+      )
+        .then(() => resolve())
+        .catch((error) => reject(error));
+    }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditGroupPostModal);

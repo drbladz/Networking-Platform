@@ -16,7 +16,10 @@ import {
   getDoc,
   query,
   where,
+  arrayRemove,
+  deleteDoc,
 } from "firebase/firestore";
+import { useHistory } from "react-router-dom";
 import InviteToGroup from "./InviteToGroup";
 
 import GroupJobPostings from "./GroupJobPostings";
@@ -34,6 +37,8 @@ const GroupPage = (props) => {
 
   const [showEditForm, setShowEditForm] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
+
+  const history = useHistory();
 
   /* const [jobPostings, loading, error] = useCollectionData(
     query(collection(db, "JobPostings"), where("groupId", "==", groupId))
@@ -146,6 +151,98 @@ const GroupPage = (props) => {
     getGroupData();
   }, [groupId]);
 
+  async function quitGroup(groupId, userId) {
+    // Get the user's name
+    const userRef = doc(db, "Users", userId);
+    const userSnapshot = await getDoc(userRef);
+    const user = userSnapshot.data();
+    const userName = user.displayName;
+
+    // Remove the user from the groupMembers field array in the group document
+    const groupRef = doc(db, "Groups", groupId);
+    const groupSnapshot = await getDoc(groupRef);
+    const group = groupSnapshot.data();
+    const updatedGroupMembers = group.groupMembers.filter(
+      (member) => member.userName !== userName
+    );
+
+    await updateDoc(groupRef, {
+      groupMembers: updatedGroupMembers,
+    });
+
+    // Remove the respective groupId from the groupMemberOf field in the respective User document
+    const updatedGroupMemberOf = user.groupMemberOf.filter(
+      (group) => group.groupId !== groupId
+    );
+
+    await updateDoc(userRef, {
+      groupMemberOf: updatedGroupMemberOf,
+    });
+
+    // Remove the groupId from the pendingJoinRequests field in the User document
+    await updateDoc(userRef, {
+      pendingJoinRequests: arrayRemove(groupId),
+    });
+
+    const userSnapshotAfterQuit = await getDoc(userRef);
+    const userAfterQuit = userSnapshotAfterQuit.data();
+    if (userAfterQuit.pendingJoinRequests.includes(groupId)) {
+      await updateDoc(userRef, {
+        pendingJoinRequests: arrayRemove(groupId),
+      });
+    }
+
+    history.push("/home");
+  }
+
+  async function deleteGroup(groupId) {
+    console.log("deleted");
+    // Get the group document
+    const groupRef = doc(db, "Groups", groupId);
+    const groupSnapshot = await getDoc(groupRef);
+    const group = groupSnapshot.data();
+
+    // Remove the respective groupId from the groupMemberOf field in each member's User document
+    const groupMembers = group.groupMembers;
+    for (const member of groupMembers) {
+      const memberUserId = member.userId;
+      const memberUserRef = doc(db, "Users", memberUserId);
+      const memberUserSnapshot = await getDoc(memberUserRef);
+      const memberUser = memberUserSnapshot.data();
+      const updatedGroupMemberOf = memberUser.groupMemberOf.filter(
+        (group) => group.groupId !== groupId
+      );
+
+      await updateDoc(memberUserRef, {
+        groupMemberOf: updatedGroupMemberOf,
+      });
+    }
+
+    // Get the creator's document and remove the respective groupName from the groupOwned field
+    const creatorId = group.createdBy;
+    const creatorRef = doc(db, "Users", creatorId);
+    const creatorSnapshot = await getDoc(creatorRef);
+    const creator = creatorSnapshot.data();
+
+    // Remove the respective groupId and groupName from the groupOwned field
+    const updatedGroupOwned = {};
+    for (const [key, value] of Object.entries(creator.groupOwned)) {
+      if (key !== groupId) {
+        updatedGroupOwned[key] = value;
+      }
+    }
+
+    await updateDoc(creatorRef, {
+      groupOwned: updatedGroupOwned,
+    });
+
+    // Delete the group document
+    await deleteDoc(groupRef);
+
+    // Redirect to another page (e.g., home) after the group is deleted
+    history.push("/home");
+  }
+
   const currentUser = auth.currentUser;
 
   return (
@@ -155,10 +252,20 @@ const GroupPage = (props) => {
         <BannerTitle>{groupName}</BannerTitle>
         <BannerAdmin>
           <h3>Admin Name: {adminName}</h3>
+          {currentUser && adminId !== currentUser.uid && (
+            <QuitButton>
+              <button onClick={() => quitGroup(groupId, currentUser.uid)}>
+                Quit Group
+              </button>
+            </QuitButton>
+          )}
           {/* <h4>Admin Id: {adminId}</h4> */}
         </BannerAdmin>
         {currentUser && adminId === currentUser.uid && (
           <>
+            <DeleteGroupButton>
+              <button onClick={() => deleteGroup(groupId)}>Delete Group</button>
+            </DeleteGroupButton>
             <EditGroupButton>
               <button onClick={handleEditClick}>Edit Group Informations</button>
               <CustomModal5 isOpen={showEditForm} onRequestClose={handleClose}>
@@ -186,8 +293,8 @@ const GroupPage = (props) => {
             <h4>Group Members</h4>
             {groupMembers.length > 0 ? (
               <ul>
-                {groupMembers.map((member) => (
-                  <li key={member}>{member}</li>
+                {groupMembers.map((member, index) => (
+                  <li key={index}>{member.userName}</li>
                 ))}
               </ul>
             ) : (
@@ -247,7 +354,22 @@ const EditGroupButton = styled.div`
   line-height: 1.33;
   font-weight: 400;
 `;
+
+const DeleteGroupButton = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
 const InviteButton = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+`;
+const QuitButton = styled.div`
   color: #0a66c2;
   margin-top: 4px;
   font-size: 12px;

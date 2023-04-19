@@ -1,47 +1,52 @@
 import styled from "styled-components";
-import {connect } from "react-redux";
-import { signOutAPI, getUsers} from "../actions";
+import { connect } from "react-redux";
+import { signOutAPI, getUsers } from "../actions";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCog} from '@fortawesome/free-solid-svg-icons';
-import { filterJobsByPreferences, getUserSearchingPreferences } from '../actions/index';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog } from "@fortawesome/free-solid-svg-icons";
+import {
+  filterJobsByPreferences,
+  getUserSearchingPreferences,
+} from "../actions/index";
 import { db, auth } from "../firebase";
-import { collection, doc, query, where, updateDoc } from 'firebase/firestore';
+import { collection, doc, query, where, updateDoc } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { MdNotificationsActive } from 'react-icons/md';
+import { MdNotificationsActive } from "react-icons/md";
 
 const Header = (props) => {
   // useState hook to manage the search input value
   const [value, setValue] = useState("");
-    // useState hook to manage the list of users returned by the API call
+  // useState hook to manage the list of users returned by the API call
   const [users, setUsers] = useState([]);
   const [searchPreferences, setSearchPreferences] = useState(null);
   const [usePreferences, setUsePreferences] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   // useEffect hook to call the getUsers function from the actions file on component mount
   useEffect(() => {
-        // getUsers returns a promise that resolves to an array of user objects
-    getUsers().then(data => {
+    // getUsers returns a promise that resolves to an array of user objects
+    getUsers().then((data) => {
       setUsers(data);
     });
 
     if (props.user) {
-      getUserSearchingPreferences(props.user.userId).then(searchingPreferences => {
-        setSearchPreferences(searchingPreferences);
-      });
+      getUserSearchingPreferences(props.user.userId).then(
+        (searchingPreferences) => {
+          setSearchPreferences(searchingPreferences);
+        }
+      );
     }
-        // console.log statement to show when the component is mounted
+    // console.log statement to show when the component is mounted
 
     console.log("get users and search preferences");
     if (auth.currentUser) {
       setCurrentUserId(auth.currentUser.uid);
-    } 
+    }
     // return statement to clean up the users state on component unmount
     return () => {
       setUsers([]);
-    }
-  }, [])
+    };
+  }, []);
   // function to update the search input value when the user types
   const onChange = (event) => {
     setValue(event.target.value);
@@ -49,120 +54,139 @@ const Header = (props) => {
 
   // Get realtime current user data
   const [user, userLoading, userError] = useCollectionData(
-    query(collection(db, "Users"), where('userId', '==', currentUserId)
-    )
+    query(collection(db, "Users"), where("userId", "==", currentUserId))
   );
   let notifications = [];
   // Get notifications
-  if (user && user[0].notifications){
+  /* if (user && user[0].notifications) {
     notifications = user[0].notifications;
-  }
-  
+  } */
+
   // component JSX for the Header
   return (
     <Container>
-    <Content>
-      <Logo>
-        <Link to="/home">
-          <img src="/images/jobshare.png" width="40px" alt="" />
-        </Link>
-      </Logo>
-      <SearchContainer>
-      <Search>
-        <div>
-        <input type="text" placeholder="Search" value={value} onChange={onChange} />
-        </div>
-        <SearchIcon>
-          <img src="/images/search-icon.svg" alt="" />
-        </SearchIcon>
-        
-        <Dropdown show={value}>
-  {value && (
-    <>
-      <UserSection>
-        <SectionLabel>Users</SectionLabel>
-        {users
-          .filter((user) => {
-            const searchTerm = value.toLowerCase();
-            let fullName;
-            if (user.displayName) {
-              fullName = user.displayName.toLowerCase();
-            } else {
-              fullName = "No name";
-            }
-            return searchTerm && fullName.startsWith(searchTerm);
-          })
-          .slice(0, 10)
-          .map((user) => (
-            <DropdownRow key={user.userId}>
-              <Link
-                to={{
-                  pathname: `/user/${user.userId}`,
-                  state: user,
-                }}
-                style={{ textDecoration: "none", color: "black" }}
-                onClick={() => setValue("")}
-              >
-                {user.photoURL ? (
-                  <UserPhoto
-                    src={user.photoURL}
-                    alt=""
-                    width={30}
-                    height={30}
-                  />
-                ) : (
-                  <UserPhoto
-                    src="/images/user.svg"
-                    alt=""
-                    width={30}
-                    height={30}
-                  />
-                )}
-                {user.displayName}
-              </Link>
-            </DropdownRow>
-          ))}
-      </UserSection>
-      <HorizontalLine />
-      <JobSection>
-  <SectionLabel>Jobs</SectionLabel>
-  {(usePreferences ? filterJobsByPreferences(props.jobPostings, searchPreferences) : props.jobPostings)
-    .filter((job) => {
-      const searchTerm = value.toLowerCase();
-      const title = job.postTitle.toLowerCase();
-      const description = job.postDescription.toLowerCase();
-      return (
-        searchTerm &&
-        (title.startsWith(searchTerm) ||
-          description.startsWith(searchTerm))
-      );
-    })
-    .slice(0, 10)
-    .map((job) => (
-      <DropdownRow key={job.id}>
-        <Link
-          to={{
-            pathname: `/job-posting/${job.id}`,
-            state: job,
-          }}
-          style={{ textDecoration: "none", color: "black" }}
-          onClick={() => setValue("")}
-          target="_blank"
-        >
-          {job.postTitle}
-        </Link>
-      </DropdownRow>
-    ))}
-</JobSection>
-    </>
-  )}
-</Dropdown>
-        </Search>
-      </SearchContainer>
-      <ToggleButtonContainer>
-        <ToggleButton usePreferences={usePreferences} onClick={() => setUsePreferences(!usePreferences)}>
-  {usePreferences ? <><FontAwesomeIcon icon={faCog} /> Search with Preferences</> : <> Search All Jobs</>}
-        </ToggleButton>
+      <Content>
+        <Logo>
+          <Link to="/home">
+            <img src="/images/jobshare.png" width="40px" alt="" />
+          </Link>
+        </Logo>
+        <SearchContainer>
+          <Search>
+            <div>
+              <input
+                type="text"
+                placeholder="Search"
+                value={value}
+                onChange={onChange}
+              />
+            </div>
+            <SearchIcon>
+              <img src="/images/search-icon.svg" alt="" />
+            </SearchIcon>
+
+            <Dropdown show={value}>
+              {value && (
+                <>
+                  <UserSection>
+                    <SectionLabel>Users</SectionLabel>
+                    {users
+                      .filter((user) => {
+                        const searchTerm = value.toLowerCase();
+                        let fullName;
+                        if (user.displayName) {
+                          fullName = user.displayName.toLowerCase();
+                        } else {
+                          fullName = "No name";
+                        }
+                        return searchTerm && fullName.startsWith(searchTerm);
+                      })
+                      .slice(0, 10)
+                      .map((user) => (
+                        <DropdownRow key={user.userId}>
+                          <Link
+                            to={{
+                              pathname: `/user/${user.userId}`,
+                              state: user,
+                            }}
+                            style={{ textDecoration: "none", color: "black" }}
+                            onClick={() => setValue("")}
+                          >
+                            {user.photoURL ? (
+                              <UserPhoto
+                                src={user.photoURL}
+                                alt=""
+                                width={30}
+                                height={30}
+                              />
+                            ) : (
+                              <UserPhoto
+                                src="/images/user.svg"
+                                alt=""
+                                width={30}
+                                height={30}
+                              />
+                            )}
+                            {user.displayName}
+                          </Link>
+                        </DropdownRow>
+                      ))}
+                  </UserSection>
+                  <HorizontalLine />
+                  <JobSection>
+                    <SectionLabel>Jobs</SectionLabel>
+                    {(usePreferences
+                      ? filterJobsByPreferences(
+                          props.jobPostings,
+                          searchPreferences
+                        )
+                      : props.jobPostings
+                    )
+                      .filter((job) => {
+                        const searchTerm = value.toLowerCase();
+                        const title = job.postTitle.toLowerCase();
+                        const description = job.postDescription.toLowerCase();
+                        return (
+                          searchTerm &&
+                          (title.startsWith(searchTerm) ||
+                            description.startsWith(searchTerm))
+                        );
+                      })
+                      .slice(0, 10)
+                      .map((job) => (
+                        <DropdownRow key={job.id}>
+                          <Link
+                            to={{
+                              pathname: `/job-posting/${job.id}`,
+                              state: job,
+                            }}
+                            style={{ textDecoration: "none", color: "black" }}
+                            onClick={() => setValue("")}
+                            target="_blank"
+                          >
+                            {job.postTitle}
+                          </Link>
+                        </DropdownRow>
+                      ))}
+                  </JobSection>
+                </>
+              )}
+            </Dropdown>
+          </Search>
+        </SearchContainer>
+        <ToggleButtonContainer>
+          <ToggleButton
+            usePreferences={usePreferences}
+            onClick={() => setUsePreferences(!usePreferences)}
+          >
+            {usePreferences ? (
+              <>
+                <FontAwesomeIcon icon={faCog} /> Search with Preferences
+              </>
+            ) : (
+              <> Search All Jobs</>
+            )}
+          </ToggleButton>
         </ToggleButtonContainer>
         <Nav>
           <NavListWrap>
@@ -181,47 +205,52 @@ const Header = (props) => {
             </NavList>
 
             <NavList>
-              <a>
-                <img src="/images/nav-jobs.svg" alt="" />
-                <span>Jobs</span>
-              </a>
+              <NavLink to="/groupNetwork">
+                <a>
+                  <img src="/images/nav-jobs.svg" alt="" />
+                  <span>Groups</span>
+                </a>
+              </NavLink>
             </NavList>
 
             <NavList>
-            <NavLink to="/messages">
-              <a>
-                <img src="/images/nav-messaging.svg" alt="" />
-                <span>Messaging</span>
-              </a>
-            </NavLink>
+              <NavLink to="/messages">
+                <a>
+                  <img src="/images/nav-messaging.svg" alt="" />
+                  <span>Messaging</span>
+                </a>
+              </NavLink>
             </NavList>
 
             <NavList>
               <NavLink to="/notifications">
-              <a>
-                {notifications && notifications[notifications.length-1] &&
-                 notifications[notifications.length-1].viewed === false ?
-                  <MdNotificationsActive color="orange" size={24}/> :
-                  <img src="/images/nav-notifications.svg" alt="" />
-                }
-                <span>Notifications</span>
-              </a>
+                <a>
+                  {notifications &&
+                  notifications[notifications.length - 1] &&
+                  notifications[notifications.length - 1].viewed === false ? (
+                    <MdNotificationsActive color="orange" size={24} />
+                  ) : (
+                    <img src="/images/nav-notifications.svg" alt="" />
+                  )}
+                  <span>Notifications</span>
+                </a>
               </NavLink>
             </NavList>
 
             <User>
               <a>
-                {props.user && props.user.photoURL ?
-                <img src={props.user.photoURL} referrerPolicy="no-referrer"/>
-                :<img src="/images/user.svg" alt="" />}
+                {props.user && props.user.photoURL ? (
+                  <img src={props.user.photoURL} referrerPolicy="no-referrer" />
+                ) : (
+                  <img src="/images/user.svg" alt="" />
+                )}
                 <span>
                   Me
                   <img src="/images/down-icon.svg" alt="" />
                 </span>
-                
               </a>
 
-              <SignOut onClick={()=>props.signOut()}>
+              <SignOut onClick={() => props.signOut()}>
                 <a>Sign Out</a>
               </SignOut>
             </User>
@@ -288,7 +317,7 @@ const Search = styled.div`
       height: 34px;
       border-color: #dce6f1;
       vertical-align: text-top;
-      outline: none; 
+      outline: none;
     }
   }
 `;
@@ -296,8 +325,7 @@ const Search = styled.div`
 const SearchContainer = styled.div`
   position: relative;
 `;
-const ToggleButtonContainer = styled.div`
-`;
+const ToggleButtonContainer = styled.div``;
 // Styles for the search icon
 const SearchIcon = styled.div`
   width: 40px;
@@ -315,7 +343,7 @@ const SearchIcon = styled.div`
 // Styles for the dropdown menu
 const Dropdown = styled.div`
   background-color: white;
-  display: ${({ show }) => (show ? 'flex' : 'none')};
+  display: ${({ show }) => (show ? "flex" : "none")};
   flex-direction: column;
   border: 1px solid gray;
   border-radius: 5px;
@@ -373,20 +401,24 @@ const Nav = styled.nav`
 const ToggleButton = styled.button`
   margin-left: 10px;
   border: none;
-  background-color: ${({ usePreferences }) => usePreferences ? '#E5F3FF' : '#FFFFFF'};
+  background-color: ${({ usePreferences }) =>
+    usePreferences ? "#E5F3FF" : "#FFFFFF"};
   border-radius: 2px;
-  color: ${({ usePreferences }) => usePreferences ? '#0E6AFF' : 'rgba(0, 0, 0, 0.6)'};
+  color: ${({ usePreferences }) =>
+    usePreferences ? "#0E6AFF" : "rgba(0, 0, 0, 0.6)"};
   padding: 5px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 
   &:hover {
-    background-color: ${({ usePreferences }) => usePreferences ? '#E5F3FF' : 'rgba(0, 0, 0, 0.05)'};
+    background-color: ${({ usePreferences }) =>
+      usePreferences ? "#E5F3FF" : "rgba(0, 0, 0, 0.05)"};
   }
-  
+
   svg {
     margin-right: 5px;
-    fill: ${({ usePreferences }) => usePreferences ? '#0E6AFF' : 'rgba(0, 0, 0, 0.6)'};
+    fill: ${({ usePreferences }) =>
+      usePreferences ? "#0E6AFF" : "rgba(0, 0, 0, 0.6)"};
   }
 `;
 // Styles for the navigation list wrapper
@@ -491,15 +523,15 @@ const Work = styled(User)`
   border-left: 1px solid rgba(0, 0, 0, 0.08);
 `;
 
-const mapStateToProps = (state) =>{
+const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
     jobPostings: state.jobPostingsState.jobPostings,
-  }
-}
+  };
+};
 
 const mapDispatchToProps = (dispatch) => ({
-  signOut: () => dispatch(signOutAPI())
-})
+  signOut: () => dispatch(signOutAPI()),
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header)
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

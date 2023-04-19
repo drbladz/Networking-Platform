@@ -11,7 +11,7 @@ import GroupCreationForm from "./GroupCreationForm";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
 
-Modal.setAppElement("#root"); // set the modal's parent element
+//Modal.setAppElement("#root"); // set the modal's parent element
 
 const Leftside = (props) => {
   //const [showForm, setShowForm] = useState(false);
