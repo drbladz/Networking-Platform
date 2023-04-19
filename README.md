@@ -10,7 +10,7 @@ A social networking application built for professionals to connect, communicate,
 * Search functionality (find other users by name, headline, or skill)
 * Messaging (real-time private messaging between connections)
 * Notifications (receive updates on connection requests, messages, and more)
-...and many more features already implemented! Explore the app to discover all the functionalities available.
+* ...and many more features already implemented! Explore the app to discover all the functionalities available.
 
 ## Prerequisites
 * Node.js (v18.3.0 or higher)
