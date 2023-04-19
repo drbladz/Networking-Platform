@@ -4,10 +4,10 @@ A social networking application built for professionals to connect, communicate,
 
 ## Features
 
-* User authentication (login, registration, and password reset)
+* User authentication (login, registration)
 * Profile creation and editing (including profile picture, headline, summary, work experience, and education)
 * Connection management (sending, accepting, and rejecting connection requests)
-* Search functionality (find other users by name, headline, or skill)
+* Search functionality (find other users by name, find jobs by title or description)
 * Messaging (real-time private messaging between connections)
 * Notifications (receive updates on connection requests, messages, and more)
 * ...and many more features already implemented! Explore the app to discover all the functionalities available.
