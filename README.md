@@ -29,7 +29,7 @@ Start the development server: `npm start`
 * ReactJS
 * Redux
 * Firebase (Firestore database)
-* CSS/SCSS
+* CSS
 
 ## Team Members
 | Name | Github | ID | 
