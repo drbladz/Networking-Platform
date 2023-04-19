@@ -175,10 +175,18 @@ const GroupNetwork = (props) => {
             <td>{invite.inviterName}</td>
             <td>has invited you to join {invite.groupName}</td>
             <td>
-              <button onClick={() => acceptGroupInvite(invite)}>Accept</button>
+              <button
+                className="accept"
+                onClick={() => acceptGroupInvite(invite)}
+              >
+                Accept
+              </button>
             </td>
             <td>
-              <button onClick={() => declineGroupInvite(invite)}>
+              <button
+                className="decline"
+                onClick={() => declineGroupInvite(invite)}
+              >
                 Decline
               </button>
             </td>
