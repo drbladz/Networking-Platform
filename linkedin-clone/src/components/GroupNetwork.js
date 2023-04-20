@@ -3,8 +3,10 @@ import styled from "styled-components";
 import {
   getGroups,
   sendJoinGroupRequest,
-  groupJoinRequest,
-  declineRequest,
+  acceptGroupInvite,
+  declineGroupInvite,
+  acceptGroupJoinRequest,
+  declineGroupJoinRequest,
 } from "../actions";
 import {
   doc,
@@ -28,48 +30,6 @@ const GroupNetwork = (props) => {
 
   const [groupInvites, setGroupInvites] = useState([]);
 
-  async function acceptGroupInvite(invite) {
-    // Add the user to the groupMembers field object in the group document
-    const groupRef = doc(db, "Groups", invite.groupId);
-    updateDoc(groupRef, {
-      groupMembers: arrayUnion({
-        userId: invite.userId,
-        userName: invite.userName,
-      }),
-    });
-
-    // Add the respective groupId in the groupMemberOf field in the respective User document
-    const userRef = doc(db, "Users", invite.userId);
-    updateDoc(userRef, {
-      groupMemberOf: arrayUnion({
-        group: invite.groupName,
-        groupId: invite.groupId,
-      }),
-      groupInvites: arrayRemove(invite),
-    });
-
-    // Update the groupInvites state variable
-    setGroupInvites((prevInvites) =>
-      prevInvites.filter(
-        (i) => i.userId !== invite.userId || i.groupId !== invite.groupId
-      )
-    );
-  }
-
-  async function declineGroupInvite(invite) {
-    // Remove the invite from the user's groupInvites field
-    const userRef = doc(db, "Users", invite.userId);
-    updateDoc(userRef, {
-      groupInvites: arrayRemove(invite),
-    });
-
-    // Update the groupInvites state variable
-    setGroupInvites((prevInvites) =>
-      prevInvites.filter(
-        (i) => i.userId !== invite.userId || i.groupId !== invite.groupId
-      )
-    );
-  }
   useEffect(() => {
     getGroups().then((data) => {
       setGroups(data);
@@ -105,69 +65,6 @@ const GroupNetwork = (props) => {
     };
   }, [props.user]);
 
-  async function acceptGroupJoinRequest(request) {
-    // Add the user to the groupMembers field object in the group document
-    const groupRef = doc(db, "Groups", request.groupId);
-    updateDoc(groupRef, {
-      groupMembers: arrayUnion({
-        userId: request.userId,
-        userName: request.userName,
-      }),
-    });
-
-    // Add the respective groupId in the groupMemberOf field in the respective User document
-    const userRef = doc(db, "Users", request.userId);
-    updateDoc(userRef, {
-      groupMemberOf: arrayUnion({
-        group: request.groupName,
-        groupId: request.groupId,
-      }),
-    });
-
-    // Remove the join request from the group creator's groupJoinRequests field
-    const groupCreatorRef = doc(db, "Users", props.user.userId);
-    updateDoc(groupCreatorRef, {
-      groupJoinRequests: arrayRemove(request),
-    });
-
-    // Update the groupJoinRequests state variable
-    setGroupJoinRequests((prevRequests) =>
-      prevRequests.filter(
-        (r) => r.userId !== request.userId || r.groupId !== request.groupId
-      )
-    );
-
-    // Remove the groupId from the user's pendingJoinRequests field in Firebase
-    await updateDoc(userRef, {
-      pendingJoinRequests: arrayRemove(request.groupId),
-    });
-
-    // Remove the groupId from the pendingGroups field in the respective User document
-    await updateDoc(userRef, {
-      pendingGroups: arrayRemove(request.groupId),
-    });
-  }
-
-  async function declineGroupJoinRequest(request) {
-    const groupCreatorRef = doc(db, "Users", props.user.userId);
-    updateDoc(groupCreatorRef, {
-      groupJoinRequests: arrayRemove(request),
-    });
-
-    // Remove the groupId from the pendingGroups field in the respective User document
-    const userRef = doc(db, "Users", request.userId);
-    await updateDoc(userRef, {
-      pendingGroups: arrayRemove(request.groupId),
-    });
-
-    // Update the groupJoinRequests state variable
-    setGroupJoinRequests((prevRequests) =>
-      prevRequests.filter(
-        (r) => r.userId !== request.userId || r.groupId !== request.groupId
-      )
-    );
-  }
-
   return (
     <Container>
       <table className="group-center">
@@ -189,7 +86,7 @@ const GroupNetwork = (props) => {
             <td>
               <button
                 className="group-accept"
-                onClick={() => acceptGroupInvite(invite)}
+                onClick={() => props.acceptGroupInvite(invite)}
               >
                 Accept
               </button>
@@ -197,7 +94,7 @@ const GroupNetwork = (props) => {
             <td>
               <button
                 className="group-decline"
-                onClick={() => declineGroupInvite(invite)}
+                onClick={() => props.declineGroupInvite(invite)}
               >
                 Decline
               </button>
@@ -225,7 +122,7 @@ const GroupNetwork = (props) => {
             <td>
               <button
                 className="group-accept"
-                onClick={() => acceptGroupJoinRequest(request)}
+                onClick={() => props.acceptGroupJoinRequest(request)}
               >
                 Accept
               </button>
@@ -233,7 +130,7 @@ const GroupNetwork = (props) => {
             <td>
               <button
                 className="group-decline"
-                onClick={() => declineGroupJoinRequest(request)}
+                onClick={() => props.declineGroupJoinRequest(request)}
               >
                 Decline
               </button>
@@ -311,5 +208,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => ({
   sendJoinGroupRequest: (groupId, userId) => dispatch(sendJoinGroupRequest(groupId, userId)),
+  acceptGroupInvite: (invite) => dispatch(acceptGroupInvite(invite)),
+  declineGroupInvite: (invite) => dispatch(declineGroupInvite(invite)),
+  acceptGroupJoinRequest: (request) => dispatch(acceptGroupJoinRequest(request)),
+  declineGroupJoinRequest: (request) => dispatch(declineGroupJoinRequest(request)),
 });
+
 export default connect(mapStateToProps, mapDispatchToProps)(GroupNetwork);

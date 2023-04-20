@@ -18,7 +18,6 @@ import {
   arrayRemove,
   deleteDoc,
 } from "firebase/firestore";
-import { useHistory } from "react-router-dom";
 import InviteToGroup from "./InviteToGroup";
 
 import GroupJobPostings from "./GroupJobPostings";
@@ -36,8 +35,6 @@ const GroupPage = (props) => {
 
   const [showEditForm, setShowEditForm] = useState(false);
   const [groupMembers, setGroupMembers] = useState([]);
-
-  const history = useHistory();
 
   /* const [jobPostings, loading, error] = useCollectionData(
     query(collection(db, "JobPostings"), where("groupId", "==", groupId))
@@ -191,7 +188,7 @@ const GroupPage = (props) => {
       });
     }
 
-    history.push("/home");
+    window.location.assign("/home");
   }
 
   async function deleteGroup(groupId) {
@@ -239,7 +236,7 @@ const GroupPage = (props) => {
     await deleteDoc(groupRef);
 
     // Redirect to another page (e.g., home) after the group is deleted
-    history.push("/home");
+    window.location.assign("/home");
   }
 
   const currentUser = auth.currentUser;

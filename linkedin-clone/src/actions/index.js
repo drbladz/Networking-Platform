@@ -885,3 +885,105 @@ export const warnUser = async (warnUserId) => {
     return null;
   }
 };
+
+export function acceptGroupInvite(invite) {
+  return async (dispatch) => {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", invite.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userId: invite.userId,
+        userName: invite.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: invite.groupName,
+        groupId: invite.groupId,
+      }),
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
+
+export function declineGroupInvite(invite) {
+  return async (dispatch) => {
+    // Remove the invite from the user's groupInvites field
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
+
+export function acceptGroupJoinRequest(request) {
+  return async (dispatch) => {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", request.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userId: request.userId,
+        userName: request.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: request.groupName,
+        groupId: request.groupId,
+      }),
+    });
+
+    // Remove the join request from the group creator's groupJoinRequests field
+    const groupCreatorRef = doc(db, "Users", auth.currentUser.uid);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Remove the groupId from the user's pendingJoinRequests field in Firebase
+    await updateDoc(userRef, {
+      pendingJoinRequests: arrayRemove(request.groupId),
+    });
+
+    // Remove the groupId from the pendingGroups field in the respective User document
+    await updateDoc(userRef, {
+      pendingGroups: arrayRemove(request.groupId),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  } 
+}
+
+export function declineGroupJoinRequest(request) {
+  return async (dispatch) => {
+    const groupCreatorRef = doc(db, "Users", auth.currentUser.uid);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Remove the groupId from the pendingGroups field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    await updateDoc(userRef, {
+      pendingGroups: arrayRemove(request.groupId),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
