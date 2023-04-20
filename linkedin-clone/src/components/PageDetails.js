@@ -153,7 +153,7 @@ const NewPostForm = ({ onSubmit }) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h1>PAGE</h1>
+      <h1>Add a new Post</h1>
       <Input
         type="text"
         placeholder="Post Title"
