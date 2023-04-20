@@ -10,6 +10,7 @@ import UpdateConnections from "./UpdateConnections";
 import GroupCreationForm from "./GroupCreationForm";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
+import CreatePageForm from "./CreatePageForm";
 
 //Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -104,12 +105,18 @@ const Leftside = (props) => {
           </a>
           <a
             href="/job-preferences"
-            target="_blank"
-            style={{ textDecoration: "none" }}
+            
+            style={{ textDecoration: "none", display: "block"  }}
           >
             <SetPreferencesText>
               Set Job Searching Preferences
             </SetPreferencesText>
+          </a>
+          <a href="/create-page" target="_blank" style={{ textDecoration: 'none' , display: "block" }}>
+            <CreatePageText>
+              Create a Page
+            </CreatePageText>
+            
           </a>
           <a>
             <CreateGroup onClick={handleGroupClick}>
@@ -1024,7 +1031,14 @@ const SetPreferencesText = styled.span`
   font-weight: 400;
   cursor: pointer;
 `;
-
+const CreatePageText = styled.span`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+  cursor: pointer;
+`;
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
