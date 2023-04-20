@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
-import { collection, getDoc, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDoc,getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 const storage = getStorage();
 const PageDetails = () => {
@@ -16,39 +16,41 @@ const PageDetails = () => {
 
 
   useEffect(() => {
-    const fetchPageDetails = async () => {
-      try {
-        const pageRef = doc(db, 'Pages', id);
-        const pageSnapshot = await getDoc(pageRef);
-        if (!pageSnapshot.exists()) {
-          console.error('Page not found');
-          return;
+    if (userId) {
+      const fetchPageDetails = async () => {
+        try {
+          const pageRef = doc(db, 'Pages', id);
+          const pageSnapshot = await getDoc(pageRef);
+          if (!pageSnapshot.exists()) {
+            console.error('Page not found');
+            return;
+          }
+  
+          const pageData = {
+            id: pageSnapshot.id,
+            ...pageSnapshot.data(),
+          };
+  
+          setPage(pageData);
+          setIsUserPage(pageData.pageOwnerId === userId.uid);
+  
+          console.log('Page data:', pageData);
+  
+          const postsRef = collection(pageRef, 'Posts');
+          const postsSnapshot = await getDocs(postsRef);
+          const postsData = postsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+  
+          setPosts(postsData);
+        } catch (error) {
+          console.error('Error fetching page details:', error);
         }
-
-        const pageData = {
-          id: pageSnapshot.id,
-          ...pageSnapshot.data(),
-        };
-
-        setPage(pageData);
-        setIsUserPage(pageData.pageOwnerId === userId.uid);
-
-        console.log('Page datAAAAAAAAAAAAAAAAAAAAA:', pageData);
-
-        const postsRef = collection(pageRef, 'Posts');
-        const postsSnapshot = await getDoc(postsRef);
-        const postsData = postsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setPosts(postsData);
-      } catch (error) {
-        console.error('Error fetching page details:', error);
-      }
-    };
-
-    fetchPageDetails();
+      };
+  
+      fetchPageDetails();
+    }
   }, [id, userId]);
 
   const handlePostSubmit = async (newPost) => {
@@ -89,17 +91,17 @@ const PageDetails = () => {
 
       {isUserPage && <NewPostForm onSubmit={handlePostSubmit} />}
 
-      {/* <PostsList
+      <PostsList
         posts={posts}
         isUserPage={isUserPage}
         onUpdate={handlePostUpdate}
         onDelete={handlePostDelete}
-      /> */}
+      />
     </Container>
   );
 };
 
-// Add your NewPostForm component implementation here
+// NewPostForm component implementation
 const NewPostForm = ({ onSubmit }) => {
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
@@ -207,10 +209,65 @@ const Button = styled.button`
     background-color: #0056b3;
   }
 `;
-// Add your PostsList component implementation here
-
+// PostsList component implementation
+const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
+  return (
+    <PostListContainer>
+      {posts.map((post) => (
+        <Post key={post.id}>
+          <PostHeader>
+            <h2>{post.postTitle}</h2>
+          </PostHeader>
+          <PostContent>
+            <PostDescription>{post.postDescription}</PostDescription>
+            {post.postImageURL && <PostImage src={post.postImageURL} alt={post.postTitle} />}
+          </PostContent>
+          {isUserPage && (
+            <PostActions>
+              {/* Add your update and delete buttons here */}
+            </PostActions>
+          )}
+        </Post>
+      ))}
+    </PostListContainer>
+  );
+};
 const Container = styled.div`
   padding: 50px;
 `;
+const PostListContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
 
+const Post = styled.div`
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 16px;
+`;
+
+const PostHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const PostContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const PostDescription = styled.p`
+  margin: 0;
+`;
+
+const PostImage = styled.img`
+  max-width: 100%;
+`;
+
+const PostActions = styled.div`
+  display: flex;
+  gap: 8px;
+`;
 export default PageDetails;
