@@ -158,11 +158,13 @@ const NewPostForm = ({ onSubmit }) => {
         placeholder="Post Title"
         value={postTitle}
         onChange={(e) => setPostTitle(e.target.value)}
+        required
       />
       <Textarea
         placeholder="Post Description"
         value={postDescription}
         onChange={(e) => setPostDescription(e.target.value)}
+        required
       />
       <Input type="file" accept="image/*" onChange={handleImageChange} />
       <Button type="submit">Add Post</Button>
@@ -264,6 +266,10 @@ const PostDescription = styled.p`
 
 const PostImage = styled.img`
   max-width: 100%;
+  max-height: 400px;
+  min-width: 100px; 
+  min-height: 100px; 
+  object-fit: contain;
 `;
 
 const PostActions = styled.div`
