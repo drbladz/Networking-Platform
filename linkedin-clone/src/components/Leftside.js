@@ -105,7 +105,7 @@ const Leftside = (props) => {
           </a>
           <a
             href="/job-preferences"
-            target="_blank"
+            
             style={{ textDecoration: "none", display: "block"  }}
           >
             <SetPreferencesText>

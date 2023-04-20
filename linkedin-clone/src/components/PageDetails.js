@@ -107,22 +107,6 @@ const DeletePostButton = ({ onClick }) => {
   );
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const PageDetails = () => {
   const { id } = useParams();
   const [page, setPage] = useState(null);
