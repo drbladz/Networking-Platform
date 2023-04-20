@@ -58,9 +58,9 @@ const Header = (props) => {
   );
   let notifications = [];
   // Get notifications
-  /* if (user && user[0].notifications) {
+  if (user && user[0] && user[0].notifications) {
     notifications = user[0].notifications;
-  } */
+  } 
 
   // component JSX for the Header
   return (

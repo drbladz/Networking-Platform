@@ -152,33 +152,38 @@ export async function getGroups() {
   return groups;
 }
 
-export const sendJoinGroupRequest = async (groupId, userId) => {
-  const currentUserRef = doc(db, "Users", userId);
-  const currentUserDocument = await getDoc(currentUserRef);
-  const groupRef = doc(db, "Groups", groupId);
-  const groupDocument = await getDoc(groupRef);
-  const groupCreatorId = groupDocument.data().createdBy;
-  const groupCreatorRef = doc(db, "Users", groupCreatorId);
+export const sendJoinGroupRequest = (groupId, userId) => {
+  return async (dispatch) => {
+    const currentUserRef = doc(db, "Users", userId);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const groupRef = doc(db, "Groups", groupId);
+    const groupDocument = await getDoc(groupRef);
+    const groupCreatorId = groupDocument.data().createdBy;
+    const groupCreatorRef = doc(db, "Users", groupCreatorId);
 
-  // Add pending group for the current user
-  await updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
+    // Add pending group for the current user
+    updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
 
-  // Add join request for the group creator
-  await updateDoc(groupCreatorRef, {
-    groupJoinRequests: arrayUnion({
-      groupId: groupId,
-      groupName: groupDocument.data().groupName,
-      userId: userId,
-      userName: currentUserDocument.data().displayName,
-      userPhotoURL: currentUserDocument.data().photoURL,
-    }),
-  });
+    // Add join request for the group creator
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayUnion({
+        groupId: groupId,
+        groupName: groupDocument.data().groupName,
+        userId: userId,
+        userName: currentUserDocument.data().displayName,
+        userPhotoURL: currentUserDocument.data().photoURL,
+      }),
+    });
 
-  // Add the groupId to the user's pendingJoinRequests field in Firebase
-  const userRef = doc(db, "Users", userId);
-  await updateDoc(userRef, {
-    pendingJoinRequests: arrayUnion(groupId),
-  });
+    // Add the groupId to the user's pendingJoinRequests field in Firebase
+    const userRef = doc(db, "Users", userId);
+    updateDoc(userRef, {
+      pendingJoinRequests: arrayUnion(groupId),
+    });
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  };
 };
 
 // Async function to add a connection by id.
@@ -766,6 +771,7 @@ export function signOutAPI() {
         dispatch(setJobPostings(null));
       })
       .catch((error) => console.log(error));
+      window.location.assign("/");
   };
 }
 

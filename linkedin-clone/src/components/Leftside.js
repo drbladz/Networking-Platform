@@ -104,7 +104,6 @@ const Leftside = (props) => {
           </a>
           <a
             href="/job-preferences"
-            target="_blank"
             style={{ textDecoration: "none" }}
           >
             <SetPreferencesText>
@@ -129,7 +128,6 @@ const Leftside = (props) => {
                   Object.keys(props.user.groupOwned).map((groupId) => (
                     <a
                       href={`/groups/${groupId}`}
-                      target="_blank"
                       key={groupId}
                       style={{ textDecoration: "none" }}
                     >
@@ -151,7 +149,6 @@ const Leftside = (props) => {
                     <div key={group.groupId}>
                       <a
                         href={`/groups/${group.groupId}`}
-                        target="_blank"
                         style={{ textDecoration: "none" }}
                       >
                         <span>{group.group}</span>

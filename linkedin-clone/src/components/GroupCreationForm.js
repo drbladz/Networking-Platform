@@ -21,6 +21,7 @@ function GroupCreationForm(props) {
   const createGroup = async (e) => {
     e.preventDefault();
     const userId = auth.currentUser.uid;
+    //***update name
     const adminName = auth.currentUser.displayName;
     const updateGroupData = {
       groupName: groupName,

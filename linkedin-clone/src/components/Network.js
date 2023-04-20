@@ -24,7 +24,6 @@ const Network = (props) => {
 
   return (
     <Container>
-      {!props.user && <Redirect to="/" />}
       <table className="center">
         <caption>
           <b>Requests</b>

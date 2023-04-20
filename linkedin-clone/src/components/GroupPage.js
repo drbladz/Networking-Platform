@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import Header from "./Header";
 //import Main from "./Main";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -247,7 +246,6 @@ const GroupPage = (props) => {
 
   return (
     <>
-      <Header />
       <Banner>
         <BannerTitle>{groupName}</BannerTitle>
         <BannerAdmin>
