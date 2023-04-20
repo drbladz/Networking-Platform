@@ -6,6 +6,114 @@ import { getAuth } from 'firebase/auth';
 import { collection, getDoc,getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 const storage = getStorage();
+
+const EditPostForm = ({ post, onUpdate, onClose }) => {
+  const [postTitle, setPostTitle] = useState(post.postTitle);
+  const [postDescription, setPostDescription] = useState(post.postDescription);
+  const [postImage, setPostImage] = useState(null);
+
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setPostImage(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    let postImageURL = post.postImageURL;
+
+    if (postImage) {
+      const storageRef = ref(storage, `post-images/${postImage.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, postImage);
+
+      await new Promise((resolve, reject) => {
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {},
+          (error) => {
+            console.error('Error uploading image:', error);
+            reject();
+          },
+          async () => {
+            postImageURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve();
+          }
+        );
+      });
+    }
+
+    onUpdate(post.id, {
+      postTitle,
+      postDescription,
+      postImageURL,
+    });
+
+    onClose();
+  };
+
+  return (
+    <Modal>
+      <ModalContent>
+        <Form onSubmit={handleSubmit}>
+          <h1>Edit Post</h1>
+          <Input
+            type="text"
+            placeholder="Post Title"
+            value={postTitle}
+            onChange={(e) => setPostTitle(e.target.value)}
+            required
+          />
+          <Textarea
+            placeholder="Post Description"
+            value={postDescription}
+            onChange={(e) => setPostDescription(e.target.value)}
+            required
+          />
+          <Input type="file" accept="image/*" onChange={handleImageChange} />
+          <Button type="submit">Save Changes</Button>
+          <Button onClick={onClose}>Cancel</Button>
+        </Form>
+      </ModalContent>
+    </Modal>
+  );
+};
+
+
+
+
+const EditPostButton = ({ onClick }) => {
+  return (
+    <StyledButton onClick={onClick}>
+      Edit
+    </StyledButton>
+  );
+};
+
+const DeletePostButton = ({ onClick }) => {
+  return (
+    <StyledButton style={{backgroundColor: "red"}} onClick={onClick}>
+      Delete
+    </StyledButton>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const PageDetails = () => {
   const { id } = useParams();
   const [page, setPage] = useState(null);
@@ -13,7 +121,7 @@ const PageDetails = () => {
   const [isUserPage, setIsUserPage] = useState(false);
   const userId = getAuth().currentUser;
   const [isEditing, setIsEditing] = useState(false);
-
+  const [updatedPosts, setUpdatedPosts] = useState([]);
 
   useEffect(() => {
     if (userId) {
@@ -93,6 +201,9 @@ const PageDetails = () => {
     try {
       const postRef = doc(doc(db, 'Pages', id), 'Posts', postId);
       await updateDoc(postRef, updatedPost);
+  
+      const newPosts = posts.map((post) => (post.id === postId ? { ...post, ...updatedPost } : post));
+      setUpdatedPosts(newPosts);
     } catch (error) {
       console.error('Error updating post:', error);
     }
@@ -130,7 +241,7 @@ const PageDetails = () => {
         </>
       )}
       <PostsList
-        posts={posts}
+        posts={updatedPosts.length > 0 ? updatedPosts : posts}
         isUserPage={isUserPage}
         onUpdate={handlePostUpdate}
         onDelete={handlePostDelete}
@@ -326,6 +437,17 @@ const Button = styled.button`
 `;
 // PostsList component implementation
 const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
+  const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const handleEditClick = (post) => {
+    setSelectedPost(post);
+    setIsEditPostModalOpen(true);
+  };
+
+  const handleEditPostModalClose = () => {
+    setIsEditPostModalOpen(false);
+  };
   return (
     <PostListContainer>
       {posts.map((post) => (
@@ -339,11 +461,19 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
           </PostContent>
           {isUserPage && (
             <PostActions>
-              {/* Add your update and delete buttons here */}
+              <EditPostButton onClick={() => handleEditClick(post)} />
+              <DeletePostButton onClick={() => onDelete(post.id)} />
             </PostActions>
           )}
         </Post>
       ))}
+      {isEditPostModalOpen && (
+        <EditPostForm
+          post={selectedPost}
+          onUpdate={onUpdate}
+          onClose={handleEditPostModalClose}
+        />
+      )}
     </PostListContainer>
   );
 };
@@ -416,5 +546,23 @@ const PostImage = styled.img`
 const PostActions = styled.div`
   display: flex;
   gap: 8px;
+`;
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const ModalContent = styled.div`
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 4px;
+  width: 80%;
+  max-width: 500px;
 `;
 export default PageDetails;
