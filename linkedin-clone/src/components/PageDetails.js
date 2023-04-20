@@ -91,8 +91,17 @@ const EditPostButton = ({ onClick }) => {
 };
 
 const DeletePostButton = ({ onClick }) => {
+  const handleClick = () => {
+    if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+      onClick();
+      // Show a confirmation message
+      alert("The post has been deleted successfully.");
+      // Reload the page
+      window.location.reload();
+    }
+  };
   return (
-    <StyledButton style={{backgroundColor: "red"}} onClick={onClick}>
+    <StyledButton style={{backgroundColor: "red"}} onClick={handleClick}>
       Delete
     </StyledButton>
   );
