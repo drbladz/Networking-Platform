@@ -9,15 +9,28 @@ import styled from 'styled-components';
 const CreatePageForm = () => {
   const [pageName, setPageName] = useState('');
   const [pageDescription, setPageDescription] = useState('');
-  const [pageImage, setPageImage] = useState(null); // Change the state name to pageImage
+  const [pageImage, setPageImage] = useState(null); 
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createPage(pageName, pageDescription, pageImage); // Change the argument to pageImage
+    await createPage(pageName, pageDescription, pageImage); 
     setPageName('');
     setPageDescription('');
     setPageImage(null);
+    setIsSubmitted(true);
   };
+
+  if (isSubmitted) {
+    return (
+      <ConfirmationWrapper>
+        <h2>Page created successfully!</h2>
+        <p>Your new page has been created. Go ahead and share it with others!</p>
+        <StyledButton onClick={() => setIsSubmitted(false)}>Create another page</StyledButton>
+      </ConfirmationWrapper>
+    );
+  }
+
 
   return (
     <StyledForm onSubmit={handleSubmit}>
@@ -31,13 +44,25 @@ const CreatePageForm = () => {
         <StyledTextarea value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} required></StyledTextarea>
       </Label>
       <Label>
-        Image (optional):
-        <StyledInput type="file" onChange={(e) => setPageImage(e.target.files[0])} />
-      </Label>
+          Image (optional):
+          <StyledInput key={isSubmitted} type="file" onChange={(e) => setPageImage(e.target.files[0])} />
+        </Label>
       <StyledButton type="submit">Create Page</StyledButton>
     </StyledForm>
   );
 };
+
+const ConfirmationWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 60px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+`;
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
