@@ -75,15 +75,19 @@ const PageDetails = () => {
 
 
   const handlePageDelete = async () => {
-    try {
-      const pageRef = doc(db, 'Pages', id);
-      await deleteDoc(pageRef);
-      // Redirect to a different page or show a confirmation message
-    } catch (error) {
-      console.error('Error deleting page:', error);
+    if (window.confirm("Are you sure you want to delete this page? This action cannot be undone.")) {
+      try {
+        const pageRef = doc(db, 'Pages', id);
+        await deleteDoc(pageRef);
+        // Show a confirmation message
+        alert("The page has been deleted successfully.");
+        // Redirect to the home page
+        window.location.href = "/";
+      } catch (error) {
+        console.error('Error deleting page:', error);
+      }
     }
   };
-
 
   const handlePostUpdate = async (postId, updatedPost) => {
     try {
@@ -119,7 +123,7 @@ const PageDetails = () => {
           {!isEditing && (
             <div>
               <StyledButton onClick={() => setIsEditing(true)}>Edit Page</StyledButton>
-              <StyledButton onClick={handlePageDelete}>Delete Page</StyledButton>
+              <StyledButton style={{backgroundColor: "red"}} onClick={handlePageDelete}>Delete Page</StyledButton>
             </div>
           )}
           {isEditing && <EditPageForm page={page} onSubmit={handlePageEdit} onCancel={() => setIsEditing(false)} />}
@@ -177,7 +181,7 @@ const EditPageForm = ({ page, onSubmit, onCancel }) => {
       <Textarea value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} required />
       <Input type="file" accept="image/*" onChange={(e) => setPageImage(e.target.files[0])} />
   <div>
-    <Button type="submit">Save Changes</Button>
+    <Button style={{marginRight: "10px"}} type="submit">Save Changes</Button>
     <Button onClick={onCancel}>Cancel</Button>
   </div>
 </Form>
@@ -195,6 +199,7 @@ text-align: center;
 text-decoration: none;
 display: inline-block;
 margin-right: 10px;
+margin-top: 6px;
 cursor: pointer;
 transition: background-color 0.2s;
 
