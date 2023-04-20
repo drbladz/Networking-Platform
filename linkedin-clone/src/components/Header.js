@@ -199,7 +199,10 @@ const Header = (props) => {
           <Link
             to={{
               pathname: `/page/${page.id}`,
-              state: page,
+              state: {
+                pageName: page.data().pageName,
+                pageDescription: page.data().pageDescription,
+              },
             }}
             style={{ textDecoration: "none", color: "black" }}
             onClick={() => setValue("")}

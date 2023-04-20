@@ -86,8 +86,9 @@ const PageDetails = () => {
 
   return (
     <Container>
-      <h1>{page.pageName}</h1>
-      <p>{page.pageDescription}</p>
+      {page.pageImageURL && <PageImage src={page.pageImageURL} alt={page.pageName} />}
+      <PageTitle>{page.pageName}</PageTitle>
+      <PageDescription>{page.pageDescription}</PageDescription>
 
       {isUserPage && <NewPostForm onSubmit={handlePostSubmit} />}
 
@@ -176,6 +177,8 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 50%;
+  margin: 0 auto;
 `;
 
 const Input = styled.input`
@@ -217,11 +220,11 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
     <PostListContainer>
       {posts.map((post) => (
         <Post key={post.id}>
-          <PostHeader>
-            <h2>{post.postTitle}</h2>
+          <PostHeader style={{textAlign: "center"}}>
+            <h2 style={{textAlign: "center"}}>{post.postTitle}</h2>
           </PostHeader>
           <PostContent>
-            <PostDescription>{post.postDescription}</PostDescription>
+            <PostDescription >{post.postDescription}</PostDescription>
             {post.postImageURL && <PostImage src={post.postImageURL} alt={post.postTitle} />}
           </PostContent>
           {isUserPage && (
@@ -236,38 +239,66 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
 };
 const Container = styled.div`
   padding: 50px;
+  text-align: center;
 `;
+
+const PageImage = styled.img`
+  // border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 20px;
+`;
+
+const PageTitle = styled.h1`
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+`;
+
+const PageDescription = styled.p`
+  font-size: 1.3rem;
+  margin-bottom: 30px;
+  
+`;
+
 const PostListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin: 15px;
 `;
 
 const Post = styled.div`
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 16px;
+  
 `;
 
 const PostHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  font-size: 1.5rem;
+  
 `;
 
 const PostContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  
 `;
 
 const PostDescription = styled.p`
   margin: 0;
+  font-size: 1.2rem;
+  text-align: start
 `;
 
 const PostImage = styled.img`
   max-width: 100%;
-  max-height: 400px;
-  min-width: 100px; 
+  max-height: 300px;
+  min-width: 300px; 
   min-height: 100px; 
   object-fit: contain;
 `;
