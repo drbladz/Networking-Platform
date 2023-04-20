@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 import db from '../firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { createPage } from '../actions';
-
+import styled from 'styled-components';
 
 const CreatePageForm = () => {
   const [pageName, setPageName] = useState('');
@@ -20,22 +20,74 @@ const CreatePageForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: '60px' }}>
-      <label>
+    <StyledForm onSubmit={handleSubmit}>
+      <h1 style={{textAlign: "center"}}>Create A Page</h1>
+      <Label>
         Page Name:
-        <input type="text" value={pageName} onChange={(e) => setPageName(e.target.value)} required />
-      </label>
-      <label>
+        <StyledInput type="text" value={pageName} onChange={(e) => setPageName(e.target.value)} required />
+      </Label>
+      <Label>
         Page Description:
-        <textarea value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} required></textarea>
-      </label>
-      <label>
+        <StyledTextarea value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} required></StyledTextarea>
+      </Label>
+      <Label>
         Image (optional):
-        <input type="file" onChange={(e) => setPageImage(e.target.files[0])} />
-      </label>
-      <button type="submit">Create Page</button>
-    </form>
+        <StyledInput type="file" onChange={(e) => setPageImage(e.target.files[0])} />
+      </Label>
+      <StyledButton type="submit">Create Page</StyledButton>
+    </StyledForm>
   );
 };
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 60px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const Label = styled.label`
+  display: flex;
+  flex-direction: column;
+  font-size: 1.1rem;
+`;
+
+const StyledInput = styled.input`
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  margin-top: 8px;
+`;
+
+const StyledTextarea = styled.textarea`
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  resize: vertical;
+  margin-top: 8px;
+`;
+
+const StyledButton = styled.button`
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
 
 export default CreatePageForm;
