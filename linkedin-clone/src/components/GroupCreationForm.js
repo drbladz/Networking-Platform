@@ -54,6 +54,7 @@ function GroupCreationForm(props) {
     await updateDoc(userRef, { groupOwned: updatedGroupOwned });
 
     console.log(updatedGroupOwned);
+    window.location.assign("/home");
   };
 
   return (
