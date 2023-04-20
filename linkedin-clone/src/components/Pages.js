@@ -12,26 +12,30 @@ const Pages = () => {
   const userId = getAuth().currentUser;
 
   useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const pagesRef = collection(db, 'Pages');
-        const pagesSnapshot = await getDocs(pagesRef);
-        const pagesData = pagesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    if(userId) {
+      const fetchPages = async () => {
+        try {
+          const pagesRef = collection(db, 'Pages');
+          const pagesSnapshot = await getDocs(pagesRef);
+          const pagesData = pagesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+  
+          const myPagesData = pagesData.filter((page) => page.pageOwnerId === userId.uid);
+          const allPagesData = pagesData.filter((page) => page.pageOwnerId !== userId.uid);
+  
+          setMyPages(myPagesData);
+          setAllPages(allPagesData);
+        } catch (error) {
+          console.error("Error fetching pages:", error);
+        }
+      };
+      fetchPages();
+    }
 
-        const myPagesData = pagesData.filter((page) => page.pageOwnerId === userId.uid);
-        const allPagesData = pagesData.filter((page) => page.pageOwnerId !== userId.uid);
 
-        setMyPages(myPagesData);
-        setAllPages(allPagesData);
-      } catch (error) {
-        console.error("Error fetching pages:", error);
-      }
-    };
-
-    fetchPages();
+   
   }, [userId]);
 
   return (

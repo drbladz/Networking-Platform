@@ -17,7 +17,7 @@ import Messages from "./components/Messages";
 import Notifications from "./components/Notifications";
 import CreatePageForm from "./components/CreatePageForm";
 import Pages from "./components/Pages";
-
+import PageDetails from "./components/PageDetails";
 
 function App(props) {
   useEffect(() => {
@@ -57,6 +57,7 @@ function App(props) {
           <Route path="/groups/:groupId" component={GroupPage} />
           <Route path="/create-page" component={CreatePageForm} />
           <Route path="/pages" component={Pages} />
+          <Route path="/page/:id" component={PageDetails} />
         </Switch>
       </Router>
     </div>
