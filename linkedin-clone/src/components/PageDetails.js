@@ -12,7 +12,7 @@ const PageDetails = () => {
   const [posts, setPosts] = useState([]);
   const [isUserPage, setIsUserPage] = useState(false);
   const userId = getAuth().currentUser;
-
+  const [isEditing, setIsEditing] = useState(false);
 
 
   useEffect(() => {
@@ -62,6 +62,29 @@ const PageDetails = () => {
     }
   };
 
+  const handlePageEdit = async (updatedPage) => {
+    try {
+      const pageRef = doc(db, 'Pages', id);
+      await updateDoc(pageRef, updatedPage);
+      setPage({ ...page, ...updatedPage });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating page:', error);
+    }
+  };
+
+
+  const handlePageDelete = async () => {
+    try {
+      const pageRef = doc(db, 'Pages', id);
+      await deleteDoc(pageRef);
+      // Redirect to a different page or show a confirmation message
+    } catch (error) {
+      console.error('Error deleting page:', error);
+    }
+  };
+
+
   const handlePostUpdate = async (postId, updatedPost) => {
     try {
       const postRef = doc(doc(db, 'Pages', id), 'Posts', postId);
@@ -91,7 +114,17 @@ const PageDetails = () => {
       <PageDescription>{page.pageDescription}</PageDescription>
 
       {isUserPage && <NewPostForm onSubmit={handlePostSubmit} />}
-
+      {isUserPage && (
+        <>
+          {!isEditing && (
+            <div>
+              <StyledButton onClick={() => setIsEditing(true)}>Edit Page</StyledButton>
+              <StyledButton onClick={handlePageDelete}>Delete Page</StyledButton>
+            </div>
+          )}
+          {isEditing && <EditPageForm page={page} onSubmit={handlePageEdit} onCancel={() => setIsEditing(false)} />}
+        </>
+      )}
       <PostsList
         posts={posts}
         isUserPage={isUserPage}
@@ -101,7 +134,74 @@ const PageDetails = () => {
     </Container>
   );
 };
+const EditPageForm = ({ page, onSubmit, onCancel }) => {
+  const [pageName, setPageName] = useState(page.pageName);
+  const [pageDescription, setPageDescription] = useState(page.pageDescription);
+  const [pageImage, setPageImage] = useState(null);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    let updatedPage = {
+      pageName,
+      pageDescription,
+    };
+
+    if (pageImage) {
+      const storageRef = ref(storage, `page-images/${pageImage.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, pageImage);
+
+      await new Promise((resolve, reject) => {
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {},
+          (error) => {
+            console.error('Error uploading image:', error);
+            reject();
+          },
+          async () => {
+            const pageImageURL = await getDownloadURL(uploadTask.snapshot.ref);
+            updatedPage.pageImageURL = pageImageURL;
+            resolve();
+          }
+        );
+      });
+    }
+
+    onSubmit(updatedPage);
+  };
+  return (
+    <Form onSubmit={handleSubmit}>
+      <h1>Edit Page</h1>
+      <Input type="text" value={pageName} onChange={(e) => setPageName(e.target.value)} required />
+      <Textarea value={pageDescription} onChange={(e) => setPageDescription(e.target.value)} required />
+      <Input type="file" accept="image/*" onChange={(e) => setPageImage(e.target.files[0])} />
+  <div>
+    <Button type="submit">Save Changes</Button>
+    <Button onClick={onCancel}>Cancel</Button>
+  </div>
+</Form>
+);
+};
+const StyledButton = styled.button`
+background-color: #0d6efd;
+color: white;
+border: none;
+border-radius: 4px;
+padding: 8px 16px;
+font-size: 14px;
+font-weight: 500;
+text-align: center;
+text-decoration: none;
+display: inline-block;
+margin-right: 10px;
+cursor: pointer;
+transition: background-color 0.2s;
+
+&:hover {
+background-color: #0056b3;
+}
+`;
 // NewPostForm component implementation
 const NewPostForm = ({ onSubmit }) => {
   const [postTitle, setPostTitle] = useState('');
@@ -172,6 +272,11 @@ const NewPostForm = ({ onSubmit }) => {
     </Form>
   );
 };
+
+
+
+
+
 
 const Form = styled.form`
   display: flex;
