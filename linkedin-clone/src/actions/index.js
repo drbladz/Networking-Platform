@@ -181,6 +181,18 @@ export const sendJoinGroupRequest = (groupId, userId) => {
       pendingJoinRequests: arrayUnion(groupId),
     });
 
+    // Create notification for the group creator
+    updateDoc(groupCreatorRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } wants to join ${groupDocument.data().groupName}.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
+    });
+
     const userData = await getUserDataById(auth.currentUser.uid);
     dispatch(setUser(userData));
   };
@@ -568,7 +580,7 @@ export function createGroupJobPosting(
   jobParameters,
   groupId = null
 ) {
-  return (dispatch) => {
+  return async (dispatch) => {
     const newJobPostingData = {
       id: uuidv4(),
       userId: userId,
@@ -597,6 +609,26 @@ export function createGroupJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList));
       })
       .catch((error) => alert(error.message));
+
+      const groupRef = doc(db, "Groups", groupId);
+      const groupDocument = await getDoc(groupRef);
+      const currentUserRef = doc(db, "Users", auth.currentUser.uid);
+      const currentUserDocument = await getDoc(currentUserRef);
+
+    // Create notification for the all group members
+    groupDocument.data().groupMembers.forEach((member) => {
+      updateDoc(doc(db, "Users", member.userId), {
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDocument.data().displayName
+          } posted in ${groupDocument.data().groupName}.`,
+          postURL: `/groups/${newJobPostingData.groupId}`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false,
+        }),
+      });
+    });
   };
 }
 
@@ -961,6 +993,20 @@ export function acceptGroupJoinRequest(request) {
     // Remove the groupId from the pendingGroups field in the respective User document
     await updateDoc(userRef, {
       pendingGroups: arrayRemove(request.groupId),
+    });
+
+    // Create notification for the other user
+    const groupCreatorDocument = await getDoc(groupCreatorRef);
+    updateDoc(userRef, {
+      notifications: arrayUnion({
+        notification: `${
+          groupCreatorDocument.data().displayName
+        } approved your request to join ${request.groupName}.`,
+        photoURL: groupCreatorDocument.data().photoURL,
+        postURL: `/groups/${request.groupId}`,
+        date: new Date(),
+        viewed: false,
+      }),
     });
 
     // Update user state
