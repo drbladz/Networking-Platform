@@ -81,7 +81,7 @@ const Main = (props) => {
   return (
     <Container>
       
-      <button onClick={() => setView("feedJobs") }>Feed</button>
+      <button onClick={() => setView("feedJobs") }>Job List</button>
       <button onClick={() => setView("userJobs")}>My Job Postings</button>
       <button onClick={() => setView("savedJobs")}>Saved Jobs</button>
       <Sharebox>
