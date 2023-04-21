@@ -4,7 +4,7 @@ import { signOutAPI, getUsers } from "../actions";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faFileAlt } from "@fortawesome/free-solid-svg-icons";
 import {
   filterJobsByPreferences,
   getUserSearchingPreferences,
@@ -13,6 +13,7 @@ import { db, auth } from "../firebase";
 import { collection, doc, query, where, updateDoc } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { MdNotificationsActive } from "react-icons/md";
+import { useCollection } from "react-firebase-hooks/firestore";
 
 const Header = (props) => {
   // useState hook to manage the search input value
@@ -22,6 +23,15 @@ const Header = (props) => {
   const [searchPreferences, setSearchPreferences] = useState(null);
   const [usePreferences, setUsePreferences] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [pages, pagesLoading, pagesError] = useCollection(
+    query(
+      collection(db, "Pages"),
+      where("pageName", ">=", value),
+      where("pageName", "<=", value + "\uf8ff")
+    )
+  );
+
+
   // useEffect hook to call the getUsers function from the actions file on component mount
   useEffect(() => {
     // getUsers returns a promise that resolves to an array of user objects
@@ -169,6 +179,56 @@ const Header = (props) => {
                         </DropdownRow>
                       ))}
                   </JobSection>
+                  <HorizontalLine />
+                  <PagesSection>
+  <SectionLabel>Pages</SectionLabel>
+  {pages &&
+    pages.docs
+      .filter((page) => {
+        const searchTerm = value.toLowerCase();
+        const pageName = page.data().pageName.toLowerCase();
+        const pageDescription = page.data().pageDescription.toLowerCase();
+        return (
+          searchTerm &&
+          (pageName.includes(searchTerm) ||
+            pageDescription.includes(searchTerm))
+        );
+      })
+      .map((page) => (
+        <DropdownRow key={page.id}>
+          <Link
+            to={{
+              pathname: `/page/${page.id}`,
+              state: {
+                pageName: page.data().pageName,
+                pageDescription: page.data().pageDescription,
+              },
+            }}
+            style={{ textDecoration: "none", color: "black" }}
+            onClick={() => setValue("")}
+          >
+            <PageContent>
+              {page.data().pageImageURL ? (
+                <PageImage
+                  src={page.data().pageImageURL}
+                  alt=""
+                  width={30}
+                  height={30}
+                />
+              ) : (
+                <PageImage
+                  src="/images/placeholder-image.svg"
+                  alt=""
+                  width={30}
+                  height={30}
+                />
+              )}
+              <PageName>{page.data().pageName}</PageName>
+            </PageContent>
+          </Link>
+        </DropdownRow>
+      ))}
+</PagesSection>
                 </>
               )}
             </Dropdown>
@@ -214,6 +274,15 @@ const Header = (props) => {
             </NavList>
 
             <NavList>
+            <NavLink to="/pages">
+              <a>
+                <FontAwesomeIcon icon={faFileAlt} />
+                <span>Pages</span>
+              </a>
+            </NavLink>
+          </NavList>
+
+            <NavList>
               <NavLink to="/messages">
                 <a>
                   <img src="/images/nav-messaging.svg" alt="" />
@@ -255,7 +324,7 @@ const Header = (props) => {
               </SignOut>
             </User>
 
-            <Work>
+            {/* <Work>
               <a>
                 <img src="/images/nav-work.svg" alt="" />
                 <span>
@@ -263,7 +332,7 @@ const Header = (props) => {
                   <img src="/images/down-icon.svg" alt="" />
                 </span>
               </a>
-            </Work>
+            </Work> */}
           </NavListWrap>
         </Nav>
       </Content>
@@ -321,7 +390,10 @@ const Search = styled.div`
     }
   }
 `;
-
+const PageContent = styled.div`
+  display: flex;
+  align-items: center;
+`;
 const SearchContainer = styled.div`
   position: relative;
 `;
@@ -518,7 +590,22 @@ const User = styled(NavList)`
     }
   }
 `;
+const PagesSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const PageImage = styled.img`
+  border-radius: 50%;
+  margin-right: 8px;
+`;
+const PageName = styled.div`
+  font-weight: bold;
+`;
 
+const PageDescription = styled.div`
+  font-size: 12px;
+  color: gray;
+`;
 const Work = styled(User)`
   border-left: 1px solid rgba(0, 0, 0, 0.08);
 `;

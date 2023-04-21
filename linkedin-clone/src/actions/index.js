@@ -31,6 +31,11 @@ import {
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
 import { useParams } from "react-router-dom";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+
+
+
+
 // Define an action creator to set the current user in the store.
 export const setUser = (payload) => ({
   type: SET_USER,
@@ -1033,3 +1038,49 @@ export function declineGroupJoinRequest(request) {
     dispatch(setUser(userData));  
   }
 }
+
+ export const createPage = async (pageName, pageDescription, pageImage) => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error('User not authenticated');
+  }
+
+  const storage = getStorage();
+
+  let pageImageURL = '';
+
+  if (pageImage) {
+    const storageRef = ref(storage, `page-images/${currentUser.uid}/${pageImage.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, pageImage);
+
+    await new Promise((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Handle uploading progress
+        },
+        (error) => {
+          // Handle error
+          reject(error);
+        },
+        async () => {
+          // Handle successful upload
+          pageImageURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve();
+        },
+      );
+    });
+  }
+
+  const newPage = {
+    pageName,
+    pageDescription,
+    pageImageURL,
+    pageOwnerId: currentUser.uid,
+  };
+
+  const pagesCollectionRef = collection(db, 'Pages');
+  await addDoc(pagesCollectionRef, newPage); 
+};
