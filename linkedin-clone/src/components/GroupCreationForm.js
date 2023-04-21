@@ -21,6 +21,7 @@ function GroupCreationForm(props) {
   const createGroup = async (e) => {
     e.preventDefault();
     const userId = auth.currentUser.uid;
+    //***update name
     const adminName = auth.currentUser.displayName;
     const updateGroupData = {
       groupName: groupName,
@@ -53,6 +54,7 @@ function GroupCreationForm(props) {
     await updateDoc(userRef, { groupOwned: updatedGroupOwned });
 
     console.log(updatedGroupOwned);
+    window.location.assign("/home");
   };
 
   return (

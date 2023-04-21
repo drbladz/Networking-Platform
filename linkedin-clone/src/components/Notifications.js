@@ -46,6 +46,16 @@ const Notifications = (props) => {
     window.location.assign("/network");
   };
 
+  // Set notification as viewed and redirect to network page
+  const viewGroupRequest = async (notification) => {
+    const notifIndex = notifications.findIndex(notif => notif.date === notification.date);
+    notifications[notifIndex].viewed = true;
+    await updateDoc(doc(db, "Users", currentUserId), {
+      notifications: notifications
+    })
+    window.location.assign("/groupNetwork");
+  };
+
   // Set notification as viewed and redirect to the post
   const viewPost = async (notification) => {
     const notifIndex = notifications.findIndex(notif => notif.date === notification.date);
@@ -87,8 +97,14 @@ const Notifications = (props) => {
                   Go to Network
                 </button>
                 }
+                {notification.notification && 
+                (notification.notification.includes("wants to join") || notification.notification.includes("invited you to join")) &&
+                <button className="buttonc" onClick={() => viewGroupRequest(notification)}>
+                  Go to Groups
+                </button>
+                }
                 {notification.postURL && 
-                <button className="buttonc" onClick={() => viewPost(notification)}>View Post</button>
+                <button className="buttonc" onClick={() => viewPost(notification)}>View</button>
                 }
                 <button className="buttonc" onClick={() => markAsViewed(notification)}>Mark as Viewed</button>
               </NotificationItem>

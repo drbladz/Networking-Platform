@@ -54,12 +54,22 @@ const InviteToGroup = (props) => {
       };
 
       // Update the invited user's document with the new groupInvites field
+      // Notify user
       await updateDoc(doc(db, "Users", connectionId), {
         groupInvites: arrayUnion(invite),
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDoc.data().displayName
+          } has invited you to join his group.`,
+          photoURL: currentUserDoc.data().photoURL,
+          date: new Date(),
+          viewed: false,
+        }),
       });
 
       // Display success message
       setSuccess(`${connectionName} has been invited to the group!`);
+      alert(`${connectionName} has been invited to the group!`);
 
       // Close the modal
       /* handleClose(); */
@@ -135,7 +145,7 @@ const ConnectionPhoto = styled.img`
 `;
 
 const InviteButton = styled.button`
-  background-color: #f44336;
+  background-color: rgb(79, 117, 220);
   color: #fff;
   border: none;
   padding: 8px 16px;
