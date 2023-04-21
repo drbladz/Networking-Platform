@@ -48,7 +48,7 @@ const Pages = () => {
           {myPages.map((page) => (
             <Card key={page.id}>
               <PageImage src={page.pageImageURL || "/images/default-page-image.jpg"} alt="Page" />
-              <h3>{page.pageName}</h3>
+              <h3 className="notranslate">{page.pageName}</h3>
               <Link to={`/page/${page.id}`} style={{ textDecoration: "none" }}>
                 <Button>Visit Page</Button>
               </Link>
@@ -63,7 +63,7 @@ const Pages = () => {
           {allPages.map((page) => (
             <Card key={page.id}>
               <PageImage src={page.pageImageURL || "./images/default-page-image.jpg"} alt="Page" />
-              <h3>{page.pageName}</h3>
+              <h3 className="notranslate">{page.pageName}</h3>
               <Link to={`/page/${page.id}`} style={{ textDecoration: "none" }}>
                 <Button>Visit Page</Button>
               </Link>

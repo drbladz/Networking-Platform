@@ -31,7 +31,7 @@ const UpdateConnections = (props) => {
               ) : (
                 <ConnectionPhoto src="/images/user.svg" alt="" />
               )}
-              <ConnectionName>{connection.name}</ConnectionName>
+              <ConnectionName className="notranslate">{connection.name}</ConnectionName>
               <DmButton onClick={() => handleDmOpen(connection.id)}>
                 <AiFillMessage />
               </DmButton>

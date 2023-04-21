@@ -41,7 +41,7 @@ const Network = (props) => {
                   <img src="/images/user.svg" alt="" height="50" width="50" />
                 )}
               </td>
-              <td>{req.name}</td>
+              <td className="notranslate">{req.name}</td>
               <td>
                 <button
                   className="accept"
@@ -111,7 +111,7 @@ const Network = (props) => {
                         </div>
                       </Link>
 
-                      <h2>{user.displayName}</h2>
+                      <h2 className="notranslate">{user.displayName}</h2>
                       {props.user &&
                       props.user.pending &&
                       props.user.pending.includes(user.userId) ? (

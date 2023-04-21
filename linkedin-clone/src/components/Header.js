@@ -137,7 +137,8 @@ const Header = (props) => {
                                 height={30}
                               />
                             )}
-                            {user.displayName}
+                            <div className="notranslate">{user.displayName}</div>
+                            
                           </Link>
                         </DropdownRow>
                       ))}
@@ -223,7 +224,7 @@ const Header = (props) => {
                   height={30}
                 />
               )}
-              <PageName>{page.data().pageName}</PageName>
+              <PageName className="notranslate">{page.data().pageName}</PageName>
             </PageContent>
           </Link>
         </DropdownRow>
