@@ -198,13 +198,11 @@ const Main = (props) => {
                         </button>
                       </SharedActor>
                       <Description>
-                        {" "}
-                        {job.isExternal ? (
+                        {/* {" "} */}
+                        {job.isExternal && (
                           <a href={`${job.postDescription}`} target="_blank">
-                            link to external job
+                            Go to external job
                           </a>
-                        ) : (
-                          job.postDescription
                         )}
                       </Description>
                       {/*
