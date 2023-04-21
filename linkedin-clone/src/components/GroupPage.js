@@ -244,9 +244,9 @@ const GroupPage = (props) => {
   return (
     <>
       <Banner>
-        <BannerTitle>{groupName}</BannerTitle>
+        <BannerTitle className="notranslate">{groupName}</BannerTitle>
         <BannerAdmin>
-          <h3>Admin Name: {adminName}</h3>
+          <h3>Admin Name: <span className="notranslate">{adminName}</span> </h3>
           {currentUser && adminId !== currentUser.uid && (
             <QuitButton>
               <button onClick={() => quitGroup(groupId, currentUser.uid)}>
@@ -289,7 +289,7 @@ const GroupPage = (props) => {
             {groupMembers.length > 0 ? (
               <ul>
                 {groupMembers.map((member, index) => (
-                  <li key={index}>{member.userName}</li>
+                  <li key={index} className="notranslate">{member.userName}</li>
                 ))}
               </ul>
             ) : (

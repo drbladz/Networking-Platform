@@ -72,7 +72,7 @@ const Leftside = (props) => {
               <Photo />
             )}
             {props.user && props.user.displayName ? (
-              <StyledLink>Welcome {props.user.displayName}</StyledLink>
+              <StyledLink>Welcome Back, <span className="notranslate"> {props.user.displayName} </span> </StyledLink>
             ) : (
               <StyledLink>Welcome User</StyledLink>
             )}
@@ -80,6 +80,7 @@ const Leftside = (props) => {
           <a>
             <Bio>{props.user && props.user.bio}</Bio>
           </a>
+          <div id="google_translate_element"></div>
           <a>
             <AddPhotoText onClick={handlePhotoClick}>
               Change Profile Picture
@@ -103,21 +104,22 @@ const Leftside = (props) => {
               )}
             </CustomModal4>
           </a>
-          <a
-            href="/job-preferences"
+          <Link 
+
+            to="/job-preferences"
             
             style={{ textDecoration: "none", display: "block"  }}
           >
             <SetPreferencesText>
               Set Job Searching Preferences
             </SetPreferencesText>
-          </a>
-          <a href="/create-page" target="_blank" style={{ textDecoration: 'none' , display: "block" }}>
+          </Link>
+          <Link to="/create-page"  style={{ textDecoration: 'none' , display: "block" }}>
             <CreatePageText>
               Create a Page
             </CreatePageText>
             
-          </a>
+          </Link>
           <a>
             <CreateGroup onClick={handleGroupClick}>
               Create a new group
@@ -134,15 +136,15 @@ const Leftside = (props) => {
                 {props.user &&
                   props.user.groupOwned &&
                   Object.keys(props.user.groupOwned).map((groupId) => (
-                    <a
-                      href={`/groups/${groupId}`}
+                    <Link
+                      to={`/groups/${groupId}`}
                       key={groupId}
                       style={{ textDecoration: "none" }}
                     >
                       <MyGroup>
-                        <span>{props.user.groupOwned[groupId]}</span>
+                        <span className="notranslate">{props.user.groupOwned[groupId]}</span>
                       </MyGroup>
-                    </a>
+                    </Link>
                   ))}
               </div>
             </a>
@@ -159,7 +161,7 @@ const Leftside = (props) => {
                         href={`/groups/${group.groupId}`}
                         style={{ textDecoration: "none" }}
                       >
-                        <span>{group.group}</span>
+                        <span className="notranslate">{group.group}</span>
                       </a>
                     </div>
                   ))}

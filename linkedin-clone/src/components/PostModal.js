@@ -49,7 +49,7 @@ const PostModal = (props) => {
                   <img src="/images/user.svg" />
                 )}
                 {props.user && props.user.displayName ? (
-                  <span>{props.user.displayName}</span>
+                  <span className="notranslate">{props.user.displayName}</span>
                 ) : (
                   <span>User</span>
                 )}

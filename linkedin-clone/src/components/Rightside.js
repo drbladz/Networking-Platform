@@ -258,7 +258,7 @@ const Rightside = (props) => {
             state: user
             }}  style={{ textDecoration: 'none', color: 'black' }}> 
             <div>
-            <h3>{user.displayName}</h3>
+            <h3 className="notranslate">{user.displayName}</h3>
             </div>
       </Link>
       </div>

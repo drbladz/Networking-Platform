@@ -6,8 +6,25 @@ import EditPostModal from "./EditPostModal";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
-
+import { useEffect } from "react";
+import { Link} from "react-router-dom";
+import "./translate.css"
 const Main = (props) => {
+
+  const googleTranslateElementInit = () => {
+    new window.google.translate.TranslateElement(
+      {
+        pageLanguage: "en",
+        autoDisplay: false
+        
+      },
+      "google_translate_element"
+    );
+  };
+
+
+
+
   const [showModal, setShowModal] = useState("close");
   const [showEditPostModal, setShowEditPostModal] = useState(false);
   const [showMyJobs, setShowMyJobs] = useState(false);
@@ -49,10 +66,22 @@ const Main = (props) => {
   // const handleApply = (jobPostingId) => {
   //   history.push(`/job-posting/${jobPostingId}`);
   // };
+  useEffect(() => {
+    var addScript = document.createElement("script");
+    addScript.setAttribute(
+      "src",
+      "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    );
+    document.body.appendChild(addScript);
+    window.googleTranslateElementInit = googleTranslateElementInit;
+  }, []);
+
+
 
   return (
     <Container>
-      <button onClick={() => setView("feedJobs")}>Feed</button>
+      
+      <button onClick={() => setView("feedJobs") }>Job List</button>
       <button onClick={() => setView("userJobs")}>My Job Postings</button>
       <button onClick={() => setView("savedJobs")}>Saved Jobs</button>
       <Sharebox>
@@ -89,7 +118,7 @@ const Main = (props) => {
                           )}
                           <div>
                             <span>{job.postTitle}</span>
-                            <span>{job.displayName}</span>
+                            <span className="notranslate">{job.displayName}</span>
                             <span>{Date(job.timeStamp)}</span>
                           </div>
                         </a>
@@ -130,12 +159,12 @@ const Main = (props) => {
                             </button>
                           </a>
                         ) : (
-                          <a href={`/job-posting/${job.id}`} target="_blank">
+                          <Link to={`/job-posting/${job.id}`} >
                             <button>
                               <img src="/images/apply.svg" />
                               <span>Apply!</span>
                             </button>
-                          </a>
+                          </Link>
                         )}
                       </SocialActions>
                     </div>
@@ -149,8 +178,8 @@ const Main = (props) => {
       ) : view == "userJobs" ? (
         <div>
           <Articles>
-            {props.jobPostings ? (
-              props.jobPostings
+            {props.userJobPostings ? (
+              props.userJobPostings
                 .filter((job) => !job.groupId)
                 .map((job) => {
                   return (
@@ -160,7 +189,7 @@ const Main = (props) => {
                           <img src={job.photoURL} />
                           <div>
                             <span>{job.postTitle}</span>
-                            <span>{job.displayName}</span>
+                            <span className="notranslate">{job.displayName}</span>
                             <span>{Date(job.timeStamp)}</span>
                           </div>
                         </a>
@@ -169,13 +198,11 @@ const Main = (props) => {
                         </button>
                       </SharedActor>
                       <Description>
-                        {" "}
-                        {job.isExternal ? (
+                        {/* {" "} */}
+                        {job.isExternal && (
                           <a href={`${job.postDescription}`} target="_blank">
-                            link to external job
+                            Go to external job
                           </a>
-                        ) : (
-                          job.postDescription
                         )}
                       </Description>
                       {/*
@@ -189,14 +216,11 @@ const Main = (props) => {
 
           </button> */}
                         {!job.isExternal && (
-                          <a
-                            href={`/job-applications/job/${job.id}`}
-                            target="_blank"
-                          >
+                          <Link to={`/job-applications/job/${job.id}`}>
                             <button>
                               <span>View Applications</span>
                             </button>
-                          </a>
+                          </Link>
                         )}
                       </SocialActions>
                     </div>
@@ -229,7 +253,7 @@ const Main = (props) => {
                         <img src={post.photoURL} />
                         <div>
                           <span>{post.postTitle}</span>
-                          <span>{post.displayName}</span>
+                          <span className="notranslate">{post.displayName}</span>
                           <span>{Date(post.timeStamp)}</span>
                         </div>
                       </a>
@@ -257,19 +281,19 @@ const Main = (props) => {
 
           </button> */}
                       {post.isExternal ? (
-                        <a href={`${post.postDescription}`} target="_blank">
+                        <a href={`${post.postDescription}`} target="_blank" >
                           <button>
                             <img src="/images/apply.svg" />
                             <span>Apply!</span>
                           </button>
                         </a>
                       ) : (
-                        <a href={`/job-posting/${post.id}`} target="_blank">
+                        <Link to={`/job-posting/${post.id}`}>  
                           <button>
                             <img src="/images/apply.svg" />
                             <span>Apply!</span>
                           </button>
-                        </a>
+                        </Link>
                       )}
                     </SocialActions>
                   </div>
