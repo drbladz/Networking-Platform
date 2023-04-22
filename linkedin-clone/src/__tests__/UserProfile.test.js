@@ -69,48 +69,62 @@ describe('UserProfile', () => {
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { UserProfile } from '../components/UserProfile';
+import UserProfile from '../components/UserProfile';
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme'
+import * as ReactRouter from 'react-router';
+import { Redirect } from 'react-router-dom';
+Enzyme.configure({ adapter: new Adapter() })
+jest.mock('react-redux', () => ({
+  connect: () => (ReactComponent) => ReactComponent,
+}));
+const user = {
+  userId: '123',
+  displayName: 'John Doe',
+  photoURL: '/images/user.svg',
+  bio: 'I am a software engineer.',
+  works: [
+    {
+      title: 'Software Engineer',
+      company: 'Acme Inc.',
+      location: 'Montreal, QC',
+      startDate: '2019-01-01',
+      endDate: '2021-12-31',
+      description: 'Developed new features and maintained existing codebase.',
+    },
+  ],
+  educations: [
+    {
+      school: 'University of Montreal',
+      program: 'Computer Science',
+      startDate: '2015-09-01',
+      endDate: '2019-05-31',
+    },
+  ],
+  skills: ['JavaScript', 'React', 'Node.js'],
+  courses: [
+    {
+      title: 'React Fundamentals',
+      school: 'Pluralsight',
+    },
+  ],
+  projects: [
+    {
+      title: 'React App',
+      startDate: '2022-01-01',
+      endDate: '2022-01-31',
+      description: 'Built a simple React app.',
+    },
+  ],
+};
+
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn().mockReturnValue({
+    state: user,
+  }),
+}));
 
 describe('UserProfile component', () => {
-  const user = {
-    userId: '123',
-    displayName: 'John Doe',
-    photoURL: 'https://example.com/image.jpg',
-    bio: 'I am a software engineer.',
-    works: [
-      {
-        title: 'Software Engineer',
-        company: 'Acme Inc.',
-        location: 'Montreal, QC',
-        startDate: '2019-01-01',
-        endDate: '2021-12-31',
-        description: 'Developed new features and maintained existing codebase.',
-      },
-    ],
-    educations: [
-      {
-        school: 'University of Montreal',
-        program: 'Computer Science',
-        startDate: '2015-09-01',
-        endDate: '2019-05-31',
-      },
-    ],
-    skills: ['JavaScript', 'React', 'Node.js'],
-    courses: [
-      {
-        title: 'React Fundamentals',
-        school: 'Pluralsight',
-      },
-    ],
-    projects: [
-      {
-        title: 'React App',
-        startDate: '2022-01-01',
-        endDate: '2022-01-31',
-        description: 'Built a simple React app.',
-      },
-    ],
-  };
 
   const props = {
     user: {
@@ -123,20 +137,20 @@ describe('UserProfile component', () => {
   };
 
   it('renders the user profile container', () => {
-    const wrapper = shallow(<UserProfile {...props} />, {
-      context: { router: { location: { state: user } } },
-    });
+    const mockLocation = {
+      state: user
+    }
+    const useLocationSpy = jest.spyOn(ReactRouter, 'useLocation').mockReturnValue(mockLocation)
+    const wrapper = shallow(<UserProfile {...props} />, { context: useLocationSpy });
 
     expect(wrapper.find('.profile-container')).toHaveLength(1);
   });
 
   it('redirects to home if user is not logged in', () => {
-    const wrapper = shallow(<UserProfile {...props} />, {
-      context: { router: { location: { state: user } } },
-    });
-
-    wrapper.setProps({ user: null });
-
+    const mockLocation = { state: user }
+    const useLocationSpy = jest.spyOn(ReactRouter, 'useLocation').mockReturnValue(mockLocation)
+    const wrapper = shallow(<UserProfile {...props} />, { context: useLocationSpy });
+    wrapper.setProps({ ...props, user: {} })
     expect(wrapper.find('Redirect')).toHaveLength(1);
     expect(wrapper.find('Redirect').prop('to')).toEqual('/');
   });
