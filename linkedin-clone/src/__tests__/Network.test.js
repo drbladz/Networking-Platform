@@ -1,6 +1,13 @@
 import React from "react";
-import { shallow } from "enzyme";
-import { Network } from "../components/Network";
+import { render, shallow } from "enzyme";
+import Network from "../components/Network";
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme'
+import { BrowserRouter } from 'react-router-dom';
+jest.mock('react-redux', () => ({
+  connect: () => (ReactComponent) => ReactComponent,
+}));
+Enzyme.configure({ adapter: new Adapter() })
 
 describe("Network component", () => {
   let props;
@@ -57,6 +64,8 @@ describe("Network component", () => {
       connections: [],
       pending: [],
     };
+    const stateSetter = jest.fn()
+    jest.spyOn(React, 'useState').mockImplementation(stateValue => [stateValue = users, stateSetter])
     network().setState({ users });
     expect(network().find(".card").length).toBe(2);
   });
