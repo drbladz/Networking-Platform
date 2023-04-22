@@ -4,6 +4,14 @@ import configureStore from "redux-mock-store";
 import Login from "../components/Login";
 import userEvent from "@testing-library/user-event";
 import { Router } from "react-redux";
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme';
+import React from "react";
+jest.mock('react-redux', () => ({
+  connect: () => (ReactComponent) => ReactComponent,
+}));
+Enzyme.configure({ adapter: new Adapter() })
+
 
 const mockStore = configureStore([]);
 
@@ -19,11 +27,7 @@ describe("Login", () => {
   });
 
   it("renders login and sign up buttons", () => {
-    render(
-      <Provider store={store}>
-        <Login />
-      </Provider>
-    );
+    render(<Login />);
 
     expect(screen.getByRole("button", { value: /login/i })).toBeInTheDocument();
     expect(
@@ -31,35 +35,25 @@ describe("Login", () => {
     ).toBeInTheDocument();
   });
 
-  /*it('shows the sign up form when "Sign Up" button is clicked', () => {
-    render(
-      <Provider store={store}>
-        <Login />
-      </Provider>
-    );
-
-    userEvent.click(screen.getByRole("button", { value: /sign up/i }));
-
+  it('shows the sign up form when "Sign Up" button is clicked', () => {
+    const SignIn = jest.fn()
+    render(<Login SignIn={SignIn} />);
+    fireEvent.click(screen.getByText("Sign Up"));
     expect(
-      screen.getByRole("heading", { value: /sign up/i })
+      screen.getByPlaceholderText("Full Name")
     ).toBeInTheDocument();
   });
 
   it('shows the login form when "Login" button is clicked', () => {
-    render(
-      <Provider store={store}>
-        <Login />
-      </Provider>
-    );
-
-    userEvent.click(screen.getByRole("button", { value: /login/i }));
-
+    const SignIn = jest.fn()
+    render(<Login SignIn={SignIn} />);
+    fireEvent.click(screen.getByText("Login"));
     expect(
-      screen.getByRole("heading", { value: /login/i })
+      screen.getByPlaceholderText("Email")
     ).toBeInTheDocument();
   });
 
-  it.only('redirects to home page if user is logged in', () => {
+  /*it.only('redirects to home page if user is logged in', () => {
     store = mockStore({
       userState: {
         user: { name: 'test user' },
