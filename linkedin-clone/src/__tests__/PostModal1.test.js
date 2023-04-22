@@ -41,12 +41,12 @@ describe('PostModal component', () => {
     expect(input.value).toBe('Software Engineer');
   });
 
-  /*it('updates the post description when the user types in the textarea', () => {
+  it('updates the post description when the user types in the textarea', () => {
     const { getByPlaceholderText } = component;
-    const textarea = getByPlaceholderText('Job Description');
+    const textarea = getByPlaceholderText('Job Description or External link');
     fireEvent.change(textarea, { target: { value: 'We are looking for a software engineer to join our team.' } });
     expect(textarea.value).toBe('We are looking for a software engineer to join our team.');
-  });*/
+  });
 
   it('updates the mandatory resume checkbox when clicked', () => {
     const { getByLabelText } = component;
@@ -62,8 +62,16 @@ describe('PostModal component', () => {
     expect(checkbox.checked).toBe(true);
   });
 
-  /*it('dispatches a createJobPosting action when the Post button is clicked', () => {
-    const { getByText } = component;
+  it('dispatches a createJobPosting action when the Post button is clicked', () => {
+    const { getByText, getByPlaceholderText, getByLabelText } = component;
+    const input = getByPlaceholderText('Title');
+    fireEvent.change(input, { target: { value: 'Software Engineer' } });
+    const textarea = getByPlaceholderText('Job Description or External link');
+    fireEvent.change(textarea, { target: { value: 'We are looking for a software engineer to join our team.' } });
+    const checkboxR = getByLabelText('Resume');
+    fireEvent.click(checkboxR);
+    const checkbox = getByLabelText('Cover Letter');
+    fireEvent.click(checkbox);
     const postButton = getByText('Post');
     fireEvent.click(postButton);
     const actions = store.getActions();
@@ -82,5 +90,5 @@ describe('PostModal component', () => {
         },
       },
     ]);
-  });*/
+  });
 });
