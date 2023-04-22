@@ -16,6 +16,14 @@ import { getStorage } from "firebase/storage";
 import store from "../store"
 import { render, screen, fireEvent } from '@testing-library/react';
 import EditForm from "../components/EditForm";
+import React from "react";
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme';
+jest.mock('react-redux', () => ({
+  connect: () => (ReactComponent) => ReactComponent,
+}));
+
+Enzyme.configure({ adapter: new Adapter() })
 
 describe('EditForm', () => {
   const mockUpdateUserProfile = jest.fn();
@@ -35,20 +43,18 @@ describe('EditForm', () => {
     languages: 'Some languages',
   };
 
-  beforeEach(() => {
-    render(<EditForm user={mockUser} userId={mockUser.id} updateUserProfile={mockUpdateUserProfile} />);
-  });
-
   it('should update the state when the user types in the input fields', () => {
-    const educationInput = screen.getByRole("input",{name: /educations/i});
-    fireEvent.change(educationInput, { target: { value: 'New education' } });
-    expect(educationInput.value).toBe('New education');
+    render(<EditForm user={mockUser} userId={mockUser.id} updateUserProfile={mockUpdateUserProfile} />);
+    const educationInput = screen.getByLabelText("Contact Info:");
+    fireEvent.change(educationInput, { target: { value: 'New contact info' } });
+    expect(educationInput.value).toBe('New contact info');
   });
 
 
-  
+  // NOTE: Validation data problem.
+  it('should call updateUserProfile function with the updated user data when the form is submitted', () => {
+    render(<EditForm user={mockUser} userId={mockUser.id} updateUserProfile={mockUpdateUserProfile} />);
 
- it('should call updateUserProfile function with the updated user data when the form is submitted', () => {
     const saveButton = screen.getByRole('button', { name: /save changes/i });
     fireEvent.click(saveButton);
 
@@ -56,18 +62,18 @@ describe('EditForm', () => {
     expect(mockUpdateUserProfile).toHaveBeenCalledWith(
       mockUser.id,
       {
-        educations: '',
-        works: '',
+        educations: [],
+        works: [],
         contactInfo: '',
-        connections: '',
+        connections: [],
         bio: '',
-        volunteerings: '',
-        skills: '',
-        recommendations: '',
-        courses: '',
-        projects: '',
-        awards: '',
-        languages: '',
+        volunteerings: [],
+        skills: [],
+        recommendations: [],
+        courses: [],
+        projects: [],
+        awards: [],
+        languages: [],
       },
       mockUser
     );

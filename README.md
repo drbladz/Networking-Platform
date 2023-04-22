@@ -1,5 +1,35 @@
 # MiniCap
-A simplified LinkedIn-like app
+
+A social networking application built for professionals to connect, communicate, and collaborate with one another. Our app is inspired by the popular professional networking platform LinkedIn, but is not affiliated with the official LinkedIn Corporation. This project utilizes ReactJS, Redux, and Firebase (Firestore database) to create a seamless user experience with a responsive and scalable design.
+
+## Features
+
+* User authentication (login, registration)
+* Profile creation and editing (including profile picture, headline, summary, work experience, and education)
+* Connection management (sending, accepting, and rejecting connection requests)
+* Search functionality (find other users by name, find jobs by title or description)
+* Messaging (real-time private messaging between connections)
+* Notifications (receive updates on connection requests, messages, and more)
+* ...and many more features already implemented! Explore the app to discover all the functionalities available.
+
+## Prerequisites
+* Node.js (v18.3.0 or higher)
+* NPM (v8.19.3 or higher)
+
+## Installation
+
+Clone the repository: `git clone https://github.com/TNT05/MiniCap.git` <br>  
+Change directory to the project folder: `cd linkedin-clone` <br>   
+Install the required dependencies: `npm install`  <br> 
+
+## Usage
+Start the development server: `npm start`
+
+## Technologies
+* ReactJS
+* Redux
+* Firebase (Firestore database)
+* CSS
 
 ## Team Members
 | Name | Github | ID | 

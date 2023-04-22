@@ -3,6 +3,15 @@ import { render, screen } from "@testing-library/react";
 import Main from "../components/Main";
 import { Provider } from "react-redux";
 import store from "../store";
+import Network from "../components/Network";
+import React from "react";
+import Adapter from 'enzyme-adapter-react-16';
+import Enzyme from 'enzyme'
+import { BrowserRouter } from 'react-router-dom';
+jest.mock('react-redux', () => ({
+  connect: () => (ReactComponent) => ReactComponent,
+}));
+Enzyme.configure({ adapter: new Adapter() })
 
 describe("Main", () => {
   const mockJobPostings = [
@@ -23,11 +32,7 @@ describe("Main", () => {
   ];
 
   beforeEach(() => {
-    render(
-      <Provider store={store}>
-        <Main jobPostings={mockJobPostings} />
-      </Provider>
-    );
+    render(<Main jobPostings={mockJobPostings} />);
   });
 
   it("renders the post title and description for each job posting", () => {

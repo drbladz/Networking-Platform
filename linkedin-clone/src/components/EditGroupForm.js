@@ -52,6 +52,7 @@ const EditGroupForm = () => {
     };
 
     await updateDoc(groupRef, updatedGroupData, { merge: true });
+    window.location.reload();
   };
 
   return (

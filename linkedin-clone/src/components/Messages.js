@@ -128,7 +128,7 @@ const Messages = (props) => {
               <img src="/images/user.svg" alt={conversation.user.displayName} />
             }
             <div>
-              <h3>{conversation.user.displayName}</h3>
+              <h3 className="notranslate">{conversation.user.displayName}</h3>
               {conversation.messages && conversation.messages[conversation.messages.length - 1].message ?
                 <p>{conversation.messages && conversation.messages[conversation.messages.length - 1].message}</p> :
                 <p>{conversation.messages && conversation.messages[conversation.messages.length - 1].fileName}</p>

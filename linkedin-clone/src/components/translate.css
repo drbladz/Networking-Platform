@@ -1,0 +1,13 @@
+/* .goog-te-banner-frame.skiptranslate {
+    display: none !important;
+    } 
+body {
+    top: 0px !important; 
+    } */
+body > .skiptranslate {
+        display: none;
+    }
+.notranslate {
+        -webkit-user-modify: read-only !important;
+        pointer-events: none !important;
+     }

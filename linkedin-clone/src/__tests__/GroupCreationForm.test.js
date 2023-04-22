@@ -29,4 +29,32 @@ describe("GroupCreationForm", () => {
     });
     expect(groupDescriptionInput.value).toBe("This is my group");
   });
+
+  // it("should update the group location when the input changes", () => {
+  //   const { getByLabelText } = render(<GroupCreationForm />);
+  //   const groupLocationInput = getByLabelText(/group location/i);
+  //   fireEvent.change(groupLocationInput, {
+  //     target: { value: "New York, NY" },
+  //   });
+  //   expect(groupLocationInput.value).toBe("New York, NY");
+  // });
+
+  // it("should update the group rules when the input changes", () => {
+  //   const { getByLabelText } = render(<GroupCreationForm />);
+  //   const groupRulesInput = getByLabelText(/group rules/i);
+  //   fireEvent.change(groupRulesInput, {
+  //     target: { value: "Be kind and respectful" },
+  //   });
+  //   expect(groupRulesInput.value).toBe("Be kind and respectful");
+  // });
+
+  /*it("should call handleSubmit when the form is submitted", () => {
+    const handleSubmitMock = jest.fn();
+    const { getByText } = render(
+      <GroupCreationForm onSubmit={handleSubmitMock} />
+    );
+    const createButton = getByText(/create/i);
+    fireEvent.click(createButton);
+    expect(handleSubmitMock).toHaveBeenCalledTimes(1);
+  });*/
 });

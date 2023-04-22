@@ -31,6 +31,11 @@ import {
 import { async } from "@firebase/util";
 import { v4 as uuidv4 } from "uuid";
 import { useParams } from "react-router-dom";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+
+
+
+
 // Define an action creator to set the current user in the store.
 export const setUser = (payload) => ({
   type: SET_USER,
@@ -152,33 +157,50 @@ export async function getGroups() {
   return groups;
 }
 
-export const sendJoinGroupRequest = async (groupId, userId) => {
-  const currentUserRef = doc(db, "Users", userId);
-  const currentUserDocument = await getDoc(currentUserRef);
-  const groupRef = doc(db, "Groups", groupId);
-  const groupDocument = await getDoc(groupRef);
-  const groupCreatorId = groupDocument.data().createdBy;
-  const groupCreatorRef = doc(db, "Users", groupCreatorId);
+export const sendJoinGroupRequest = (groupId, userId) => {
+  return async (dispatch) => {
+    const currentUserRef = doc(db, "Users", userId);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const groupRef = doc(db, "Groups", groupId);
+    const groupDocument = await getDoc(groupRef);
+    const groupCreatorId = groupDocument.data().createdBy;
+    const groupCreatorRef = doc(db, "Users", groupCreatorId);
 
-  // Add pending group for the current user
-  await updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
+    // Add pending group for the current user
+    updateDoc(currentUserRef, { pendingGroups: arrayUnion(groupId) });
 
-  // Add join request for the group creator
-  await updateDoc(groupCreatorRef, {
-    groupJoinRequests: arrayUnion({
-      groupId: groupId,
-      groupName: groupDocument.data().groupName,
-      userId: userId,
-      userName: currentUserDocument.data().displayName,
-      userPhotoURL: currentUserDocument.data().photoURL,
-    }),
-  });
+    // Add join request for the group creator
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayUnion({
+        groupId: groupId,
+        groupName: groupDocument.data().groupName,
+        userId: userId,
+        userName: currentUserDocument.data().displayName,
+        userPhotoURL: currentUserDocument.data().photoURL,
+      }),
+    });
 
-  // Add the groupId to the user's pendingJoinRequests field in Firebase
-  const userRef = doc(db, "Users", userId);
-  await updateDoc(userRef, {
-    pendingJoinRequests: arrayUnion(groupId),
-  });
+    // Add the groupId to the user's pendingJoinRequests field in Firebase
+    const userRef = doc(db, "Users", userId);
+    updateDoc(userRef, {
+      pendingJoinRequests: arrayUnion(groupId),
+    });
+
+    // Create notification for the group creator
+    updateDoc(groupCreatorRef, {
+      notifications: arrayUnion({
+        notification: `${
+          currentUserDocument.data().displayName
+        } wants to join ${groupDocument.data().groupName}.`,
+        photoURL: currentUserDocument.data().photoURL,
+        date: new Date(),
+        viewed: false,
+      }),
+    });
+
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));
+  };
 };
 
 // Async function to add a connection by id.
@@ -563,7 +585,7 @@ export function createGroupJobPosting(
   jobParameters,
   groupId = null
 ) {
-  return (dispatch) => {
+  return async (dispatch) => {
     const newJobPostingData = {
       id: uuidv4(),
       userId: userId,
@@ -592,6 +614,26 @@ export function createGroupJobPosting(
         dispatch(setUserJobPostings(newUserPostingsList));
       })
       .catch((error) => alert(error.message));
+
+      const groupRef = doc(db, "Groups", groupId);
+      const groupDocument = await getDoc(groupRef);
+      const currentUserRef = doc(db, "Users", auth.currentUser.uid);
+      const currentUserDocument = await getDoc(currentUserRef);
+
+    // Create notification for the all group members
+    groupDocument.data().groupMembers.forEach((member) => {
+      updateDoc(doc(db, "Users", member.userId), {
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDocument.data().displayName
+          } posted in ${groupDocument.data().groupName}.`,
+          postURL: `/groups/${newJobPostingData.groupId}`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false,
+        }),
+      });
+    });
   };
 }
 
@@ -766,6 +808,7 @@ export function signOutAPI() {
         dispatch(setJobPostings(null));
       })
       .catch((error) => console.log(error));
+      window.location.assign("/");
   };
 }
 
@@ -878,4 +921,166 @@ export const warnUser = async (warnUserId) => {
     console.error("Error warning the user", error);
     return null;
   }
+};
+
+export function acceptGroupInvite(invite) {
+  return async (dispatch) => {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", invite.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userId: invite.userId,
+        userName: invite.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: invite.groupName,
+        groupId: invite.groupId,
+      }),
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
+
+export function declineGroupInvite(invite) {
+  return async (dispatch) => {
+    // Remove the invite from the user's groupInvites field
+    const userRef = doc(db, "Users", invite.userId);
+    updateDoc(userRef, {
+      groupInvites: arrayRemove(invite),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
+
+export function acceptGroupJoinRequest(request) {
+  return async (dispatch) => {
+    // Add the user to the groupMembers field object in the group document
+    const groupRef = doc(db, "Groups", request.groupId);
+    updateDoc(groupRef, {
+      groupMembers: arrayUnion({
+        userId: request.userId,
+        userName: request.userName,
+      }),
+    });
+
+    // Add the respective groupId in the groupMemberOf field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    updateDoc(userRef, {
+      groupMemberOf: arrayUnion({
+        group: request.groupName,
+        groupId: request.groupId,
+      }),
+    });
+
+    // Remove the join request from the group creator's groupJoinRequests field
+    const groupCreatorRef = doc(db, "Users", auth.currentUser.uid);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Remove the groupId from the user's pendingJoinRequests field in Firebase
+    await updateDoc(userRef, {
+      pendingJoinRequests: arrayRemove(request.groupId),
+    });
+
+    // Remove the groupId from the pendingGroups field in the respective User document
+    await updateDoc(userRef, {
+      pendingGroups: arrayRemove(request.groupId),
+    });
+
+    // Create notification for the other user
+    const groupCreatorDocument = await getDoc(groupCreatorRef);
+    updateDoc(userRef, {
+      notifications: arrayUnion({
+        notification: `${
+          groupCreatorDocument.data().displayName
+        } approved your request to join ${request.groupName}.`,
+        photoURL: groupCreatorDocument.data().photoURL,
+        postURL: `/groups/${request.groupId}`,
+        date: new Date(),
+        viewed: false,
+      }),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  } 
+}
+
+export function declineGroupJoinRequest(request) {
+  return async (dispatch) => {
+    const groupCreatorRef = doc(db, "Users", auth.currentUser.uid);
+    updateDoc(groupCreatorRef, {
+      groupJoinRequests: arrayRemove(request),
+    });
+
+    // Remove the groupId from the pendingGroups field in the respective User document
+    const userRef = doc(db, "Users", request.userId);
+    await updateDoc(userRef, {
+      pendingGroups: arrayRemove(request.groupId),
+    });
+
+    // Update user state
+    const userData = await getUserDataById(auth.currentUser.uid);
+    dispatch(setUser(userData));  
+  }
+}
+
+ export const createPage = async (pageName, pageDescription, pageImage) => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error('User not authenticated');
+  }
+
+  const storage = getStorage();
+
+  let pageImageURL = '';
+
+  if (pageImage) {
+    const storageRef = ref(storage, `page-images/${currentUser.uid}/${pageImage.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, pageImage);
+
+    await new Promise((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          // Handle uploading progress
+        },
+        (error) => {
+          // Handle error
+          reject(error);
+        },
+        async () => {
+          // Handle successful upload
+          pageImageURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve();
+        },
+      );
+    });
+  }
+
+  const newPage = {
+    pageName,
+    pageDescription,
+    pageImageURL,
+    pageOwnerId: currentUser.uid,
+  };
+
+  const pagesCollectionRef = collection(db, 'Pages');
+  await addDoc(pagesCollectionRef, newPage); 
 };

@@ -10,6 +10,7 @@ import UpdateConnections from "./UpdateConnections";
 import GroupCreationForm from "./GroupCreationForm";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
+import CreatePageForm from "./CreatePageForm";
 
 //Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -71,7 +72,7 @@ const Leftside = (props) => {
               <Photo />
             )}
             {props.user && props.user.displayName ? (
-              <StyledLink>Welcome {props.user.displayName}</StyledLink>
+              <StyledLink>Welcome Back, <span className="notranslate"> {props.user.displayName} </span> </StyledLink>
             ) : (
               <StyledLink>Welcome User</StyledLink>
             )}
@@ -79,6 +80,7 @@ const Leftside = (props) => {
           <a>
             <Bio>{props.user && props.user.bio}</Bio>
           </a>
+          <div id="google_translate_element"></div>
           <a>
             <AddPhotoText onClick={handlePhotoClick}>
               Change Profile Picture
@@ -102,15 +104,22 @@ const Leftside = (props) => {
               )}
             </CustomModal4>
           </a>
-          <a
-            href="/job-preferences"
-            target="_blank"
-            style={{ textDecoration: "none" }}
+          <Link 
+
+            to="/job-preferences"
+            
+            style={{ textDecoration: "none", display: "block"  }}
           >
             <SetPreferencesText>
               Set Job Searching Preferences
             </SetPreferencesText>
-          </a>
+          </Link>
+          <Link to="/create-page"  style={{ textDecoration: 'none' , display: "block" }}>
+            <CreatePageText>
+              Create a Page
+            </CreatePageText>
+            
+          </Link>
           <a>
             <CreateGroup onClick={handleGroupClick}>
               Create a new group
@@ -127,16 +136,15 @@ const Leftside = (props) => {
                 {props.user &&
                   props.user.groupOwned &&
                   Object.keys(props.user.groupOwned).map((groupId) => (
-                    <a
-                      href={`/groups/${groupId}`}
-                      target="_blank"
+                    <Link
+                      to={`/groups/${groupId}`}
                       key={groupId}
                       style={{ textDecoration: "none" }}
                     >
                       <MyGroup>
-                        <span>{props.user.groupOwned[groupId]}</span>
+                        <span className="notranslate">{props.user.groupOwned[groupId]}</span>
                       </MyGroup>
-                    </a>
+                    </Link>
                   ))}
               </div>
             </a>
@@ -151,10 +159,9 @@ const Leftside = (props) => {
                     <div key={group.groupId}>
                       <a
                         href={`/groups/${group.groupId}`}
-                        target="_blank"
                         style={{ textDecoration: "none" }}
                       >
-                        <span>{group.group}</span>
+                        <span className="notranslate">{group.group}</span>
                       </a>
                     </div>
                   ))}
@@ -1024,7 +1031,14 @@ const SetPreferencesText = styled.span`
   font-weight: 400;
   cursor: pointer;
 `;
-
+const CreatePageText = styled.span`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+  cursor: pointer;
+`;
 const mapStateToProps = (state) => {
   return {
     user: state.userState.user,
