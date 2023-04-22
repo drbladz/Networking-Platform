@@ -146,7 +146,7 @@ const Header = (props) => {
                   <HorizontalLine />
                   <JobSection>
                     <SectionLabel>Jobs</SectionLabel>
-                    {(usePreferences
+                    {(usePreferences && searchPreferences
                       ? filterJobsByPreferences(
                           props.jobPostings,
                           searchPreferences
