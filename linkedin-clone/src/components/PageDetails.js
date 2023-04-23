@@ -3,8 +3,10 @@ import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
-import { collection, getDoc,getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDoc, getDocs, addDoc, doc, updateDoc, deleteDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+
 const storage = getStorage();
 
 const EditPostForm = ({ post, onUpdate, onClose }) => {
@@ -78,6 +80,63 @@ const EditPostForm = ({ post, onUpdate, onClose }) => {
     </Modal>
   );
 };
+
+const PostLikes = ({ postId, userId }) => {
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (userId) {
+      const postLikesRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Likes');
+
+      const unsubscribe = onSnapshot(postLikesRef, (snapshot) => {
+        let userLiked = false;
+        let count = 0;
+        snapshot.forEach((doc) => {
+          if (doc.id === userId.uid) {
+            userLiked = true;
+          }
+          count++;
+        });
+        setLiked(userLiked);
+        setLikesCount(count);
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [id, postId, userId]);
+
+  const handleLike = async () => {
+    const postLikeRef = doc(doc(db, 'Pages', id), 'Posts', postId, 'Likes', userId.uid);
+    if (liked) {
+      await deleteDoc(postLikeRef);
+    } else {
+      await setDoc(postLikeRef, {});
+    }
+  };
+
+  return (
+    <div onClick={handleLike} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+      {liked ? <FaHeart style={{ color: 'red' }} /> : <FaRegHeart />}
+      <span style={{ marginLeft: '4px' }}>{likesCount}</span>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -432,6 +491,7 @@ const Button = styled.button`
 const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
   const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const userId = getAuth().currentUser;
 
   const handleEditClick = (post) => {
     setSelectedPost(post);
@@ -441,23 +501,26 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
   const handleEditPostModalClose = () => {
     setIsEditPostModalOpen(false);
   };
-  return (
+ return (
     <PostListContainer>
       {posts.map((post) => (
         <Post key={post.id}>
-          <PostHeader style={{textAlign: "center"}}>
-            <h2 style={{textAlign: "center"}}>{post.postTitle}</h2>
+          <PostHeader style={{ textAlign: 'center' }}>
+            <h2 style={{ textAlign: 'center' }}>{post.postTitle}</h2>
           </PostHeader>
           <PostContent>
-            <PostDescription >{post.postDescription}</PostDescription>
+            <PostDescription>{post.postDescription}</PostDescription>
             {post.postImageURL && <PostImage src={post.postImageURL} alt={post.postTitle} />}
           </PostContent>
-          {isUserPage && (
-            <PostActions>
-              <EditPostButton onClick={() => handleEditClick(post)} />
-              <DeletePostButton onClick={() => onDelete(post.id)} />
-            </PostActions>
-          )}
+          <PostActions>
+            <PostLikes postId={post.id} userId={userId} />
+            {isUserPage && (
+              <>
+                <EditPostButton onClick={() => handleEditClick(post)} />
+                <DeletePostButton onClick={() => onDelete(post.id)} />
+              </>
+            )}
+          </PostActions>
         </Post>
       ))}
       {isEditPostModalOpen && (
