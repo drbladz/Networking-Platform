@@ -121,7 +121,7 @@ const DmModal = ({ currentUserId, recipientId }) => {
                 ) : (
                   <div>{msg.message}</div>
                 )}
-                <div className="direct-message-date">{Date(msg.createdAt)}</div>
+                <div className="direct-message-date">{new Date(msg.createdAt.seconds * 1000 + msg.createdAt.nanoseconds / 1000000).toLocaleString()}</div>
                 {msg.sender === recipientId && !msg.flagged && (
                   <div className="direct-message-flag">
                     <FaFlag onClick={() => flagMessage(msg.id)} />
