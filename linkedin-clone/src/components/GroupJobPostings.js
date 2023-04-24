@@ -71,6 +71,7 @@ const GroupJobPostings = (props) => {
           <Articles>
             {props.jobPostings ? (
               props.jobPostings
+                .sort((a, b) => b.timeStamp - a.timeStamp)
                 .filter((job) => job.groupId === groupId)
                 .map((job) => {
                   return (
@@ -81,7 +82,7 @@ const GroupJobPostings = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span>{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                       </SharedActor>
@@ -107,7 +108,7 @@ const GroupJobPostings = (props) => {
                             </button>
                           </a>
                         ) : (
-                          <a href={`/job-posting/${job.id}`} target="_blank">
+                          <a href={`/job-posting/${job.id}`}>
                             <button>
                               <span>Apply!</span>
                             </button>
@@ -137,7 +138,7 @@ const GroupJobPostings = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span>{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                         <button onClick={() => handleJobEditOpen(job)}>
@@ -167,7 +168,6 @@ const GroupJobPostings = (props) => {
                         {!job.isExternal && (
                           <a
                             href={`/job-applications/job/${job.id}`}
-                            target="_blank"
                           >
                             <button>
                               <span>View Applications</span>
