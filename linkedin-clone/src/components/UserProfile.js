@@ -187,6 +187,7 @@ const UserProfile = (props) => {
               ))}
             </ul>
           </div>}
+          <div style={{marginTop: '50px'}}>&nbsp;</div>
       </div>
       {showDm &&
       <Modal className="dm-modal" isOpen={showDm} onRequestClose={() => setShowDm(false)}>
