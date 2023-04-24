@@ -5,6 +5,10 @@ import { useState, useEffect } from "react";
 import { storage, db, auth } from "../firebase";
 import EditGroupForm from "./EditGroupForm";
 import Modal from "react-modal";
+import { HiUserGroup } from "react-icons/hi";
+import { BsFillTrashFill } from "react-icons/bs";
+import { AiFillEdit } from "react-icons/ai";
+import { IoPersonAdd } from "react-icons/io5";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   doc,
@@ -244,12 +248,13 @@ const GroupPage = (props) => {
   return (
     <>
       <Banner>
+        <HiUserGroup size={50} />
         <BannerTitle className="notranslate">{groupName}</BannerTitle>
         <BannerAdmin>
           <h3>Admin Name: <span className="notranslate">{adminName}</span> </h3>
           {currentUser && adminId !== currentUser.uid && (
             <QuitButton>
-              <button onClick={() => quitGroup(groupId, currentUser.uid)}>
+              <button className="remove-button" onClick={() => quitGroup(groupId, currentUser.uid)}>
                 Quit Group
               </button>
             </QuitButton>
@@ -258,26 +263,29 @@ const GroupPage = (props) => {
         </BannerAdmin>
         {currentUser && adminId === currentUser.uid && (
           <>
-            <DeleteGroupButton>
-              <button onClick={() => deleteGroup(groupId)}>Delete Group</button>
-            </DeleteGroupButton>
-            <EditGroupButton>
-              <button onClick={handleEditClick}>Edit Group Informations</button>
+            <DeleteGroupButton onClick={() => deleteGroup(groupId)}>
+              <BsFillTrashFill color="white" size={16} />
+              &nbsp;Delete Group
+              </DeleteGroupButton>
+
+              <EditGroupButton onClick={handleEditClick}>
+                <AiFillEdit color="white" size={16} />
+                &nbsp;Edit Group Information
+              </EditGroupButton>
               <CustomModal5 isOpen={showEditForm} onRequestClose={handleClose}>
                 {showEditForm && <EditGroupForm />}
               </CustomModal5>
-            </EditGroupButton>
-            <InviteButton>
-              <button onClick={() => setShowConnectionModal(true)}>
-                Invite People
-              </button>
+
+              <InviteButton onClick={() => setShowConnectionModal(true)}>
+                <IoPersonAdd color="white" size={16} />
+                &nbsp;Invite People
+              </InviteButton>
               <CustomModal6
                 isOpen={showConnectionModal}
                 onRequestClose={handleClose}
               >
                 {showConnectionModal && <InviteToGroup />}
               </CustomModal6>
-            </InviteButton>
           </>
         )}
       </Banner>
@@ -340,29 +348,56 @@ const CustomModal6 = styled(Modal)`
   width: 400px;
   height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
 `;
 
 const EditGroupButton = styled.div`
-  color: #0a66c2;
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.33;
-  font-weight: 400;
+display: flex;
+align-items: center;
+padding: 8px;
+margin-bottom: 5px;
+background-color: #0077FF;
+color: #FFFFFF;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+cursor: pointer;
+transition: background-color 0.3s ease;
+&:hover {
+  background-color: #0058CC;
+}
 `;
 
 const DeleteGroupButton = styled.div`
-  color: #0a66c2;
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.33;
-  font-weight: 400;
+display: flex;
+padding: 8px;
+margin-bottom: 5px;
+background-color: red;
+color: #FFFFFF;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+cursor: pointer;
+align-items: center;
+transition: background-color 0.3s ease;
+&:hover {
+  background-color: darkred;
+}
 `;
 const InviteButton = styled.div`
-  color: #0a66c2;
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.33;
-  font-weight: 400;
+display: flex;
+align-items: center;
+padding: 8px;
+background-color: #0077FF;
+color: #FFFFFF;
+border: none;
+border-radius: 4px;
+font-size: 14px;
+cursor: pointer;
+transition: background-color 0.3s ease;
+&:hover {
+  background-color: #0058CC;
+}
 `;
 const QuitButton = styled.div`
   color: #0a66c2;
@@ -370,6 +405,7 @@ const QuitButton = styled.div`
   font-size: 12px;
   line-height: 1.33;
   font-weight: 400;
+  text-align: center;
 `;
 
 const Banner = styled.div`
