@@ -8,10 +8,21 @@ import {
 } from "../actions";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
+import Modal from "react-modal";
 import "./Network.css";
+import UpdateConnections from "./UpdateConnections";
 
 const Network = (props) => {
   const [users, setUsers] = useState([]);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+
+  const handleConnectionClick = () => {
+    setShowConnectionModal(true);
+  };
+
+  const handleClose = () => {
+    setShowConnectionModal(false);
+  };
 
   useEffect(() => {
     getUsers().then((data) => {
@@ -69,6 +80,19 @@ const Network = (props) => {
         )}
       </table>
       <br />
+      <a>
+            <ReviewConnections onClick={handleConnectionClick}>
+              My Connections
+            </ReviewConnections>
+            <CustomModal3
+              isOpen={showConnectionModal}
+              onRequestClose={handleClose}
+            >
+              {showConnectionModal && (
+                <UpdateConnections userId={props.user.userId} />
+              )}
+            </CustomModal3>
+          </a>
       <div className="wrapper">
         <div className="container">
           <h1>Add Connections</h1>
@@ -141,6 +165,33 @@ const Network = (props) => {
 const Container = styled.div`
   padding-top: 72px;
   max-width: 100%;
+`;
+
+const ReviewConnections = styled.div`
+  color: #0a66c2;
+  margin-top: 4px;
+  margin-left: 30px;
+  font-size: 16px;
+  line-height: 1.33;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const CustomModal3 = styled(Modal)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  height: 55%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
 `;
 
 const mapStateToProps = (state) => {
