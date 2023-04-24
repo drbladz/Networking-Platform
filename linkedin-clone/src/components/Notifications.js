@@ -24,7 +24,7 @@ const Notifications = (props) => {
   let notifications = [];
   // Sort notifications by latest
   if (user && user[0].notifications) {
-    notifications = user[0].notifications.reverse();
+    notifications = user[0].notifications.sort((a, b) => b.date - a.date);
   }
 
   // Update db and mark notification as viewed
@@ -90,7 +90,10 @@ const Notifications = (props) => {
                   <img src={notification.photoURL} width={50} height={50} style={{ borderRadius: '50%' }} /> :
                   <img src="/images/user.svg" alt="" height={50} width={50} style={{ borderRadius: '50%' }} />
                 }
-                <p>{notification.notification}</p>
+                <NotificationText>
+                  <p>{notification.notification}</p>
+                  <small style={{color: '#999', fontSize: '12px'}}>{new Date(notification.date.seconds * 1000 + notification.date.nanoseconds / 1000000).toLocaleString()}</small>
+                </NotificationText>
                 {notification.notification && 
                 notification.notification.includes("connect") &&
                 <button className="buttonc" onClick={() => viewRequest(notification)}>
@@ -107,6 +110,7 @@ const Notifications = (props) => {
                 <button className="buttonc" onClick={() => viewPost(notification)}>View</button>
                 }
                 <button className="buttonc" onClick={() => markAsViewed(notification)}>Mark as Viewed</button>
+                
               </NotificationItem>
             ))}
           </NotificationList>
@@ -156,6 +160,11 @@ const NotificationItem = styled.li`
   border-bottom: 1px solid #ccc;
   flex-wrap: wrap;
 
+`;
+
+const NotificationText = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const mapStateToProps = (state) => {

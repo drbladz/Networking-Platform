@@ -87,7 +87,7 @@ export function updateUserProfile(userId, updatedUserData, currentUserData) {
   // Update the user document in the "Users" collection
   for (let property in currentUserData) {
     if (
-      updatedUserData[property] == "" ||
+      //updatedUserData[property] == "" ||
       !updatedUserData.hasOwnProperty(property)
     ) {
       updatedUserData[property] = currentUserData[property];
