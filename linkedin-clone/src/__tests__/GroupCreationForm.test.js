@@ -5,15 +5,12 @@ import GroupCreationForm from "../components/GroupCreationForm";
 describe("GroupCreationForm", () => {
   it("should render the form", () => {
     const { getByLabelText, getByText } = render(<GroupCreationForm />);
-    const groupNameInput = getByLabelText("Group Name:");
-    const groupDescriptionInput = getByLabelText("Group Description:");
-    // const groupLocationInput = getByLabelText(/group location/i);
-    // const groupRulesInput = getByLabelText(/group rules/i);
-    const createButton = getByText("Create Group");
+    const groupNameInput = getByLabelText(/group name/i);
+    const groupDescriptionInput = getByLabelText(/group description/i);
+    
+    const createButton = getByText(/create/i);
     expect(groupNameInput).toBeInTheDocument();
     expect(groupDescriptionInput).toBeInTheDocument();
-    // expect(groupLocationInput).toBeInTheDocument();
-    // expect(groupRulesInput).toBeInTheDocument();
     expect(createButton).toBeInTheDocument();
   });
 

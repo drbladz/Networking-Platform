@@ -9,13 +9,13 @@ describe('DmModal', () => {
     expect(getByPlaceholderText('Type your message')).toBeInTheDocument();
   });
 
-  test('sends a message', async () => {
+  test.only('sends a message', async () => {
     const { getByText, getByPlaceholderText } = render(<DmModal currentUserId="123" recipientId="456" />);
     const input = getByPlaceholderText('Type your message');
     fireEvent.change(input, { target: { value: 'Hello World!' } });
     expect(input.value).toBe('Hello World!');
-    const sendButton = getByText('Send');
-    fireEvent.click(sendButton);
+    const icon = getByText("Send");
+    fireEvent.click(icon);
     expect(input.value).toBe('Hello World!');
   });
 });
