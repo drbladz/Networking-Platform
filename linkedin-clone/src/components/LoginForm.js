@@ -5,10 +5,10 @@ const LoginForm = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   return (
-    <div>
+    <div className="form">
       <input type="email" required={true} placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
       <input type="password" required={true} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit" onClick={()=>props.login(email, password)}>Login</button>
+      <button className="apply-btn" type="submit" onClick={()=>props.login(email, password)}>Login</button>
     </div>
   );
 };
