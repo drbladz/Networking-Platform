@@ -8,7 +8,8 @@ import { useHistory } from "react-router-dom";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { useEffect } from "react";
 import { Link} from "react-router-dom";
-import "./translate.css"
+import "./translate.css";
+import "./Main.css";
 const Main = (props) => {
 
   const googleTranslateElementInit = () => {
@@ -81,9 +82,9 @@ const Main = (props) => {
   return (
     <Container>
       
-      <button onClick={() => setView("feedJobs") }>Job List</button>
-      <button onClick={() => setView("userJobs")}>My Job Postings</button>
-      <button onClick={() => setView("savedJobs")}>Saved Jobs</button>
+      <button className="feed-btn" onClick={() => setView("feedJobs") }>Job List</button>
+      <button className="feed-btn" onClick={() => setView("userJobs")}>My Job Postings</button>
+      <button className="feed-btn" onClick={() => setView("savedJobs")}>Saved Jobs</button>
       <Sharebox>
         <div>
           {props.user && props.user.photoURL ? (
@@ -99,6 +100,7 @@ const Main = (props) => {
           <Articles>
             {props.jobPostings ? (
               props.jobPostings
+                .sort((a, b) => b.timeStamp - a.timeStamp)
                 .filter((job) => !job.groupId)
                 .map((job) => {
                   let saved = [];
@@ -119,7 +121,7 @@ const Main = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span className="notranslate">{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                         {saved ? (
@@ -154,14 +156,12 @@ const Main = (props) => {
                         {job.isExternal ? (
                           <a href={`${job.postDescription}`} target="_blank">
                             <button>
-                              <img src="/images/apply.svg" />
                               <span>Apply!</span>
                             </button>
                           </a>
                         ) : (
                           <Link to={`/job-posting/${job.id}`} >
                             <button>
-                              <img src="/images/apply.svg" />
                               <span>Apply!</span>
                             </button>
                           </Link>
@@ -190,7 +190,7 @@ const Main = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span className="notranslate">{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                         <button onClick={() => handleJobEditOpen(job)}>
@@ -254,7 +254,7 @@ const Main = (props) => {
                         <div>
                           <span>{post.postTitle}</span>
                           <span className="notranslate">{post.displayName}</span>
-                          <span>{Date(post.timeStamp)}</span>
+                          <span>{(new Date(post.timeStamp)).toLocaleString()}</span>
                         </div>
                       </a>
                       {
@@ -283,14 +283,12 @@ const Main = (props) => {
                       {post.isExternal ? (
                         <a href={`${post.postDescription}`} target="_blank" >
                           <button>
-                            <img src="/images/apply.svg" />
                             <span>Apply!</span>
                           </button>
                         </a>
                       ) : (
                         <Link to={`/job-posting/${post.id}`}>  
                           <button>
-                            <img src="/images/apply.svg" />
                             <span>Apply!</span>
                           </button>
                         </Link>
@@ -349,6 +347,7 @@ const Sharebox = styled(CommonCard)`
       display: flex;
       align-items: center;
       font-weight: 600;
+      cursor: text;
     }
     &:first-child {
       display: flex;
@@ -380,7 +379,7 @@ const Articles = styled(CommonCard)`
 const SharedActor = styled.div`
   padding-right: 40px;
   flex-wrap: nowrap;
-  padding: 12px 16px 0;
+  padding: 20px 16px 0;
   margin-bottom: 8px;
   align-items: center;
   display: flex;
@@ -461,12 +460,21 @@ const SocialActions = styled.div`
   button {
     display: inline-flex;
     align-items: center;
-    padding: 8px;
-    color: #0a66c2;
+    padding: 15px;
+    background: #0a66c2;
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: darkblue;
+    }
 
     @media (min-width: 468px) {
       span {
-        margin-left: 8px;
+        margin-left: 0px;
       }
     }
   }
