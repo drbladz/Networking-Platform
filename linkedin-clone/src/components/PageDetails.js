@@ -130,9 +130,53 @@ const PostLikes = ({ postId, userId }) => {
 
 
 
+const Comment = ({ comment, user, onEdit, onDelete }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editText, setEditText] = useState(comment.text);
+
+  const handleSaveEdit = () => {
+    onEdit(comment.id, editText);
+    setIsEditMode(false);
+  };
+
+  const handleDelete = () => {
+    onDelete(comment.id);
+  };
+
+  return (
+    <CommentContainer>
+      <CommentUser>{comment.user}</CommentUser>
+      {isEditMode ? (
+        <input
+          type="text"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      ) : (
+        <CommentText>{comment.text}</CommentText>
+      )}
+      <CommentTime>{new Date(comment.time).toLocaleString()}</CommentTime>
+      <CommentActions>
+  {user && user.uid === comment.userId && (
+    <>
+      {isEditMode ? (
+        <EditButton onClick={handleSaveEdit}>Save</EditButton>
+      ) : (
+        <EditButton onClick={() => setIsEditMode(true)}>Edit</EditButton>
+      )}
+      <DeleteButton onClick={handleDelete}>Delete</DeleteButton>
+    </>
+  )}
+</CommentActions>
+    </CommentContainer>
+  );
+};
+
+
 const CommentsList = ({ postId }) => {
   const { id } = useParams();
   const [comments, setComments] = useState([]);
+  const user = getAuth().currentUser;
 
   useEffect(() => {
     const commentsRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Comments');
@@ -149,14 +193,36 @@ const CommentsList = ({ postId }) => {
     };
   }, [id, postId]);
 
+  const handleEditComment = async (commentId, newText) => {
+    try {
+      const commentRef = doc(db, 'Pages', id, 'Posts', postId, 'Comments', commentId);
+      await updateDoc(commentRef, { text: newText });
+    } catch (error) {
+      console.error('Error updating comment:', error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      try {
+        const commentRef = doc(db, 'Pages', id, 'Posts', postId, 'Comments', commentId);
+        await deleteDoc(commentRef);
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+      }
+    }
+  };
+
   return (
     <CommentsContainer>
       {comments.map((comment) => (
-        <Comment key={comment.id}>
-          <CommentUser>{comment.user}</CommentUser>
-          <CommentText>{comment.text}</CommentText>
-          <CommentTime>{new Date(comment.time).toLocaleString()}</CommentTime>
-        </Comment>
+        <Comment
+          key={comment.id}
+          comment={comment}
+          user={user}
+          onEdit={handleEditComment}
+          onDelete={handleDeleteComment}
+        />
       ))}
     </CommentsContainer>
   );
@@ -172,6 +238,7 @@ const NewCommentForm = ({ postId }) => {
     if (!commentText.trim()) return;
 
     const newComment = {
+      userId: user.uid,
       user: user.displayName || user.email,
       text: commentText,
       time: new Date().toISOString(),
@@ -699,10 +766,10 @@ const CommentsContainer = styled.div`
   margin-top: 1rem;
 `;
 
-const Comment = styled.div`
-  padding: 0.5rem;
-  border-top: 1px solid #ccc;
-`;
+// const Comment = styled.div`
+//   padding: 0.5rem;
+//   border-top: 1px solid #ccc;
+// `;
 
 const CommentUser = styled.span`
   font-weight: bold;
@@ -751,5 +818,47 @@ const CommentSubmitButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+const CommentContainer = styled.div`
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+`;
+
+const CommentActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+`;
+
+const EditButton = styled.button`
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
+`;
+
+const DeleteButton = styled.button`
+  background-color: #f44336;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
 `;
 export default PageDetails;
