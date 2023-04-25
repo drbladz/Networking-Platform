@@ -130,6 +130,76 @@ const PostLikes = ({ postId, userId }) => {
 
 
 
+const CommentsList = ({ postId }) => {
+  const { id } = useParams();
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    const commentsRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Comments');
+    const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
+      const commentsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComments(commentsData);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [id, postId]);
+
+  return (
+    <CommentsContainer>
+      {comments.map((comment) => (
+        <Comment key={comment.id}>
+          <CommentUser>{comment.user}</CommentUser>
+          <CommentText>{comment.text}</CommentText>
+          <CommentTime>{new Date(comment.time).toLocaleString()}</CommentTime>
+        </Comment>
+      ))}
+    </CommentsContainer>
+  );
+};
+
+const NewCommentForm = ({ postId }) => {
+  const { id } = useParams();
+  const [commentText, setCommentText] = useState('');
+  const user = getAuth().currentUser;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
+    const newComment = {
+      user: user.displayName || user.email,
+      text: commentText,
+      time: new Date().toISOString(),
+    };
+
+    try {
+      const commentsRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Comments');
+      await addDoc(commentsRef, newComment);
+      setCommentText('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  return (
+    <CommentForm onSubmit={handleSubmit}>
+      <CommentInput
+        type="text"
+        placeholder="Write a comment..."
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+      />
+      <CommentSubmitButton type="submit">Submit</CommentSubmitButton>
+    </CommentForm>
+  );
+};
+
+
 
 
 
@@ -521,6 +591,8 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
               </>
             )}
           </PostActions>
+          <CommentsList postId={post.id} />
+          <NewCommentForm postId={post.id} />
         </Post>
       ))}
       {isEditPostModalOpen && (
@@ -620,5 +692,64 @@ const ModalContent = styled.div`
   border-radius: 4px;
   width: 80%;
   max-width: 500px;
+`;
+
+
+const CommentsContainer = styled.div`
+  margin-top: 1rem;
+`;
+
+const Comment = styled.div`
+  padding: 0.5rem;
+  border-top: 1px solid #ccc;
+`;
+
+const CommentUser = styled.span`
+  font-weight: bold;
+  font-size: 0.9rem;
+`;
+
+const CommentText = styled.p`
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+`;
+
+const CommentTime = styled.span`
+  font-size: 0.7rem;
+  color: #777;
+`;
+
+const CommentForm = styled.form`
+  display: flex;
+  margin-top: 1rem;
+`;
+
+const CommentInput = styled.input`
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.8rem;
+`;
+
+const CommentSubmitButton = styled.button`
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: #007bff;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 export default PageDetails;
