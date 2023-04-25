@@ -7,11 +7,11 @@ const SignUpForm = (props) => {
   const [fullName, setFullName] = useState("")
 
   return (
-    <div>
+    <div className="form">
       <input type="email" required={true} placeholder="Email" onChange={(e) => setEmail(e.target.value)}/>
       <input type="text" required={true} placeholder="Full Name" onChange={(e) => setFullName(e.target.value)} />
       <input type="password" required={true} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-      <button onClick={()=>props.SignUp(email, password, fullName)}>Sign Up</button>
+      <button className="apply-btn" onClick={()=>props.SignUp(email, password, fullName)}>Sign Up</button>
     </div>
   );
 };

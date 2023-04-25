@@ -26,6 +26,7 @@ const Leftside = (props) => {
   const [showConnectionModal, setShowConnectionModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showLanguage, setShowLanguage] = useState(false);
 
   const handleGroupClick = () => {
     setShowGroupModal(true);
@@ -66,7 +67,7 @@ const Leftside = (props) => {
               <img
                 src={props.user.photoURL}
                 referrerPolicy="no-referrer"
-                style={{ width: "120px", height: "110px", objectFit: "cover" }}
+                style={{ width: "120px", height: "110px", objectFit: "cover", marginTop: '8px'}}
               />
             ) : (
               <Photo />
@@ -80,7 +81,10 @@ const Leftside = (props) => {
           <a>
             <Bio>{props.user && props.user.bio}</Bio>
           </a>
-          <div id="google_translate_element"></div>
+          <ChangeLanguageText onClick={() => setShowLanguage(!showLanguage)}>
+            Change Language
+          </ChangeLanguageText>
+          <div style={{display: `${showLanguage ? 'block' : 'none'}`}} id="google_translate_element"></div>
           <a>
             <AddPhotoText onClick={handlePhotoClick}>
               Change Profile Picture
@@ -170,18 +174,19 @@ const Leftside = (props) => {
           </GroupList2>
           <EditInfo>
             <img
+              style={{cursor: 'pointer'}}
               onClick={handleEditClick}
               src="/images/edit-icon.svg"
               alt=""
             ></img>
             <CustomModal2 isOpen={showEditModal} onRequestClose={handleClose}>
-              {showEditModal && <EditForm userId={props.user.userId} />}
+              {showEditModal && <EditForm userId={props.user.userId} userInfo={props.user} />}
             </CustomModal2>
           </EditInfo>
         </UserInfo>
 
         <Widget>
-          <a>
+          <a href="/network">
             <div>
               <span>Connections</span>
               <span>Grow your network</span>
@@ -386,6 +391,11 @@ const CreateGroup = styled.div`
   font-size: 12px;
   line-height: 1.33;
   font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
 `;
 
 const ReviewConnections = styled.div`
@@ -394,6 +404,7 @@ const ReviewConnections = styled.div`
   font-size: 12px;
   line-height: 1.33;
   font-weight: 400;
+  cursor: pointer;
 `;
 
 const CustomModal3 = styled(Modal)`
@@ -931,6 +942,11 @@ const AddPhotoText = styled.div`
   font-size: 12px;
   line-height: 1.33;
   font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
 `;
 
 const ViewDocumentsText = styled.div`
@@ -939,6 +955,11 @@ const ViewDocumentsText = styled.div`
   font-size: 12px;
   line-height: 1.33;
   font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
 `;
 
 const Widget = styled.div`
@@ -1023,6 +1044,7 @@ const CommunityCard = styled(ArtCard)`
     }
   }
 `;
+
 const SetPreferencesText = styled.span`
   color: #0a66c2;
   margin-top: 4px;
@@ -1030,7 +1052,14 @@ const SetPreferencesText = styled.span`
   line-height: 1.33;
   font-weight: 400;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
 `;
+
 const CreatePageText = styled.span`
   color: #0a66c2;
   margin-top: 4px;
@@ -1038,6 +1067,27 @@ const CreatePageText = styled.span`
   line-height: 1.33;
   font-weight: 400;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+`;
+
+const ChangeLanguageText = styled.span`
+  color: #0a66c2;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
 `;
 const mapStateToProps = (state) => {
   return {

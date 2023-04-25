@@ -21,8 +21,12 @@ function GroupCreationForm(props) {
   const createGroup = async (e) => {
     e.preventDefault();
     const userId = auth.currentUser.uid;
-    //***update name
-    const adminName = auth.currentUser.displayName;
+
+    // Set admin name
+    const currentUserRef = doc(db, "Users", userId);
+    const currentUserDocument = await getDoc(currentUserRef);
+    const adminName = currentUserDocument.data().displayName;
+
     const updateGroupData = {
       groupName: groupName,
       groupDescription: groupDescription,
@@ -58,7 +62,7 @@ function GroupCreationForm(props) {
   };
 
   return (
-    <form className="groupForm">
+    <form className="form">
       <label>
         Group Name:
         <input
@@ -93,7 +97,7 @@ function GroupCreationForm(props) {
           onChange={(e) => setGroupRules(e.target.value)}
         />
       </label> */}
-      <button onClick={createGroup}>Create Group</button>
+      <button className="edit-save-btn" onClick={createGroup}>Create Group</button>
     </form>
   );
 }

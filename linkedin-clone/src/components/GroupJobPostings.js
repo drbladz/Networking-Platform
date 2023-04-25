@@ -53,7 +53,7 @@ const GroupJobPostings = (props) => {
 
   return (
     <Container>
-      <button onClick={() => setShowMyJobs(!showMyJobs)}>
+      <button className="feed-btn" onClick={() => setShowMyJobs(!showMyJobs)}>
         My Job Postings
       </button>
       <Sharebox>
@@ -71,6 +71,7 @@ const GroupJobPostings = (props) => {
           <Articles>
             {props.jobPostings ? (
               props.jobPostings
+                .sort((a, b) => b.timeStamp - a.timeStamp)
                 .filter((job) => job.groupId === groupId)
                 .map((job) => {
                   return (
@@ -81,7 +82,7 @@ const GroupJobPostings = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span>{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                       </SharedActor>
@@ -103,14 +104,12 @@ const GroupJobPostings = (props) => {
                         {job.isExternal ? (
                           <a href={`${job.postDescription}`} target="_blank">
                             <button>
-                              <img src="/images/apply.svg" />
                               <span>Apply!</span>
                             </button>
                           </a>
                         ) : (
-                          <a href={`/job-posting/${job.id}`} target="_blank">
+                          <a href={`/job-posting/${job.id}`}>
                             <button>
-                              <img src="/images/apply.svg" />
                               <span>Apply!</span>
                             </button>
                           </a>
@@ -139,7 +138,7 @@ const GroupJobPostings = (props) => {
                           <div>
                             <span>{job.postTitle}</span>
                             <span>{job.displayName}</span>
-                            <span>{Date(job.timeStamp)}</span>
+                            <span>{(new Date(job.timeStamp)).toLocaleString()}</span>
                           </div>
                         </a>
                         <button onClick={() => handleJobEditOpen(job)}>
@@ -169,7 +168,6 @@ const GroupJobPostings = (props) => {
                         {!job.isExternal && (
                           <a
                             href={`/job-applications/job/${job.id}`}
-                            target="_blank"
                           >
                             <button>
                               <span>View Applications</span>
@@ -230,6 +228,7 @@ const Sharebox = styled(CommonCard)`
       display: flex;
       align-items: center;
       font-weight: 600;
+      cursor: text;
     }
     &:first-child {
       display: flex;
@@ -261,7 +260,7 @@ const Articles = styled(CommonCard)`
 const SharedActor = styled.div`
   padding-right: 40px;
   flex-wrap: nowrap;
-  padding: 12px 16px 0;
+  padding: 20px 16px 0;
   margin-bottom: 8px;
   align-items: center;
   display: flex;
@@ -275,6 +274,7 @@ const SharedActor = styled.div`
     img {
       width: 48px;
       height: 48px;
+      border-radius: 50%;
     }
     & > div {
       display: flex;
@@ -341,12 +341,21 @@ const SocialActions = styled.div`
   button {
     display: inline-flex;
     align-items: center;
-    padding: 8px;
-    color: #0a66c2;
+    padding: 15px;
+    background: #0a66c2;
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: darkblue;
+    }
 
     @media (min-width: 468px) {
       span {
-        margin-left: 8px;
+        margin-left: 0px;
       }
     }
   }

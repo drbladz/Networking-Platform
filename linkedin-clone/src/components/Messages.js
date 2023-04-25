@@ -218,7 +218,7 @@ const Messages = (props) => {
                 ) : (
                   <p>{msg.message}</p>
                 )}
-                <small className="direct-message-date">{Date(msg.createdAt)}</small>
+                <small className="direct-message-date">{new Date(msg.createdAt.seconds * 1000 + msg.createdAt.nanoseconds / 1000000).toLocaleString()}</small>
                 {msg.sender === conversation.user.userId && !msg.flagged && (
                   <div className="direct-message-flag">
                     <FaFlag onClick={() => flagMessage(msg.id)} />

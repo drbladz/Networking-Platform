@@ -20,6 +20,7 @@ import {
 import { db } from "../firebase";
 import { connect } from "react-redux";
 import { Redirect, Link } from "react-router-dom";
+import { HiUserGroup } from "react-icons/hi";
 import "./GroupNetwork.css";
 
 const GroupNetwork = (props) => {
@@ -158,6 +159,7 @@ const GroupNetwork = (props) => {
                       ></Link>
                       <div className="group-info">
                         <h2>{group.groupName}</h2>
+                        <HiUserGroup size={50} />
                         <p>{group.groupDescription}</p>
                       </div>
                       {props.user &&

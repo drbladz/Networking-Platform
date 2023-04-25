@@ -56,7 +56,7 @@ const EditGroupForm = () => {
   };
 
   return (
-    <form className="groupForm">
+    <form className="form">
       <label>
         Group Name:
         <input
@@ -91,7 +91,7 @@ const EditGroupForm = () => {
           onChange={(e) => setGroupRules(e.target.value)}
         />
       </label> */}
-      <button onClick={updateGroup}>Update Group</button>
+      <button className="edit-save-btn" onClick={updateGroup}>Update Group</button>
     </form>
   );
 };

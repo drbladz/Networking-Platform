@@ -277,7 +277,7 @@ const Header = (props) => {
             <NavList>
             <NavLink to="/pages">
               <a>
-                <FontAwesomeIcon icon={faFileAlt} />
+                <FontAwesomeIcon icon={faFileAlt} color="#666666" style={{fontSize: '24px'}}/>
                 <span>Pages</span>
               </a>
             </NavLink>
@@ -469,6 +469,7 @@ const Nav = styled.nav`
     bottom: 0;
     background: white;
     width: 100%;
+    overflow-x: auto;
   }
 `;
 const ToggleButton = styled.button`
@@ -564,6 +565,7 @@ const SignOut = styled.div`
   transition-duration: 167ms;
   text-align: center;
   display: none;
+  cursor: pointer;
 `;
 
 const User = styled(NavList)`

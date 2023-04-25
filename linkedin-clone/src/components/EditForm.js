@@ -6,18 +6,17 @@ import './EditForm.css';
 
 const EditForm = (props) => {
 // use useState hook to initialize states and their respective setter functions
-  const [contactInfo, setContactInfo] = useState("");
-  const [bio, setBio] = useState("");
-  const [connections, setConnections] = useState([]);
-  const [works, setWorkExperience] = useState([]);
-  const [education, setEducation] = useState([]);
-  const [volunteering, setVolunteering] = useState([]);
-  const [skills, setSkills] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [awards, setAwards] = useState([]);
-  const [languages, setLanguages] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
+  const [contactInfo, setContactInfo] = useState(props.userInfo.contactInfo);
+  const [bio, setBio] = useState(props.userInfo.bio);
+  const [works, setWorkExperience] = useState(props.userInfo.works);
+  const [education, setEducation] = useState(props.userInfo.educations);
+  const [volunteering, setVolunteering] = useState(props.userInfo.volunteerings);
+  const [skills, setSkills] = useState(props.userInfo.skills);
+  const [courses, setCourses] = useState(props.userInfo.courses);
+  const [projects, setProjects] = useState(props.userInfo.projects);
+  const [awards, setAwards] = useState(props.userInfo.awards);
+  const [languages, setLanguages] = useState(props.userInfo.languages);
+  const [recommendations, setRecommendations] = useState(props.userInfo.recommendations);
 // create a function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,7 +25,6 @@ const EditForm = (props) => {
       educations: education,
       works: works,
       contactInfo: contactInfo,
-      connections: connections,
       bio: bio,
       volunteerings: volunteering,
       skills: skills,
@@ -213,6 +211,7 @@ const EditForm = (props) => {
             type="text"
             id="contactInfo"
             name="contactInfo"
+            value={contactInfo}
             onChange={(e) => setContactInfo(e.target.value)}
           />
         </label>
@@ -222,6 +221,7 @@ const EditForm = (props) => {
           <textarea
             id="bio"
             name="bio"
+            value={bio}
             onChange={(e) => setBio(e.target.value)}
           />
         </label>
