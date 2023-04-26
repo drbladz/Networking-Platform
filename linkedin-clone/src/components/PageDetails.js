@@ -359,7 +359,8 @@ const PageDetails = () => {
   const handlePostSubmit = async (newPost) => {
     try {
       const postsRef = collection(doc(db, 'Pages', id), 'Posts');
-      await addDoc(postsRef, newPost);
+      const newPostRef = await addDoc(postsRef, newPost);
+      setPosts([...posts, { ...newPost, id: newPostRef.id }]);
     } catch (error) {
       console.error('Error adding post:', error);
     }
@@ -398,12 +399,11 @@ const PageDetails = () => {
       await updateDoc(postRef, updatedPost);
   
       const newPosts = posts.map((post) => (post.id === postId ? { ...post, ...updatedPost } : post));
-      setUpdatedPosts(newPosts);
+      setPosts(newPosts);
     } catch (error) {
       console.error('Error updating post:', error);
     }
   };
-
   const handlePostDelete = async (postId) => {
     console.log('handlePostDelete called with postId:', postId);
     try {
@@ -454,7 +454,7 @@ const PageDetails = () => {
         </>
       )}
       <PostsList
-        posts={updatedPosts.length > 0 ? updatedPosts : posts}
+        posts={posts}
         isUserPage={isUserPage}
         onUpdate={handlePostUpdate}
         onDelete={handlePostDelete}
