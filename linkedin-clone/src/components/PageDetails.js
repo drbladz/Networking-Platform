@@ -130,6 +130,143 @@ const PostLikes = ({ postId, userId }) => {
 
 
 
+const Comment = ({ comment, user, onEdit, onDelete }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editText, setEditText] = useState(comment.text);
+
+  const handleSaveEdit = () => {
+    onEdit(comment.id, editText);
+    setIsEditMode(false);
+  };
+
+  const handleDelete = () => {
+    onDelete(comment.id);
+  };
+
+  return (
+    <CommentContainer>
+      <CommentUser>{comment.user}</CommentUser>
+      {isEditMode ? (
+        <input
+          type="text"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+        />
+      ) : (
+        <CommentText>{comment.text}</CommentText>
+      )}
+      <CommentTime>{new Date(comment.time).toLocaleString()}</CommentTime>
+      <CommentActions>
+  {user && user.uid === comment.userId && (
+    <>
+      {isEditMode ? (
+        <EditButton onClick={handleSaveEdit}>Save</EditButton>
+      ) : (
+        <EditButton onClick={() => setIsEditMode(true)}>Edit</EditButton>
+      )}
+      <DeleteButton onClick={handleDelete}>Delete</DeleteButton>
+    </>
+  )}
+</CommentActions>
+    </CommentContainer>
+  );
+};
+
+
+const CommentsList = ({ postId }) => {
+  const { id } = useParams();
+  const [comments, setComments] = useState([]);
+  const user = getAuth().currentUser;
+
+  useEffect(() => {
+    const commentsRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Comments');
+    const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
+      const commentsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setComments(commentsData);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [id, postId]);
+
+  const handleEditComment = async (commentId, newText) => {
+    try {
+      const commentRef = doc(db, 'Pages', id, 'Posts', postId, 'Comments', commentId);
+      await updateDoc(commentRef, { text: newText });
+    } catch (error) {
+      console.error('Error updating comment:', error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      try {
+        const commentRef = doc(db, 'Pages', id, 'Posts', postId, 'Comments', commentId);
+        await deleteDoc(commentRef);
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+      }
+    }
+  };
+
+  return (
+    <CommentsContainer>
+      {comments.map((comment) => (
+        <Comment
+          key={comment.id}
+          comment={comment}
+          user={user}
+          onEdit={handleEditComment}
+          onDelete={handleDeleteComment}
+        />
+      ))}
+    </CommentsContainer>
+  );
+};
+
+const NewCommentForm = ({ postId }) => {
+  const { id } = useParams();
+  const [commentText, setCommentText] = useState('');
+  const user = getAuth().currentUser;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!commentText.trim()) return;
+
+    const newComment = {
+      userId: user.uid,
+      user: user.displayName || user.email,
+      text: commentText,
+      time: new Date().toISOString(),
+    };
+
+    try {
+      const commentsRef = collection(doc(db, 'Pages', id), 'Posts', postId, 'Comments');
+      await addDoc(commentsRef, newComment);
+      setCommentText('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  return (
+    <CommentForm onSubmit={handleSubmit}>
+      <CommentInput
+        type="text"
+        placeholder="Write a comment..."
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+      />
+      <CommentSubmitButton type="submit">Submit</CommentSubmitButton>
+    </CommentForm>
+  );
+};
+
+
 
 
 
@@ -150,15 +287,21 @@ const EditPostButton = ({ onClick }) => {
 };
 
 const DeletePostButton = ({ onClick }) => {
-  const handleClick = () => {
+  const handleClick = async () => {
     if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
-      onClick();
-      // Show a confirmation message
-      alert("The post has been deleted successfully.");
-      // Reload the page
-      window.location.reload();
+      try {
+        await onClick();
+        // Show a confirmation message
+        alert("The post has been deleted successfully.");
+        // Reload the page
+        window.location.reload();
+      } catch (error) {
+        console.error('Error during post deletion:', error);
+        // Optionally, display an error message to the user
+      }
     }
   };
+
   return (
     <StyledButton style={{backgroundColor: "red"}} onClick={handleClick}>
       Delete
@@ -216,7 +359,8 @@ const PageDetails = () => {
   const handlePostSubmit = async (newPost) => {
     try {
       const postsRef = collection(doc(db, 'Pages', id), 'Posts');
-      await addDoc(postsRef, newPost);
+      const newPostRef = await addDoc(postsRef, newPost);
+      setPosts([...posts, { ...newPost, id: newPostRef.id }]);
     } catch (error) {
       console.error('Error adding post:', error);
     }
@@ -255,18 +399,35 @@ const PageDetails = () => {
       await updateDoc(postRef, updatedPost);
   
       const newPosts = posts.map((post) => (post.id === postId ? { ...post, ...updatedPost } : post));
-      setUpdatedPosts(newPosts);
+      setPosts(newPosts);
     } catch (error) {
       console.error('Error updating post:', error);
     }
   };
-
   const handlePostDelete = async (postId) => {
+    console.log('handlePostDelete called with postId:', postId);
     try {
       const postRef = doc(doc(db, 'Pages', id), 'Posts', postId);
-      await deleteDoc(postRef);
+  
+      // Fetch the post from Firestore
+      console.log('Fetching post from Firestore');
+      const postSnapshot = await getDoc(postRef);
+  
+      // Check if the post exists
+      if (postSnapshot.exists()) {
+        console.log('Post exists, attempting to delete');
+        // Delete the post if it exists
+        await deleteDoc(postRef);
+        console.log('Post deleted successfully.');
+        return Promise.resolve();
+      } else {
+        console.error(`Post with ID ${postId} does not exist.`);
+        // Optionally, display a warning message to the user
+        return Promise.reject(new Error(`Post with ID ${postId} does not exist.`));
+      }
     } catch (error) {
       console.error('Error deleting post:', error);
+      return Promise.reject(error);
     }
   };
 
@@ -286,14 +447,14 @@ const PageDetails = () => {
           {!isEditing && (
             <div>
               <StyledButton onClick={() => setIsEditing(true)}>Edit Page</StyledButton>
-              <StyledButton style={{backgroundColor: "red"}} onClick={handlePageDelete}>Delete Page</StyledButton>
+              <StyledButton style={{backgroundColor: "orange"}} onClick={handlePageDelete}>Delete Page</StyledButton>
             </div>
           )}
           {isEditing && <EditPageForm page={page} onSubmit={handlePageEdit} onCancel={() => setIsEditing(false)} />}
         </>
       )}
       <PostsList
-        posts={updatedPosts.length > 0 ? updatedPosts : posts}
+        posts={posts}
         isUserPage={isUserPage}
         onUpdate={handlePostUpdate}
         onDelete={handlePostDelete}
@@ -521,6 +682,8 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
               </>
             )}
           </PostActions>
+          <CommentsList postId={post.id} />
+          <NewCommentForm postId={post.id} />
         </Post>
       ))}
       {isEditPostModalOpen && (
@@ -536,6 +699,10 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
 const Container = styled.div`
   padding: 50px;
   text-align: center;
+
+  @media (max-width: 767px) {
+    padding: 20px;
+  }
 `;
 
 const PageImage = styled.img`
@@ -544,38 +711,62 @@ const PageImage = styled.img`
   height: 150px;
   object-fit: cover;
   margin-bottom: 20px;
-`;
 
+  @media (max-width: 767px) {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+  }
+`;
 const PageTitle = styled.h1`
   font-size: 2.2rem;
   margin-bottom: 10px;
+
+  @media (max-width: 767px) {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+  }
 `;
 
 const PageDescription = styled.p`
   font-size: 1.3rem;
   margin-bottom: 30px;
-  
-`;
 
+  @media (max-width: 767px) {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+`;
 const PostListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 15px;
+
+  @media (max-width: 767px) {
+    gap: 8px;
+    margin: 10px;
+  }
 `;
 
 const Post = styled.div`
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 16px;
-  
+
+  @media (max-width: 767px) {
+    padding: 8px;
+  }
 `;
 
 const PostHeader = styled.div`
   display: flex;
   justify-content: center;
   font-size: 1.5rem;
-  
+
+  @media (max-width: 767px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const PostContent = styled.div`
@@ -588,15 +779,29 @@ const PostContent = styled.div`
 const PostDescription = styled.p`
   margin: 0;
   font-size: 1.2rem;
-  text-align: start
+  text-align: start;
+
+  @media (max-width: 767px) {
+    font-size: 1rem;
+  }
 `;
 
 const PostImage = styled.img`
   max-width: 100%;
   max-height: 300px;
-  min-width: 300px; 
-  min-height: 100px; 
   object-fit: contain;
+
+  @media (max-width: 767px) {
+    max-height: 200px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    max-height: 250px;
+  }
+
+  @media (min-width: 1024px) {
+    max-height: 300px;
+  }
 `;
 
 const PostActions = styled.div`
@@ -620,5 +825,119 @@ const ModalContent = styled.div`
   border-radius: 4px;
   width: 80%;
   max-width: 500px;
+`;
+
+
+const CommentsContainer = styled.div`
+  margin-top: 1rem;
+`;
+
+// const Comment = styled.div`
+//   padding: 0.5rem;
+//   border-top: 1px solid #ccc;
+// `;
+
+const CommentUser = styled.span`
+  font-weight: bold;
+  font-size: 0.9rem;
+`;
+
+const CommentText = styled.p`
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+`;
+
+const CommentTime = styled.span`
+  font-size: 0.7rem;
+  color: #777;
+`;
+
+const CommentForm = styled.form`
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  align-items: center;
+`;
+
+const CommentInput = styled.input`
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  min-width: 200px; // Set a minimum width for the input field
+
+  @media (max-width: 767px) {
+    font-size: 0.7rem;
+  }
+`;
+
+const CommentSubmitButton = styled.button`
+  margin-left: 0.5rem;
+  margin-top: 0.5rem; // Add margin-top to space out the button when it wraps
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:disabled {
+    background-color: #007bff;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.8rem;
+  }
+`;
+const CommentContainer = styled.div`
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+`;
+
+const CommentActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+`;
+
+const EditButton = styled.button`
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
+`;
+
+const DeleteButton = styled.button`
+  background-color: #f44336;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 0.25rem;
+  cursor: pointer;
+  border-radius: 4px;
 `;
 export default PageDetails;
