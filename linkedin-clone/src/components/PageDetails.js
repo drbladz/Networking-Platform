@@ -287,15 +287,21 @@ const EditPostButton = ({ onClick }) => {
 };
 
 const DeletePostButton = ({ onClick }) => {
-  const handleClick = () => {
+  const handleClick = async () => {
     if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
-      onClick();
-      // Show a confirmation message
-      alert("The post has been deleted successfully.");
-      // Reload the page
-      window.location.reload();
+      try {
+        await onClick();
+        // Show a confirmation message
+        alert("The post has been deleted successfully.");
+        // Reload the page
+        window.location.reload();
+      } catch (error) {
+        console.error('Error during post deletion:', error);
+        // Optionally, display an error message to the user
+      }
     }
   };
+
   return (
     <StyledButton style={{backgroundColor: "red"}} onClick={handleClick}>
       Delete
@@ -399,11 +405,29 @@ const PageDetails = () => {
   };
 
   const handlePostDelete = async (postId) => {
+    console.log('handlePostDelete called with postId:', postId);
     try {
       const postRef = doc(doc(db, 'Pages', id), 'Posts', postId);
-      await deleteDoc(postRef);
+  
+      // Fetch the post from Firestore
+      console.log('Fetching post from Firestore');
+      const postSnapshot = await getDoc(postRef);
+  
+      // Check if the post exists
+      if (postSnapshot.exists()) {
+        console.log('Post exists, attempting to delete');
+        // Delete the post if it exists
+        await deleteDoc(postRef);
+        console.log('Post deleted successfully.');
+        return Promise.resolve();
+      } else {
+        console.error(`Post with ID ${postId} does not exist.`);
+        // Optionally, display a warning message to the user
+        return Promise.reject(new Error(`Post with ID ${postId} does not exist.`));
+      }
     } catch (error) {
       console.error('Error deleting post:', error);
+      return Promise.reject(error);
     }
   };
 
@@ -423,7 +447,7 @@ const PageDetails = () => {
           {!isEditing && (
             <div>
               <StyledButton onClick={() => setIsEditing(true)}>Edit Page</StyledButton>
-              <StyledButton style={{backgroundColor: "red"}} onClick={handlePageDelete}>Delete Page</StyledButton>
+              <StyledButton style={{backgroundColor: "orange"}} onClick={handlePageDelete}>Delete Page</StyledButton>
             </div>
           )}
           {isEditing && <EditPageForm page={page} onSubmit={handlePageEdit} onCancel={() => setIsEditing(false)} />}
