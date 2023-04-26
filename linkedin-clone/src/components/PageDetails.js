@@ -699,6 +699,10 @@ const PostsList = ({ posts, isUserPage, onUpdate, onDelete }) => {
 const Container = styled.div`
   padding: 50px;
   text-align: center;
+
+  @media (max-width: 767px) {
+    padding: 20px;
+  }
 `;
 
 const PageImage = styled.img`
@@ -707,38 +711,62 @@ const PageImage = styled.img`
   height: 150px;
   object-fit: cover;
   margin-bottom: 20px;
-`;
 
+  @media (max-width: 767px) {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+  }
+`;
 const PageTitle = styled.h1`
   font-size: 2.2rem;
   margin-bottom: 10px;
+
+  @media (max-width: 767px) {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+  }
 `;
 
 const PageDescription = styled.p`
   font-size: 1.3rem;
   margin-bottom: 30px;
-  
-`;
 
+  @media (max-width: 767px) {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+`;
 const PostListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 15px;
+
+  @media (max-width: 767px) {
+    gap: 8px;
+    margin: 10px;
+  }
 `;
 
 const Post = styled.div`
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 16px;
-  
+
+  @media (max-width: 767px) {
+    padding: 8px;
+  }
 `;
 
 const PostHeader = styled.div`
   display: flex;
   justify-content: center;
   font-size: 1.5rem;
-  
+
+  @media (max-width: 767px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const PostContent = styled.div`
@@ -751,15 +779,29 @@ const PostContent = styled.div`
 const PostDescription = styled.p`
   margin: 0;
   font-size: 1.2rem;
-  text-align: start
+  text-align: start;
+
+  @media (max-width: 767px) {
+    font-size: 1rem;
+  }
 `;
 
 const PostImage = styled.img`
   max-width: 100%;
   max-height: 300px;
-  min-width: 300px; 
-  min-height: 100px; 
   object-fit: contain;
+
+  @media (max-width: 767px) {
+    max-height: 200px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    max-height: 250px;
+  }
+
+  @media (min-width: 1024px) {
+    max-height: 300px;
+  }
 `;
 
 const PostActions = styled.div`
@@ -812,7 +854,9 @@ const CommentTime = styled.span`
 
 const CommentForm = styled.form`
   display: flex;
+  flex-wrap: wrap;
   margin-top: 1rem;
+  align-items: center;
 `;
 
 const CommentInput = styled.input`
@@ -821,10 +865,16 @@ const CommentInput = styled.input`
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 0.8rem;
+  min-width: 200px; // Set a minimum width for the input field
+
+  @media (max-width: 767px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const CommentSubmitButton = styled.button`
   margin-left: 0.5rem;
+  margin-top: 0.5rem; // Add margin-top to space out the button when it wraps
   padding: 0.5rem 1rem;
   background-color: #007bff;
   border: none;
@@ -841,6 +891,11 @@ const CommentSubmitButton = styled.button`
     background-color: #007bff;
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.8rem;
   }
 `;
 const CommentContainer = styled.div`
