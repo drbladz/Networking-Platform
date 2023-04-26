@@ -196,7 +196,9 @@ const GroupPage = (props) => {
   }
 
   async function deleteGroup(groupId) {
-    console.log("deleted");
+    const confirmed = window.confirm("Are you sure you want to delete this group? This action cannot be undone.");
+    if(confirmed) {
+      console.log("deleted");
     // Get the group document
     const groupRef = doc(db, "Groups", groupId);
     const groupSnapshot = await getDoc(groupRef);
@@ -241,6 +243,8 @@ const GroupPage = (props) => {
 
     // Redirect to another page (e.g., home) after the group is deleted
     window.location.assign("/home");
+    }
+    
   }
 
   const currentUser = auth.currentUser;
