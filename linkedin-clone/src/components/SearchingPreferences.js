@@ -10,14 +10,19 @@ const Title = styled.h1`
   font-weight: bold;
   color: #333;
   text-align: center;
-  margin-top: 40px;
+  margin-top: 20px;
   margin-bottom: 40px;
+  @media (max-width: 768px) {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
 `;
 const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 600px;
-  min-height: 450px; // change this line
+  width: 100%;
+  max-width: 600px;
+  min-height: 450px;
   margin: 0 auto;
   padding: 30px;
   border: 1px solid #ccc;
@@ -25,14 +30,23 @@ const FormContainer = styled.div`
   background-color: #fff;
   justify-content: center;
   align-items: center;
-  position: relative; 
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    margin-top: 0px; 
+  }
 `;
 const FieldContainer = styled.div`
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: space-between;
-  width: 500px;
-  
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const Label = styled.label`
@@ -75,12 +89,13 @@ const SuccessMessage = styled.div`
   background-color: green;
   color: white;
   padding: 10px;
-  margin-top: 10px; // change this line
+  margin-top: 10px;
   border-radius: 5px;
-  position: absolute; 
-  bottom: 15px; // change this line
+  position: fixed; // Changed from absolute to fixed
+  bottom: 30px; // Updated bottom value
   left: 50%;
-  transform: translateX(-50%); // add this line
+  transform: translateX(-50%);
+  z-index: 1000; // Added z-index to ensure it is on top
 `;
 
 const CurrentPreferences = styled.div`
@@ -111,6 +126,13 @@ const FieldWrapper = styled.div`
   align-items: center;
   margin-right: 10px;
   
+`;
+
+
+const ResponsiveWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 const SearchingPreferences = () => {
   const [preferences, setPreferences] = useState({
@@ -260,7 +282,8 @@ useEffect(() => {
 return (
   <div style={{ marginTop: '80px' }}>
     <Title>Searching Preferences</Title>
-    <FormContainer style={{ marginTop: '100px' }}>
+    <FormContainer>
+    <ResponsiveWrapper>
     <form onSubmit={handleSubmit}>
   <FieldContainer>
     <Label htmlFor="jobType">Job Type</Label>
@@ -374,6 +397,7 @@ return (
   </SuccessMessage>
 )}
       </form>
+    </ResponsiveWrapper>
     </FormContainer>
   </div>
 );
