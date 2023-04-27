@@ -5,7 +5,7 @@ import { act } from 'react-dom/test-utils';
 import { auth, db } from '../firebase';
 import Notifications from '../components/Notifications';
 
-import firebase from 'firebase';
+import firebase from '../firebase';
 
 jest.mock('firebase');
 
