@@ -11,7 +11,8 @@ import { Redirect, Link } from "react-router-dom";
 import Modal from "react-modal";
 import "./Network.css";
 import UpdateConnections from "./UpdateConnections";
-
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
 const Network = (props) => {
   const [users, setUsers] = useState([]);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
@@ -33,6 +34,33 @@ const Network = (props) => {
     };
   }, []);
 
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  useEffect(() => {
+    async function checkActiveUsers() {
+      if (props.user && props.user.requests) {
+        const activeRequests = [];
+
+        for (const req of props.user.requests) {
+          const userRef = doc(db, "Users", req.id);
+          const userSnapshot = await getDoc(userRef);
+          if (userSnapshot.exists()) {
+            const isActive = userSnapshot.get("active");
+            if (isActive === undefined || isActive === true) {
+              activeRequests.push(req);
+            }
+          }
+        }
+
+        setFilteredRequests(activeRequests);
+      } else {
+        setFilteredRequests([]);
+      }
+    }
+
+    checkActiveUsers();
+  }, [props.user]);
+
+  
   return (
     <Container>
       <table className="center">
@@ -42,8 +70,8 @@ const Network = (props) => {
         {props.user &&
           props.user.requests &&
           props.user.requests.length === 0 && <div>No requests</div>}
-        {props.user && props.user.requests ? (
-          props.user.requests.map((req, index) => (
+        {filteredRequests.length > 0 ? (
+          filteredRequests.map((req, index) => (
             <tr className="reqRow" key={req.id}>
               <td>
                 {req.photoURL ? (
@@ -101,12 +129,13 @@ const Network = (props) => {
               {props.user &&
                 props.user.requests &&
                 users
-                  .filter(
-                    (user) =>
-                      user.userId !== props.user.userId &&
-                      !props.user.requests.some((c) => c.id === user.userId) &&
-                      !props.user.connections.some((c) => c.id === user.userId)
-                  )
+                .filter(
+                  (user) =>
+                    user.userId !== props.user.userId &&
+                    !props.user.requests.some((c) => c.id === user.userId) &&
+                    !props.user.connections.some((c) => c.id === user.userId) &&
+                    (user.active === undefined || user.active === true)
+                )
                   .map((user, index) => (
                     <div className="card" key={user.userId}>
                       <Link
