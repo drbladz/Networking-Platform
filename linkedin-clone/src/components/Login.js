@@ -5,10 +5,18 @@ import {Redirect} from "react-router"
 import { useState } from "react";
 import SignUpForm from "./SignUpForm";
 import LoginForm from "./LoginForm";
+import { useEffect } from "react";
 
 const Login = (props) => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false); 
+
+  useEffect(() => {
+    if (props.user && isSigningOut) {
+      setIsSigningOut(false);
+    }
+  }, [props.user, isSigningOut]);
 
   return (
     <Container>
@@ -43,10 +51,10 @@ const Login = (props) => {
           <img src="/images/login-hero.svg" alt="" />
         </Hero>
         <Form>
-          <Google onClick={() => props.SignIn()}>
-            <img src="/images/google.svg" alt="" />
-            Sign in with Google
-          </Google>
+        <Google onClick={() => props.SignIn(isSigningOut)}>
+          <img src="/images/google.svg" alt="" />
+          Sign in with Google
+        </Google>
         </Form>
       </Section>
     </Container>
@@ -194,7 +202,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  SignIn: () => dispatch(signInAPI())
+   SignIn: (isSigningOut) => dispatch(signInAPI(isSigningOut)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login)

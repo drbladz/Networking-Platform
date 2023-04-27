@@ -7,7 +7,7 @@ import db, {
   createUserWithEmailAndPassword,
 } from "../firebase";
 import { getAuth, deleteUser, signOut } from "firebase/auth";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged ,reauthenticateWithCredential, GoogleAuthProvider, signInWithRedirect  } from "firebase/auth";
 import store from "../store";
 import {
   SET_JOB_POSTINGS,
@@ -33,6 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useParams } from "react-router-dom";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
+import { EmailAuthProvider } from "firebase/auth";
 
 
 
@@ -144,7 +145,17 @@ export async function getUsers() {
   });
   return users;
 }
-
+export async function getUserByEmail(email) {
+  const collectionRef = collection(db, "Users");
+  const collectionSnap = await getDocs(collectionRef);
+  let user = null;
+  collectionSnap.forEach((doc) => {
+    if (doc.data().mail === email) {
+      user = { ...doc.data(), docId: doc.id };
+    }
+  });
+  return user;
+}
 // Async function to get all the groups from the database.
 export async function getGroups() {
   const collectionRef = collection(db, "Groups");
@@ -380,13 +391,16 @@ async function createUserInDB(InitialUserData) {
   await setDoc(userDocumentRef, InitialUserData);
 }
 
-export function signInAPI() {
+export function signInAPI(isSigningOut) {
   /* const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
   collectionSnap.forEach(doc => {
     console.log(doc.data());
 })*/
   return (dispatch) => {
+    if (isSigningOut) { 
+      return; 
+    }
     signInWithPopup(auth, provider)
       .then(async (payload) => {
         let userExist = await userExistsInDB(payload.user.uid);
@@ -448,10 +462,36 @@ export function signInAPI() {
 }
 
 export function createUserByEmail(email, password, fullName) {
-  return (dispatch) => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(async (payload) => {
-        console.log(payload);
+  return async (dispatch) => {
+    try {
+      const existingUser = await getUserByEmail(email);
+
+      if (existingUser) {
+        // If the user exists, update their data
+        const userRef = doc(db, "Users", existingUser.docId);
+        await updateDoc(userRef, {
+          displayName: fullName,
+          photoURL: "",
+          contactInfo: "",
+          volunteerings: [],
+          works: [],
+          courses: [],
+          educations: [],
+          languages: [],
+          projects: [],
+          recommendations: [],
+          skills: [],
+          awards: [],
+          bio: "",
+          savedJobs: [],
+          connections: [],
+          requests: [],
+          pending: [],
+        });
+      } else {
+        // If the user doesn't exist, create a new user in Firebase Authentication
+        const payload = await createUserWithEmailAndPassword(auth, email, password);
+
         const InitialDataToStore = {
           userId: payload.user.uid,
           displayName: fullName,
@@ -473,20 +513,18 @@ export function createUserByEmail(email, password, fullName) {
           requests: [],
           pending: [],
         };
-        //can send more data from google to create the user
         await createUserInDB(InitialDataToStore);
-        const userData = await getUserDataById(payload.user.uid);
-        dispatch(setUser(userData));
-        const jobPostings = await getAllJobPostings();
-        dispatch(setJobPostings(jobPostings));
-        const userJobPostings = jobPostings.filter(
-          (job) => job.userId == userData.userId
-        );
-        dispatch(setUserJobPostings(userJobPostings));
-      })
-      .catch((e) => {
-        alert(e);
-      });
+      }
+
+      const userData = await getUserByEmail(email);
+      dispatch(setUser(userData));
+      const jobPostings = await getAllJobPostings();
+      dispatch(setJobPostings(jobPostings));
+      const userJobPostings = jobPostings.filter((job) => job.userId == userData.userId);
+      dispatch(setUserJobPostings(userJobPostings));
+    } catch (e) {
+      alert(e);
+    }
   };
 }
 
@@ -1095,30 +1133,79 @@ export function declineGroupJoinRequest(request) {
   await addDoc(pagesCollectionRef, newPage); 
 };
 
+
+
+
+async function updateFieldsAndSignOut(userId) {
+  const userRef = doc(db, "Users", userId);
+  await updateDoc(userRef, { active: false });
+  await updateDoc(userRef, {
+    displayName: "",
+    photoURL: "",
+    contactInfo: "",
+    volunteerings: [],
+    works: [],
+    courses: [],
+    educations: [],
+    languages: [],
+    projects: [],
+    recommendations: [],
+    skills: [],
+    awards: [],
+    bio: "",
+    savedJobs: [],
+    connections: [],
+    requests: [],
+    pending: [],
+  });
+
+  // Delete user from Firebase Authentication
+  const user = getAuth().currentUser;
+  await deleteUser(user);
+
+  // Sign out the user
+  signOut(getAuth());
+
+  // Redirect to the home page
+  window.location.assign("/");
+}
+
 export async function deleteProfile() {
-  const confirmed = window.confirm("Are you sure you want to delete your profile? This action cannot be undone.");
+  const confirmed = window.confirm(
+    "Are you sure you want to delete your profile? This action cannot be undone."
+  );
 
   if (confirmed) {
     // Get the user's auth ID
     const auth = getAuth();
     const user = auth.currentUser;
     const userId = user.uid;
+    const email = user.email;
 
-    // Check if the user document has the 'active' field
-    const userRef = doc(db, "Users", userId);
-    const userSnapshot = await getDoc(userRef);
-    if (userSnapshot.exists() && userSnapshot.get("active") !== undefined) {
-      // Update the 'active' field to false if it exists
-      await updateDoc(userRef, { active: false });
+
+
+    // Check if the user is signed in with email and password
+    const isEmailProvider = user.providerData.some(
+      (provider) => provider.providerId === "password"
+    );
+
+    if (isEmailProvider) {
+      // Reauthenticate the user with their email and password
+      const password = prompt("Please enter your password to confirm the deletion:");
+      const credential = EmailAuthProvider.credential(email, password);
+      await reauthenticateWithCredential(user, credential);
+      await updateFieldsAndSignOut(userId);
     } else {
-      // Add the 'active' field with a value of false if it doesn't exist
-      await setDoc(userRef, { active: false }, { merge: true });
+      // Reauthenticate the user with Google
+      const googleProvider = new GoogleAuthProvider();
+      googleProvider.setCustomParameters({ prompt: "select_account" });
+      signInWithPopup(auth, googleProvider)
+        .then(async () => {
+          await updateFieldsAndSignOut(userId);
+        })
+        .catch((error) => {
+          console.error("Error reauthenticating with Google:", error);
+        });
     }
-
-    // Sign out the user
-    await signOut(auth);
-
-    // Redirect to the home page
-    window.location.assign("/home");
   }
 }
