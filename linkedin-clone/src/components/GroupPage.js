@@ -152,51 +152,55 @@ const GroupPage = (props) => {
   }, [groupId]);
 
   async function quitGroup(groupId, userId) {
-    // Get the user's name
-    const userRef = doc(db, "Users", userId);
-    const userSnapshot = await getDoc(userRef);
-    const user = userSnapshot.data();
-    const userName = user.displayName;
-
-    // Remove the user from the groupMembers field array in the group document
-    const groupRef = doc(db, "Groups", groupId);
-    const groupSnapshot = await getDoc(groupRef);
-    const group = groupSnapshot.data();
-    const updatedGroupMembers = group.groupMembers.filter(
-      (member) => member.userName !== userName
-    );
-
-    await updateDoc(groupRef, {
-      groupMembers: updatedGroupMembers,
-    });
-
-    // Remove the respective groupId from the groupMemberOf field in the respective User document
-    const updatedGroupMemberOf = user.groupMemberOf.filter(
-      (group) => group.groupId !== groupId
-    );
-
-    await updateDoc(userRef, {
-      groupMemberOf: updatedGroupMemberOf,
-    });
-
-    // Remove the groupId from the pendingJoinRequests field in the User document
-    await updateDoc(userRef, {
-      pendingJoinRequests: arrayRemove(groupId),
-    });
-
-    const userSnapshotAfterQuit = await getDoc(userRef);
-    const userAfterQuit = userSnapshotAfterQuit.data();
-    if (userAfterQuit.pendingJoinRequests.includes(groupId)) {
+    const confirmed = window.confirm("Are you sure you want to leave this group?");
+    if (confirmed) {
+      // Get the user's name
+      const userRef = doc(db, "Users", userId);
+      const userSnapshot = await getDoc(userRef);
+      const user = userSnapshot.data();
+      const userName = user.displayName;
+  
+      // Remove the user from the groupMembers field array in the group document
+      const groupRef = doc(db, "Groups", groupId);
+      const groupSnapshot = await getDoc(groupRef);
+      const group = groupSnapshot.data();
+      const updatedGroupMembers = group.groupMembers.filter(
+        (member) => member.userName !== userName
+      );
+  
+      await updateDoc(groupRef, {
+        groupMembers: updatedGroupMembers,
+      });
+  
+      // Remove the respective groupId from the groupMemberOf field in the respective User document
+      const updatedGroupMemberOf = user.groupMemberOf.filter(
+        (group) => group.groupId !== groupId
+      );
+  
+      await updateDoc(userRef, {
+        groupMemberOf: updatedGroupMemberOf,
+      });
+  
+      // Remove the groupId from the pendingJoinRequests field in the User document
       await updateDoc(userRef, {
         pendingJoinRequests: arrayRemove(groupId),
       });
+  
+      const userSnapshotAfterQuit = await getDoc(userRef);
+      const userAfterQuit = userSnapshotAfterQuit.data();
+      if (userAfterQuit.pendingJoinRequests.includes(groupId)) {
+        await updateDoc(userRef, {
+          pendingJoinRequests: arrayRemove(groupId),
+        });
+      }
+  
+      window.location.assign("/home");
     }
-
-    window.location.assign("/home");
   }
-
   async function deleteGroup(groupId) {
-    console.log("deleted");
+    const confirmed = window.confirm("Are you sure you want to delete this group? This action cannot be undone.");
+    if(confirmed) {
+      console.log("deleted");
     // Get the group document
     const groupRef = doc(db, "Groups", groupId);
     const groupSnapshot = await getDoc(groupRef);
@@ -241,6 +245,8 @@ const GroupPage = (props) => {
 
     // Redirect to another page (e.g., home) after the group is deleted
     window.location.assign("/home");
+    }
+    
   }
 
   const currentUser = auth.currentUser;
