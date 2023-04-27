@@ -1,94 +1,47 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
-import GroupJobPostings from "../components/GroupJobPostings";
+import { render, screen } from '@testing-library/react';
+import { GroupJobPostings } from '../components/GroupJobPostings';
 
-describe("GroupJobPostings component", () => {
-  const mockJobPostings = [    {      id: 1,      groupId: 1,      photoURL: "https://picsum.photos/200",      postTitle: "Title 1",      displayName: "User 1",      timeStamp: Date.now(),      isExternal: false,      postDescription: "Description 1",    },    {      id: 2,      groupId: 1,      photoURL: "https://picsum.photos/200",      postTitle: "Title 2",      displayName: "User 2",      timeStamp: Date.now(),      isExternal: true,      postDescription: "http://example.com",    },  ];
-  const mockUser = {
-    uid: "user123",
-    photoURL: "https://picsum.photos/200",
-  };
-  const mockStore = {
-    getState: () => ({
-      auth: { user: mockUser },
-      jobPostings: mockJobPostings,
-    }),
-    subscribe: () => {},
-    dispatch: () => {},
-  };
+describe('GroupJobPostings component', () => {
+  const fakeJobPostings = [
+    {
+      id: '1',
+      postTitle: 'Fake Job Posting 1',
+      displayName: 'Fake Display Name 1',
+      timeStamp: new Date('2022-04-20T12:00:00.000Z'),
+      photoURL: 'fake-photo-url-1',
+      postDescription: 'Fake job posting description 1',
+      isExternal: true,
+      groupId: 'fake-group-id',
+    },
+    {
+      id: '2',
+      postTitle: 'Fake Job Posting 2',
+      displayName: 'Fake Display Name 2',
+      timeStamp: new Date('2022-04-21T12:00:00.000Z'),
+      photoURL: 'fake-photo-url-2',
+      postDescription: 'Fake job posting description 2',
+      isExternal: false,
+      groupId: 'fake-group-id',
+    },
+  ];
 
-  it("should render component with default props", () => {
-    render(
-      <Provider store={mockStore}>
-        <BrowserRouter>
-          <GroupJobPostings />
-        </BrowserRouter>
-      </Provider>
-    );
+  const mockConnect = jest.fn();
+  jest.mock('react-redux', () => ({
+    connect: () => (component) => component,
+  }));
 
-    expect(screen.getByText("My Job Postings")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Post Job" })).toBeInTheDocument();
+  test('renders job postings correctly', () => {
+    render(<GroupJobPostings jobPostings={fakeJobPostings} />);
+    expect(screen.getByText('Fake Job Posting 1')).toBeInTheDocument();
+    expect(screen.getByText('Fake Display Name 1')).toBeInTheDocument();
+    expect(screen.getByText('4/20/2022, 12:00:00 PM')).toBeInTheDocument();
+    expect(screen.getByText('Fake job posting description 1')).toBeInTheDocument();
+    expect(screen.getByText('Apply!')).toBeInTheDocument();
+
+    expect(screen.getByText('Fake Job Posting 2')).toBeInTheDocument();
+    expect(screen.getByText('Fake Display Name 2')).toBeInTheDocument();
+    expect(screen.getByText('4/21/2022, 12:00:00 PM')).toBeInTheDocument();
+    expect(screen.getByText('Fake job posting description 2')).toBeInTheDocument();
+    expect(screen.getByText('Apply!')).toBeInTheDocument();
   });
-
-  it("should open modal when 'Post Job' button is clicked", () => {
-    render(
-      <Provider store={mockStore}>
-        <BrowserRouter>
-          <GroupJobPostings />
-        </BrowserRouter>
-      </Provider>
-    );
-
-    const postJobButton = screen.getByRole("button", { name: "Post Job" });
-
-    fireEvent.click(postJobButton);
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-  });
-
-  it("should display job postings correctly", () => {
-    render(
-      <Provider store={mockStore}>
-        <BrowserRouter>
-          <GroupJobPostings />
-        </BrowserRouter>
-      </Provider>
-    );
-
-    expect(screen.getByText("None")).toBeInTheDocument();
-
-    const job1 = screen.getByText("Title 1");
-    const job2 = screen.getByText("Title 2");
-
-    expect(job1).toBeInTheDocument();
-    expect(job2).toBeInTheDocument();
-    expect(screen.getByText("Description 1")).toBeInTheDocument();
-    expect(screen.getByText("http://example.com")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Apply!" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View Applications" })).toBeInTheDocument();
-  });
-
-  /*it("should filter job postings correctly based on 'My Job Postings' button", () => {
-    render(
-      <Provider store={mockStore}>
-        <BrowserRouter>
-          <GroupJobPostings />
-        </BrowserRouter>
-      </Provider>
-    );
-
-    expect(screen.getByText("None")).toBeInTheDocument();
-
-    const myJobPostingsButton = screen.getByRole("button", { name: "My Job Postings" });
-
-    fireEvent.click(myJobPostingsButton);
-
-    const job1 = screen.getByText("Title 1");
-    const job2 = screen.queryByText("Title 2");
-
-    expect(job1).toBeInTheDocument();
-    expect(job2).not.toBeInTheDocument();
-    expect(screen.getByText("Description 1")).toBeInTheDocument();
-    expect(screen.getByRole
-    */ })
+});

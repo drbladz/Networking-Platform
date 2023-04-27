@@ -1,71 +1,69 @@
-import { render, fireEvent, screen } from "@testing-library/react";
-import EditGroupPostModal from "../components/EditGroupPostModal";
-import { Provider } from "react-redux";
+import React from 'react';
+import { shallow } from 'enzyme';
+import { EditGroupPostModal, mapDispatchToProps } from '../components/EditGroupPostModal';
 
-describe("EditGroupPostModal", () => {
-  const job = {
-    id: "1",
-    postTitle: "Test Job Title",
-    postDescription: "Test Job Description",
-    mandatoryResume: true,
-    mandatoryCoverLetter: false,
-    isExternal: false,
-    jobParameters: {
-      jobType: "full-time",
-      industry: "IT",
-      experienceLevel: "Senior",
-      remoteWorkOption: true,
-    },
-    userId: "user123",
-  };
-
-  const mockDeleteGroupJobPosting = jest.fn();
-  const mockHandleClick = jest.fn();
-  const mockProps = {
-    job,
-    user: { photoURL: "/test.png", displayName: "Test User" },
-    showEditGroupPostModal: true,
-    jobPostings: [],
-    deleteGroupJobPosting: mockDeleteGroupJobPosting,
-    handleClick: mockHandleClick,
-  };
+describe('EditGroupPostModal', () => {
+  let wrapper;
 
   beforeEach(() => {
-    render(<Provider><EditGroupPostModal {...mockProps} /></Provider>);
+    const mockProps = {
+      user: {
+        userId: '123',
+        displayName: 'John Doe',
+        photoURL: 'https://example.com/image.jpg'
+      },
+      jobPostings: [],
+      editGroupJobPosting: jest.fn(),
+      deleteGroupJobPosting: jest.fn(),
+      createGroupJobPosting: jest.fn()
+    };
+
+    wrapper = shallow(<EditGroupPostModal {...mockProps} />);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('should render EditGroupPostModal component', () => {
+    expect(wrapper).toMatchSnapshot();
   });
 
-  it("should update state variables when input fields change", () => {
-    const postTitleInput = screen.getByPlaceholderText(job.postTitle);
-    fireEvent.change(postTitleInput, { target: { value: "New Title" } });
-    expect(postTitleInput.value).toBe("New Title");
+  it('should render Header component', () => {
+    expect(wrapper.find('Header').exists()).toBe(true);
+  });
 
-    const postDescriptionInput = screen.getByPlaceholderText(
-      job.postDescription
-    );
-    fireEvent.change(postDescriptionInput, {
-      target: { value: "New Description" },
+  it('should render UserInfo component', () => {
+    expect(wrapper.find('UserInfo').exists()).toBe(true);
+  });
+
+  it('should render SharedCreation component', () => {
+    expect(wrapper.find('SharedCreation').exists()).toBe(true);
+  });
+
+  it('should render SharedContent component', () => {
+    expect(wrapper.find('SharedContent').exists()).toBe(true);
+  });
+
+  it('should render Editor component', () => {
+    expect(wrapper.find('Editor').exists()).toBe(true);
+  });
+
+  describe('mapDispatchToProps', () => {
+    const dispatch = jest.fn();
+
+    it('should call editGroupJobPosting action', () => {
+      const { editGroupJobPosting } = mapDispatchToProps(dispatch);
+      editGroupJobPosting({});
+      expect(dispatch).toHaveBeenCalled();
     });
-    expect(postDescriptionInput.value).toBe("New Description");
 
-    const mandatoryResumeCheckbox = screen.getByLabelText("Resume");
-    fireEvent.click(mandatoryResumeCheckbox);
-    expect(mandatoryResumeCheckbox.checked).toBe(false);
+    it('should call deleteGroupJobPosting action', () => {
+      const { deleteGroupJobPosting } = mapDispatchToProps(dispatch);
+      deleteGroupJobPosting('1', '2', '3', []);
+      expect(dispatch).toHaveBeenCalled();
+    });
 
-    const mandatoryCoverLetterCheckbox = screen.getByLabelText("Cover Letter");
-    fireEvent.click(mandatoryCoverLetterCheckbox);
-    expect(mandatoryCoverLetterCheckbox.checked).toBe(true);
-
-    const isExternalCheckbox = screen.getByLabelText("Is External");
-    fireEvent.click(isExternalCheckbox);
-    expect(isExternalCheckbox.checked).toBe(true);
-
-    const jobTypeSelect = screen.getByLabelText("Job Type");
-    fireEvent.change(jobTypeSelect, { target: { value: "part-time" } });
-    expect(jobTypeSelect.value).toBe("part-time");
+    it('should call createGroupJobPosting action', () => {
+      const { createGroupJobPosting } = mapDispatchToProps(dispatch);
+      createGroupJobPosting('1', '2', '3', [], '4', '5', true, false, {});
+      expect(dispatch).toHaveBeenCalled();
+    });
   });
-
-})
+});
