@@ -11,6 +11,7 @@ import GroupCreationForm from "./GroupCreationForm";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
 import CreatePageForm from "./CreatePageForm";
+import { deleteProfile } from "../actions";
 
 //Modal.setAppElement("#root"); // set the modal's parent element
 
@@ -132,7 +133,10 @@ const Leftside = (props) => {
               {showGroupModal && <GroupCreationForm />}
             </CustomModal5>
           </a>
-
+          <DeleteProfile onClick={deleteProfile}>
+              Delete Profile
+              <Tooltip>Deleting your profile will result in losing all your data.</Tooltip>
+          </DeleteProfile>
           <GroupList>
             <a>
               <div>
@@ -1087,6 +1091,59 @@ const ChangeLanguageText = styled.span`
   transition: all 0.3s ease;
   &:hover {
     background-color: rgba(0, 0, 0, 0.08);
+  }
+`;
+
+const Tooltip = styled.span`
+  visibility: hidden;
+  width: 180px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -90px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  
+  &:after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+  }
+`;
+
+const DeleteProfile = styled.a`
+  position: relative;
+  display: inline-block;
+  color: #ef4444;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: rgba(207, 0, 15, 0.5);
+    color: black;
+  }
+  &:hover ${Tooltip} {
+    visibility: visible;
+    opacity: 1;
   }
 `;
 const mapStateToProps = (state) => {

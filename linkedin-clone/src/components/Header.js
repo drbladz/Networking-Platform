@@ -109,7 +109,9 @@ const Header = (props) => {
                         } else {
                           fullName = "No name";
                         }
-                        return searchTerm && fullName.startsWith(searchTerm);
+                        return searchTerm && 
+                        fullName.startsWith(searchTerm) &&
+                        (user.active === undefined || user.active === true);
                       })
                       .slice(0, 10)
                       .map((user) => (

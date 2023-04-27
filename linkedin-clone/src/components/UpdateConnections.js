@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import { removeConnectionById } from "../actions";
 import { connect } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 import DmModal from "./DmModal";
 import { AiFillMessage } from "react-icons/ai";
+import db from "../firebase";
+import { getDoc, doc } from "firebase/firestore";
 
 const UpdateConnections = (props) => {
   const [showDm, setShowDm] = useState(false);
@@ -18,13 +20,38 @@ const UpdateConnections = (props) => {
     setRecipientId("");
     setShowDm(false);
   };
+  const [filteredConnections, setFilteredConnections] = useState([]);
+  useEffect(() => {
+    async function filterConnections() {
+      if (props.user && props.user.connections) {
+        const activeConnections = [];
+  
+        for (const connection of props.user.connections) {
+          const userRef = doc(db, "Users", connection.id);
+          const userSnapshot = await getDoc(userRef);
+          if (userSnapshot.exists()) {
+            const isActive = userSnapshot.get("active");
+            if (isActive === undefined || isActive === true) {
+              activeConnections.push(connection);
+            }
+          }
+        }
+  
+        setFilteredConnections(activeConnections);
+      } else {
+        setFilteredConnections([]);
+      }
+    }
+  
+    filterConnections();
+  }, [props.user]);
 
   return (
     <ConnectionsContainer>
       <ConnectionsHeader>Connections</ConnectionsHeader>
       <ConnectionsList>
         {props.user &&
-          props.user.connections.map((connection) => (
+          filteredConnections.map((connection) => (
             <ConnectionItem key={connection.id}>
               {connection.photoURL ? (
                 <ConnectionPhoto src={connection.photoURL} alt="" />
