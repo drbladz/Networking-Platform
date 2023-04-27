@@ -6,7 +6,7 @@ import db, {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "../firebase";
-import { getAuth } from "firebase/auth";
+import { getAuth, deleteUser, signOut } from "firebase/auth";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import store from "../store";
 import {
@@ -210,32 +210,37 @@ export function addConnectionById(id) {
     const currentUserDocument = await getDoc(currentUserRef);
     const otherUserRef = doc(db, "Users", id);
 
-    //current user is pending and other user gets a request
-    // Add pending and request for the current user and other user, respectively.
-    updateDoc(currentUserRef, { pending: arrayUnion(id) });
-    updateDoc(otherUserRef, {
-      requests: arrayUnion({
-        id: auth.currentUser.uid,
-        name: currentUserDocument.data().displayName,
-        photoURL: currentUserDocument.data().photoURL,
-      }),
-    });
+    // Check if other user is active before adding them as a connection
+    const otherUserDocument = await getDoc(otherUserRef);
+    if (otherUserDocument.exists() && otherUserDocument.get("active") !== false) {
+      // Add pending and request for the current user and other user, respectively.
+      updateDoc(currentUserRef, { pending: arrayUnion(id) });
+      updateDoc(otherUserRef, {
+        requests: arrayUnion({
+          id: auth.currentUser.uid,
+          name: currentUserDocument.data().displayName,
+          photoURL: currentUserDocument.data().photoURL,
+        }),
+      });
 
-    // Create notification for the other user
-    updateDoc(otherUserRef, {
-      notifications: arrayUnion({
-        notification: `${
-          currentUserDocument.data().displayName
-        } wants to connect.`,
-        photoURL: currentUserDocument.data().photoURL,
-        date: new Date(),
-        viewed: false,
-      }),
-    });
-    console.log("Request has been sent!");
+      // Create notification for the other user
+      updateDoc(otherUserRef, {
+        notifications: arrayUnion({
+          notification: `${
+            currentUserDocument.data().displayName
+          } wants to connect.`,
+          photoURL: currentUserDocument.data().photoURL,
+          date: new Date(),
+          viewed: false,
+        }),
+      });
+      console.log("Request has been sent!");
 
-    const userData = await getUserDataById(auth.currentUser.uid);
-    dispatch(setUser(userData));
+      const userData = await getUserDataById(auth.currentUser.uid);
+      dispatch(setUser(userData));
+    } else {
+      console.log("Other user is not active.");
+    }
   };
 }
 // This function accepts a request by updating the current user's document and the document of the user with the specified ID
@@ -349,12 +354,17 @@ export function removeConnectionById(id) {
 }
 
 async function getUserDataById(userId) {
-  // Get the document reference
   const userDocumentRef = doc(db, `Users/${userId}`);
   const userDocument = await getDoc(userDocumentRef);
-  return userDocument.data();
+  const userData = userDocument.data();
+  
+  // Filter out users with 'active' field set to false
+  if (userData && userData.active !== undefined && userData.active === false) {
+    return null;
+  }
+  
+  return userData;
 }
-
 async function createUserInDB(InitialUserData) {
   /*const collectionRef = collection(db, "Users");
   const collectionSnap = await getDocs(collectionRef);
@@ -1084,3 +1094,31 @@ export function declineGroupJoinRequest(request) {
   const pagesCollectionRef = collection(db, 'Pages');
   await addDoc(pagesCollectionRef, newPage); 
 };
+
+export async function deleteProfile() {
+  const confirmed = window.confirm("Are you sure you want to delete your profile? This action cannot be undone.");
+
+  if (confirmed) {
+    // Get the user's auth ID
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const userId = user.uid;
+
+    // Check if the user document has the 'active' field
+    const userRef = doc(db, "Users", userId);
+    const userSnapshot = await getDoc(userRef);
+    if (userSnapshot.exists() && userSnapshot.get("active") !== undefined) {
+      // Update the 'active' field to false if it exists
+      await updateDoc(userRef, { active: false });
+    } else {
+      // Add the 'active' field with a value of false if it doesn't exist
+      await setDoc(userRef, { active: false }, { merge: true });
+    }
+
+    // Sign out the user
+    await signOut(auth);
+
+    // Redirect to the home page
+    window.location.assign("/home");
+  }
+}
