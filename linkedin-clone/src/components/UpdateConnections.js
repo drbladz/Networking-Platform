@@ -44,7 +44,7 @@ const UpdateConnections = (props) => {
     }
   
     filterConnections();
-  }, [props.user]);
+  }, []);
 
   return (
     <ConnectionsContainer>
