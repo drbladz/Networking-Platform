@@ -84,8 +84,7 @@ const Rightside = (props) => {
     const usersSnapshot = await getDocs(usersRef);
     const usersData = usersSnapshot.docs
     .map((doc) => ({ ...doc.data(), id: doc.id }))
-    .filter((u) => u.id !== userId && (u.active === undefined || u.active === true));
-
+    .filter((u) => u.id !== userId);
   
     const currentUserDoc = await getDoc(doc(db, 'Users', userId));
     const currentUser = { ...currentUserDoc.data(), id: currentUserDoc.id };
