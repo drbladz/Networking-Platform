@@ -379,6 +379,9 @@ const CustomModal5 = styled(Modal)`
   height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const MyGroup = styled.div`
@@ -423,6 +426,9 @@ const CustomModal3 = styled(Modal)`
   height: 55%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const EditInfo = styled.div`
@@ -442,6 +448,9 @@ const CustomModal = styled(Modal)`
   width: 400px;
   height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const CustomModal4 = styled(Modal)`
@@ -455,6 +464,9 @@ const CustomModal4 = styled(Modal)`
   width: 800px;
   height: 600px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const CustomModal2 = styled(Modal)`
@@ -472,6 +484,9 @@ const CustomModal2 = styled(Modal)`
   height: 75%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const ContactInfo = styled.div`
