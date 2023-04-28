@@ -702,6 +702,7 @@ const Container = styled.div`
 
   @media (max-width: 767px) {
     padding: 20px;
+    margin-bottom: 50px;
   }
 `;
 
