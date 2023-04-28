@@ -133,10 +133,10 @@ const Leftside = (props) => {
               {showGroupModal && <GroupCreationForm />}
             </CustomModal5>
           </a>
-          <DeleteProfile onClick={deleteProfile}>
+          {/* <DeleteProfile onClick={deleteProfile}>
               Delete Profile
               <Tooltip>Deleting your profile will result in losing all your data.</Tooltip>
-          </DeleteProfile>
+          </DeleteProfile> */}
           <GroupList>
             <a>
               <div>

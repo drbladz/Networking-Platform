@@ -9,13 +9,13 @@ import {
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBSQt_8LUhxp_XTDsPE2jbkiPLiBXbsNHk",
-  authDomain: "linkedin-clone-9fd09.firebaseapp.com",
-  projectId: "linkedin-clone-9fd09",
-  storageBucket: "linkedin-clone-9fd09.appspot.com",
-  messagingSenderId: "1035473589943",
-  appId: "1:1035473589943:web:6bbb31759f0906592e1f32",
-  measurementId: "G-051EYS02K7",
+  apiKey: "AIzaSyDSF95Omw8cDWsSJv0voode74ejNERmM3Y",
+  authDomain: "linkedin-clone-4d54b.firebaseapp.com",
+  projectId: "linkedin-clone-4d54b",
+  storageBucket: "linkedin-clone-4d54b.appspot.com",
+  messagingSenderId: "282227423036",
+  appId: "1:282227423036:web:01cdf61961f1dcf27ed039",
+  measurementId: "G-SBWGHV1VVT"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -35,3 +35,7 @@ export {
   createUserWithEmailAndPassword,
 };
 export default db;
+
+
+
+

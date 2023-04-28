@@ -35,30 +35,30 @@ const Network = (props) => {
   }, []);
 
   const [filteredRequests, setFilteredRequests] = useState([]);
-  useEffect(() => {
-    async function checkActiveUsers() {
-      if (props.user && props.user.requests) {
-        const activeRequests = [];
+  // useEffect(() => {
+  //   async function checkActiveUsers() {
+  //     if (props.user && props.user.requests) {
+  //       const activeRequests = [];
 
-        for (const req of props.user.requests) {
-          const userRef = doc(db, "Users", req.id);
-          const userSnapshot = await getDoc(userRef);
-          if (userSnapshot.exists()) {
-            const isActive = userSnapshot.get("active");
-            if (isActive === undefined || isActive === true) {
-              activeRequests.push(req);
-            }
-          }
-        }
+  //       for (const req of props.user.requests) {
+  //         const userRef = doc(db, "Users", req.id);
+  //         const userSnapshot = await getDoc(userRef);
+  //         if (userSnapshot.exists()) {
+  //           const isActive = userSnapshot.get("active");
+  //           if (isActive === undefined || isActive === true) {
+  //             activeRequests.push(req);
+  //           }
+  //         }
+  //       }
 
-        setFilteredRequests(activeRequests);
-      } else {
-        setFilteredRequests([]);
-      }
-    }
+  //       setFilteredRequests(activeRequests);
+  //     } else {
+  //       setFilteredRequests([]);
+  //     }
+  //   }
 
-    checkActiveUsers();
-  }, []);
+  //   checkActiveUsers();
+  // }, []);
 
   
   return (
@@ -70,8 +70,8 @@ const Network = (props) => {
         {props.user &&
           props.user.requests &&
           props.user.requests.length === 0 && <div>No requests</div>}
-        {filteredRequests.length > 0 ? (
-          filteredRequests.map((req, index) => (
+        {props.user && props.user.requests ? (
+          props.user.requests.map((req, index) => (
             <tr className="reqRow" key={req.id}>
               <td>
                 {req.photoURL ? (
@@ -133,8 +133,7 @@ const Network = (props) => {
                   (user) =>
                     user.userId !== props.user.userId &&
                     !props.user.requests.some((c) => c.id === user.userId) &&
-                    !props.user.connections.some((c) => c.id === user.userId) &&
-                    (user.active === undefined || user.active === true)
+                    !props.user.connections.some((c) => c.id === user.userId)
                 )
                   .map((user, index) => (
                     <div className="card" key={user.userId}>

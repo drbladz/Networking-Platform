@@ -12,11 +12,11 @@ const Login = (props) => {
   const [showLogin, setShowLogin] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false); 
 
-  useEffect(() => {
-    if (props.user && isSigningOut) {
-      setIsSigningOut(false);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (props.user && isSigningOut) {
+  //     setIsSigningOut(false);
+  //   }
+  // }, []);
 
   return (
     <Container>
@@ -51,9 +51,9 @@ const Login = (props) => {
           <img src="/images/login-hero.svg" alt="" />
         </Hero>
         <Form>
-        <Google onClick={() => props.SignIn(isSigningOut)}>
-          <img src="/images/google.svg" alt="" />
-          Sign in with Google
+        <Google onClick={() => props.SignIn()}>
+            <img src="/images/google.svg" alt="" />
+            Sign in with Google
         </Google>
         </Form>
       </Section>
@@ -202,7 +202,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-   SignIn: (isSigningOut) => dispatch(signInAPI(isSigningOut)),
+  SignIn: () => dispatch(signInAPI())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login)
