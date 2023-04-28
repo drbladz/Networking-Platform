@@ -89,7 +89,6 @@ function JobApplications() {
 
   return (
     <div className="job-applications">
-      <Header />
       <div>
         <h1>Job Applications for {jobTitle}</h1>
         <button onClick={handleExpandAll}>Expand All</button>

@@ -16,7 +16,7 @@ const Login = (props) => {
     if (props.user && isSigningOut) {
       setIsSigningOut(false);
     }
-  }, [props.user, isSigningOut]);
+  }, []);
 
   return (
     <Container>

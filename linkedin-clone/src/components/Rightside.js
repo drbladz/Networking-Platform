@@ -355,7 +355,9 @@ const BannerCard = styled(FollowCard)`
 
 
 const SuggestedUsers = styled.div`
-  
+  @media (max-width: 768px) {
+    margin-bottom: 50px;
+  }
 `;
 
 // mapStateToProps function to map user state to props

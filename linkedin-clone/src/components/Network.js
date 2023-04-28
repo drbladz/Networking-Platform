@@ -58,7 +58,7 @@ const Network = (props) => {
     }
 
     checkActiveUsers();
-  }, [props.user]);
+  }, []);
 
   
   return (

@@ -341,6 +341,9 @@ const CustomModal5 = styled(Modal)`
   height: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const CustomModal6 = styled(Modal)`
@@ -443,6 +446,12 @@ const Content = styled.div`
   grid-template-columns: 1fr 3fr 1fr;
   grid-gap: 24px;
   padding: 24px 0;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
 `;
 
 const Leftside = styled.div``;
@@ -452,7 +461,10 @@ const GroupFeed = styled.div`
   flex-direction: column;
 `;
 
-const Rightside = styled.div``;
+const Rightside = styled.div`
+@media (max-width: 768px) {
+  margin-bottom: 50px;
+}`;
 
 const Card = styled.div`
   padding: 16px;
