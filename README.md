@@ -2,6 +2,9 @@
 
 A social networking application built for professionals to connect, communicate, and collaborate with one another. Our app is inspired by the popular professional networking platform LinkedIn, but is not affiliated with the official LinkedIn Corporation. This project utilizes ReactJS, Redux, and Firebase (Firestore database) to create a seamless user experience with a responsive and scalable design.
 
+## Deployed Application
+[Click here to view the live demo of the application](https://release--papaya-horse-5608be.netlify.app/)
+
 ## Features
 
 * User authentication (login, registration)
